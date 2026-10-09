@@ -1,13 +1,14 @@
-import React, { Suspense, useLayoutEffect, useMemo } from 'react';
-import { Canvas, useLoader, useThree } from '@react-three/fiber';
+import React, { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 
 function FittedCamera() {
   const { camera, size } = useThree();
 
   useLayoutEffect(() => {
-    camera.zoom = Math.min(size.width / 14, size.height / 10);
+    camera.zoom = Math.min(size.width / 15, size.height / 11);
     camera.position.set(11, 11.5, 12);
     camera.lookAt(0, 1.5, 0);
     camera.updateProjectionMatrix();
@@ -38,7 +39,119 @@ function Model({ file, position, size, rotation = 0 }) {
   return <primitive object={model} position={position} rotation={[0, rotation, 0]} />;
 }
 
-function Room() {
+const BOOKCASE_POSITION = new THREE.Vector3(-3.8, 0, -3.5);
+const MOVE_SPEED = 3.2;
+const ROOM_BOUNDS = { x: 4, z: 3 };
+const MOVEMENT_KEYS = new Set(['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright']);
+
+function Player({ onNearChange, onInteract }) {
+  const { scene, animations } = useLoader(GLTFLoader, '/models/character-female-a.glb');
+  const player = useMemo(() => {
+    const clone = cloneSkinned(scene);
+    const bounds = new THREE.Box3().setFromObject(clone);
+    const dimensions = bounds.getSize(new THREE.Vector3());
+    clone.scale.setScalar(1.85 / Math.max(dimensions.x, dimensions.y, dimensions.z));
+    const scaledBounds = new THREE.Box3().setFromObject(clone);
+    clone.position.y -= scaledBounds.min.y;
+    clone.position.x = 0.25;
+    clone.position.z = 1.55;
+    clone.traverse((part) => {
+      if (part.isMesh) {
+        part.castShadow = true;
+        part.receiveShadow = true;
+      }
+    });
+    return clone;
+  }, [scene]);
+  const idleClip = useMemo(() => animations.find((clip) => clip.name.toLowerCase() === 'idle'), [animations]);
+  const walkClip = useMemo(() => animations.find((clip) => clip.name.toLowerCase() === 'walk'), [animations]);
+  const animationController = useRef(null);
+  const keys = useRef(new Set());
+  const nearBookcase = useRef(false);
+  const interactRef = useRef(onInteract);
+  interactRef.current = onInteract;
+
+  useEffect(() => {
+    const mixer = new THREE.AnimationMixer(player);
+    const actions = {
+      idle: idleClip ? mixer.clipAction(idleClip) : null,
+      walk: walkClip ? mixer.clipAction(walkClip) : null,
+    };
+    if (actions.idle) actions.idle.play();
+    animationController.current = { mixer, actions, currentAction: actions.idle };
+
+    return () => {
+      mixer.stopAllAction();
+      mixer.uncacheRoot(player);
+      animationController.current = null;
+    };
+  }, [idleClip, player, walkClip]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const key = event.key.toLowerCase();
+      if (MOVEMENT_KEYS.has(key)) {
+        event.preventDefault();
+        keys.current.add(key);
+      } else if (key === 'e' && nearBookcase.current && !event.repeat) {
+        event.preventDefault();
+        interactRef.current();
+      }
+    };
+    const handleKeyUp = (event) => keys.current.delete(event.key.toLowerCase());
+    const clearKeys = () => keys.current.clear();
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', clearKeys);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', clearKeys);
+      keys.current.clear();
+    };
+  }, []);
+
+  useFrame((_, delta) => {
+    const position = player.position;
+    const pressed = keys.current;
+    let horizontal = Number(pressed.has('d') || pressed.has('arrowright')) - Number(pressed.has('a') || pressed.has('arrowleft'));
+    let vertical = Number(pressed.has('s') || pressed.has('arrowdown')) - Number(pressed.has('w') || pressed.has('arrowup'));
+    const moving = horizontal !== 0 || vertical !== 0;
+
+    if (moving) {
+      const length = Math.hypot(horizontal, vertical);
+      horizontal /= length;
+      vertical /= length;
+      // Controls follow the fixed camera: up moves toward the back of the room.
+      const moveX = (horizontal + vertical) * Math.SQRT1_2;
+      const moveZ = (vertical - horizontal) * Math.SQRT1_2;
+      position.x = THREE.MathUtils.clamp(position.x + moveX * MOVE_SPEED * delta, -ROOM_BOUNDS.x, ROOM_BOUNDS.x);
+      position.z = THREE.MathUtils.clamp(position.z + moveZ * MOVE_SPEED * delta, -ROOM_BOUNDS.z, ROOM_BOUNDS.z);
+      player.rotation.y = Math.atan2(moveX, moveZ);
+    }
+
+    const controller = animationController.current;
+    if (controller) {
+      const nextAction = moving ? controller.actions.walk : controller.actions.idle;
+      if (nextAction && nextAction !== controller.currentAction) {
+        controller.currentAction?.fadeOut(0.2);
+        nextAction.reset().fadeIn(0.2).play();
+        controller.currentAction = nextAction;
+      }
+      controller.mixer.update(delta);
+    }
+
+    const near = position.distanceTo(BOOKCASE_POSITION) < 1.35;
+    if (near !== nearBookcase.current) {
+      nearBookcase.current = near;
+      onNearChange(near);
+    }
+  });
+
+  return <primitive object={player} />;
+}
+
+function Room({ onNearChange, onInteract }) {
   const floorTexture = useLoader(THREE.TextureLoader, '/textures/wood-floor.jpg');
   floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
   floorTexture.repeat.set(3, 2.5);
@@ -75,14 +188,32 @@ function Room() {
       </mesh>
 
       <Model file="/models/bookcaseOpen.glb" position={[-3.8, 0, -3.5]} size={2.5} />
-      <Model file="/models/loungeSofa.glb" position={[0.1, 0, -3.35]} size={2.8} rotation={Math.PI} />
-      <Model file="/models/tableCoffee.glb" position={[0.1, 0, -1.4]} size={1.45} />
-      <Model file="/models/character-female-a.glb" position={[0.25, 0, 1.55]} size={1.65} />
+      <Model file="/models/loungeSofa.glb" position={[2.45, 0, -2.55]} size={2.8} rotation={Math.PI} />
+      <Model file="/models/tableCoffee.glb" position={[2.45, 0, -0.8]} size={1.45} />
+      <Player onNearChange={onNearChange} onInteract={onInteract} />
     </>
   );
 }
 
 export default function App() {
+  const [nearBookcase, setNearBookcase] = useState(false);
+  const [message, setMessage] = useState('');
+  const messageTimer = useRef();
+  const handleInteract = useCallback(() => {
+    setMessage('A little corner for stories.');
+    window.clearTimeout(messageTimer.current);
+    messageTimer.current = window.setTimeout(() => setMessage(''), 2600);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(messageTimer.current), []);
+  const handleNearChange = useCallback((near) => {
+    setNearBookcase(near);
+    if (!near) {
+      setMessage('');
+      window.clearTimeout(messageTimer.current);
+    }
+  }, []);
+
   return (
     <main className="page-shell">
       <header className="room-header">
@@ -102,12 +233,15 @@ export default function App() {
         >
           <FittedCamera />
           <Suspense fallback={null}>
-            <Room />
+            <Room onNearChange={handleNearChange} onInteract={handleInteract} />
           </Suspense>
         </Canvas>
+        <div className="interaction-message" role="status" aria-live="polite">
+          {message || (nearBookcase ? 'Press E to browse the bookcase' : '')}
+        </div>
         <div className="canvas-caption" aria-hidden="true">A place for stories and stillness</div>
       </section>
-      <footer className="page-footer">Take a moment. Look around.</footer>
+      <footer className="page-footer">Move with WASD or the arrow keys. Approach the bookcase and press E.</footer>
     </main>
   );
 }

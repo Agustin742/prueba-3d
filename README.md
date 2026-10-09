@@ -1,6 +1,6 @@
 # Three-dimensional room
 
-A small browser room built with React and Three.js. ROOM-2 provides the static room, furniture, lighting, and orthographic view; character movement and bookshelf interaction are planned for ROOM-3.
+A small browser room built with React and Three.js, with bounded character movement and a nearby bookshelf interaction.
 
 ## Run locally
 
@@ -20,7 +20,7 @@ npm run build
 - `public/models/bookcaseOpen.glb` — Kenney Furniture Kit bookcase.
 - `public/models/loungeSofa.glb` — Kenney Furniture Kit sofa.
 - `public/models/tableCoffee.glb` — Kenney Furniture Kit coffee table.
-- `public/models/character-female-a.glb` — Kenney Mini Characters model, displayed as a static figure.
+- `public/models/character-female-a.glb` — Kenney Mini Characters model with bundled `idle` and `walk` animation clips.
 - `public/models/Textures/colormap.png` — Kenney Mini Characters texture required by the character GLB.
 - `public/textures/wood-floor.jpg` — 1024 × 1024 web-sized derivative of the supplied wood floor diffuse texture.
 
@@ -32,6 +32,8 @@ The source assets remain under the ignored `assets/` directory; these runtime co
 - Mini Characters: https://kenney.nl/assets/mini-characters
 - Wood floor: https://polyhaven.com/a/wood_floor
 
-## Current state
+## Usage and limitations
 
-The responsive scene contains a textured floor, two rear walls, a fixed orthographic camera, soft real-time lighting, the selected GLB furniture, and a static character near the front-center. Character movement, bookshelf proximity prompts, and interaction are not implemented yet.
+Use **WASD** or the **arrow keys** to move relative to the fixed camera. Movement is continuous while a key is held and stays within the room; approach the bookcase and press **E** when its prompt appears. The character turns toward travel and cross-fades between the GLB's `idle` and `walk` clips. The bookcase message clears when you leave or after a short timeout.
+
+The responsive scene contains a textured floor, two rear walls, a fixed orthographic camera, soft real-time lighting, and the selected GLB furniture. Character movement is keyboard-only, and the camera does not follow the character.
