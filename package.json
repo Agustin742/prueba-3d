@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "test": "node --test"
   },
   "dependencies": {
     "@react-three/fiber": "^8.17.10",

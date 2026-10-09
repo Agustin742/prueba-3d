@@ -3,6 +3,7 @@ import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import * as THREE from 'three';
+import { turnTowardsAngle } from './movement.js';
 
 function FittedCamera() {
   const { camera, size } = useThree();
@@ -127,7 +128,8 @@ function Player({ onNearChange, onInteract }) {
       const moveZ = (vertical - horizontal) * Math.SQRT1_2;
       position.x = THREE.MathUtils.clamp(position.x + moveX * MOVE_SPEED * delta, -ROOM_BOUNDS.x, ROOM_BOUNDS.x);
       position.z = THREE.MathUtils.clamp(position.z + moveZ * MOVE_SPEED * delta, -ROOM_BOUNDS.z, ROOM_BOUNDS.z);
-      player.rotation.y = Math.atan2(moveX, moveZ);
+      const targetAngle = Math.atan2(moveX, moveZ);
+      player.rotation.y = turnTowardsAngle(player.rotation.y, targetAngle, delta);
     }
 
     const controller = animationController.current;
