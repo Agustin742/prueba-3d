@@ -3,7 +3,7 @@ import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import * as THREE from 'three';
-import { turnTowardsAngle } from './movement.js';
+import { moveWithCollisions, turnTowardsAngle } from './movement.js';
 
 function FittedCamera() {
   const { camera, size } = useThree();
@@ -42,7 +42,13 @@ function Model({ file, position, size, rotation = 0 }) {
 
 const BOOKCASE_POSITION = new THREE.Vector3(-3.8, 0, -3.5);
 const MOVE_SPEED = 3.2;
-const ROOM_BOUNDS = { x: 4, z: 3 };
+const PLAYER_RADIUS = 0.32;
+const ROOM_BOUNDS = { minX: -4, maxX: 4, minZ: -3, maxZ: 3 };
+const FURNITURE_HITBOXES = [
+  { minX: -3.8, maxX: -2.664, minZ: -4.21, maxZ: -3.5 },
+  { minX: -0.35, maxX: 2.45, minZ: -2.55, maxZ: -1.379 },
+  { minX: 1.439, maxX: 2.889, minZ: -1.458, maxZ: -0.581 },
+];
 const MOVEMENT_KEYS = new Set(['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright']);
 
 function Player({ onNearChange, onInteract }) {
@@ -126,8 +132,15 @@ function Player({ onNearChange, onInteract }) {
       // Controls follow the fixed camera: up moves toward the back of the room.
       const moveX = (horizontal + vertical) * Math.SQRT1_2;
       const moveZ = (vertical - horizontal) * Math.SQRT1_2;
-      position.x = THREE.MathUtils.clamp(position.x + moveX * MOVE_SPEED * delta, -ROOM_BOUNDS.x, ROOM_BOUNDS.x);
-      position.z = THREE.MathUtils.clamp(position.z + moveZ * MOVE_SPEED * delta, -ROOM_BOUNDS.z, ROOM_BOUNDS.z);
+      const nextPosition = moveWithCollisions(
+        position,
+        { x: moveX * MOVE_SPEED * delta, z: moveZ * MOVE_SPEED * delta },
+        FURNITURE_HITBOXES,
+        ROOM_BOUNDS,
+        PLAYER_RADIUS,
+      );
+      position.x = nextPosition.x;
+      position.z = nextPosition.z;
       const targetAngle = Math.atan2(moveX, moveZ);
       player.rotation.y = turnTowardsAngle(player.rotation.y, targetAngle, delta);
     }

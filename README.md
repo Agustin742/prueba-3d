@@ -34,6 +34,6 @@ The source assets remain under the ignored `assets/` directory; these runtime co
 
 ## Usage and limitations
 
-Use **WASD** or the **arrow keys** to move relative to the fixed camera. Movement is continuous while a key is held and stays within the room; approach the bookcase and press **E** when its prompt appears. The character turns toward travel and cross-fades between the GLB's `idle` and `walk` clips. The bookcase message clears when you leave or after a short timeout.
+Use **WASD** or the **arrow keys** to move relative to the fixed camera. Movement is continuous while a key is held, stays within the room, and slides along approximate floor-footprint hitboxes for the bookcase, sofa, and coffee table; approach the bookcase and press **E** when its prompt appears. These simple 2D footprints are practical movement blockers, not a full 3D physics or model-surface collision system. The character turns toward travel and cross-fades between the GLB's `idle` and `walk` clips. The bookcase message clears when you leave or after a short timeout.
 
 The responsive scene contains a textured floor, two rear walls, a fixed orthographic camera, soft real-time lighting, and the selected GLB furniture. Character movement is keyboard-only, and the camera does not follow the character.
