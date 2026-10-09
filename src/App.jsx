@@ -217,7 +217,7 @@ export default function App() {
   const handleInteract = useCallback(() => {
     setMessage('A little corner for stories.');
     window.clearTimeout(messageTimer.current);
-    messageTimer.current = window.setTimeout(() => setMessage(''), 2600);
+    messageTimer.current = window.setTimeout(() => setMessage(''), 4500);
   }, []);
 
   useEffect(() => () => window.clearTimeout(messageTimer.current), []);
@@ -251,8 +251,20 @@ export default function App() {
             <Room onNearChange={handleNearChange} onInteract={handleInteract} />
           </Suspense>
         </Canvas>
-        <div className="interaction-message" role="status" aria-live="polite">
-          {message || (nearBookcase ? 'Press E to browse the bookcase' : '')}
+        <div
+          className={`interaction-message${message ? ' interaction-result' : nearBookcase ? ' interaction-prompt' : ''}`}
+          role="status"
+          aria-live="polite"
+        >
+          {message ? (
+            message
+          ) : nearBookcase ? (
+            <>
+              <span className="sr-only">Press E to browse the bookcase</span>
+              <span className="interaction-key" aria-hidden="true">E</span>
+              <span aria-hidden="true">Browse the bookcase</span>
+            </>
+          ) : null}
         </div>
         <div className="canvas-caption" aria-hidden="true">A place for stories and stillness</div>
       </section>
