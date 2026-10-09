@@ -1,0 +1,10 @@
+# Local Pi runtime state
+.atl/
+
+# Generated dependencies and build output
+node_modules/
+dist/
+.codegraph/
+
+# Original user-provided source assets
+assets/
