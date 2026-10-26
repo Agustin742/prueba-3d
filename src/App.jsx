@@ -52,7 +52,7 @@ const FURNITURE_HITBOXES = [
 const MOVEMENT_KEYS = new Set(['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright']);
 
 function Player({ onNearChange, onInteract }) {
-  const { scene, animations } = useLoader(GLTFLoader, '/models/character-female-a.glb');
+  const { scene, animations } = useLoader(GLTFLoader, '/models/character.glb');
   const player = useMemo(() => {
     const clone = cloneSkinned(scene);
     const bounds = new THREE.Box3().setFromObject(clone);
@@ -71,7 +71,7 @@ function Player({ onNearChange, onInteract }) {
     return clone;
   }, [scene]);
   const idleClip = useMemo(() => animations.find((clip) => clip.name.toLowerCase() === 'idle'), [animations]);
-  const walkClip = useMemo(() => animations.find((clip) => clip.name.toLowerCase() === 'walk'), [animations]);
+  const runClip = useMemo(() => animations.find((clip) => clip.name.toLowerCase() === 'run'), [animations]);
   const animationController = useRef(null);
   const keys = useRef(new Set());
   const nearBookcase = useRef(false);
@@ -82,7 +82,7 @@ function Player({ onNearChange, onInteract }) {
     const mixer = new THREE.AnimationMixer(player);
     const actions = {
       idle: idleClip ? mixer.clipAction(idleClip) : null,
-      walk: walkClip ? mixer.clipAction(walkClip) : null,
+      run: runClip ? mixer.clipAction(runClip) : null,
     };
     if (actions.idle) actions.idle.play();
     animationController.current = { mixer, actions, currentAction: actions.idle };
@@ -92,7 +92,7 @@ function Player({ onNearChange, onInteract }) {
       mixer.uncacheRoot(player);
       animationController.current = null;
     };
-  }, [idleClip, player, walkClip]);
+  }, [idleClip, player, runClip]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -147,7 +147,7 @@ function Player({ onNearChange, onInteract }) {
 
     const controller = animationController.current;
     if (controller) {
-      const nextAction = moving ? controller.actions.walk : controller.actions.idle;
+      const nextAction = moving ? controller.actions.run : controller.actions.idle;
       if (nextAction && nextAction !== controller.currentAction) {
         controller.currentAction?.fadeOut(0.2);
         nextAction.reset().fadeIn(0.2).play();
