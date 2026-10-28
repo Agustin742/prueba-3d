@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Box3, Group, OrthographicCamera, SkinnedMesh, Vector3, type Intersection } from 'three';
 import type { AvatarResource } from '../avatar/load-avatar';
@@ -6,6 +6,8 @@ import { useSceneLifecycle } from '../avatar/use-scene-lifecycle';
 import type { ReceptionResource } from './load-reception';
 import type { NavigationState, Point } from './navigation';
 import { receptionInteractionTarget, type ReceptionInteractionId } from './reception-interactions';
+import { RemotePlayer } from '../network/RemotePlayer';
+import type { PlayerState } from '../network/socket';
 
 export interface ReceptionSceneProps {
   avatar: AvatarResource;
@@ -15,6 +17,8 @@ export interface ReceptionSceneProps {
   onInteract?(id: ReceptionInteractionId): void;
   onReady(): void;
   onFailure(): void;
+  remotePlayers?: Record<string, PlayerState>;
+  onAvatarMove?(position: [number, number, number], rotation: number, animation: string): void;
 }
 
 /** Only the foremost actual tile top may become a floor intent. No furniture flattening. */
@@ -25,10 +29,23 @@ export function floorDestination(hit?: Intersection): Point | null {
   return normal.y > 0.99 ? { x: hit.point.x, y: 0, z: hit.point.z } : null;
 }
 
-export function ReceptionScene({ avatar, room, tick, onSelect, onInteract, onReady, onFailure }: ReceptionSceneProps) {
+export function ReceptionScene({
+  avatar,
+  room,
+  tick,
+  onSelect,
+  onInteract,
+  onReady,
+  onFailure,
+  remotePlayers,
+  onAvatarMove,
+}: ReceptionSceneProps) {
   useSceneLifecycle(onReady, onFailure);
   const { camera, size } = useThree();
   const root = useMemo(() => new Group(), [avatar]);
+  const lastSendTime = useRef(0);
+  const wasMoving = useRef(false);
+
   useLayoutEffect(() => {
     const originalPosition = avatar.scene.position.clone();
     avatar.update(0); // Evaluate the original clip before measuring skinned posed vertices.
@@ -74,7 +91,19 @@ export function ReceptionScene({ avatar, room, tick, onSelect, onInteract, onRea
     // Copy the core's result exactly: never lerp a straight chord across route corners.
     root.position.set(position.x, 0, position.z);
     avatar.setMoving?.(moving); avatar.update(delta);
+
+    if (onAvatarMove) {
+      const now = performance.now();
+      if (moving && now - lastSendTime.current > 50) {
+        lastSendTime.current = now;
+        onAvatarMove([position.x, 0, position.z], root.rotation.y, 'walk');
+      } else if (!moving && wasMoving.current) {
+        onAvatarMove([position.x, 0, position.z], root.rotation.y, 'idle');
+      }
+      wasMoving.current = moving;
+    }
   });
+
   const select = (event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     const interactionId = receptionInteractionTarget(event.intersections[0]);
@@ -84,12 +113,22 @@ export function ReceptionScene({ avatar, room, tick, onSelect, onInteract, onRea
     }
     onSelect(floorDestination(event.intersections[0]));
   };
+
   return <>
     <hemisphereLight args={['#A9E7F4', '#B5A7D6', 2]} />
     <directionalLight position={[3, 8, 5]} color="#FFF0D8" intensity={3} />
     <group onPointerUp={select} dispose={null}>
       <primitive object={room.scene} dispose={null} />
       <primitive object={root} dispose={null} />
+      {remotePlayers && Object.values(remotePlayers).map(rp => (
+        <RemotePlayer
+          key={rp.id}
+          nickname={rp.nickname}
+          position={rp.position}
+          rotation={rp.rotation}
+          animation={rp.animation}
+        />
+      ))}
     </group>
   </>;
 }

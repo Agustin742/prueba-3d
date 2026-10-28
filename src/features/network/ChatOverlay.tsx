@@ -1,4 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
+import type { ChatMessage } from './socket';
+
+export interface ChatOverlayProps {
+  joined: boolean;
+  onJoin(nickname: string): void;
+  messages: ChatMessage[];
+  onSendMessage(content: string): void;
+  onlineCount: number;
+}
 
 export function ChatOverlay({
   joined,
@@ -6,24 +15,24 @@ export function ChatOverlay({
   messages,
   onSendMessage,
   onlineCount,
-}) {
+}: ChatOverlayProps) {
   const [nicknameInput, setNicknameInput] = useState('');
   const [chatInput, setChatInput] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(true);
-  const messagesEndRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleJoinSubmit = (e) => {
+  const handleJoinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nicknameInput.trim()) {
       onJoin(nicknameInput.trim());
     }
   };
 
-  const handleChatSubmit = (e) => {
+  const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (chatInput.trim()) {
       onSendMessage(chatInput.trim());
@@ -36,8 +45,8 @@ export function ChatOverlay({
       <div className="join-modal-backdrop">
         <form className="join-modal" onSubmit={handleJoinSubmit}>
           <div className="join-icon">👋</div>
-          <h2>Unirte a la sala</h2>
-          <p>Ingresá tu nombre para interactuar y chatear en tiempo real con otros usuarios.</p>
+          <h2>Unirte a la recepción</h2>
+          <p>Ingresá tu nombre para interactuar y chatear en tiempo real con tus compañeros.</p>
           <input
             type="text"
             className="join-input"
@@ -49,7 +58,7 @@ export function ChatOverlay({
             required
           />
           <button type="submit" className="join-button">
-            Entrar al espacio
+            Entrar a la sala
           </button>
         </form>
       </div>
@@ -61,7 +70,7 @@ export function ChatOverlay({
       <div className="chat-header" onClick={() => setIsChatOpen(!isChatOpen)}>
         <div className="chat-header-title">
           <span className="online-indicator"></span>
-          <span>Chat en vivo</span>
+          <span>Recepción en vivo</span>
           <span className="online-count">({onlineCount} online)</span>
         </div>
         <button
@@ -109,3 +118,4 @@ export function ChatOverlay({
     </div>
   );
 }
+

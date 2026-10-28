@@ -9,6 +9,8 @@ import {
 } from './reception-interactions';
 import { receptionAvatarRadius } from './reception-layout';
 import { useNavigationControls } from './use-navigation-controls';
+import { ChatOverlay } from '../network/ChatOverlay';
+import { socket, type ChatMessage, type PlayerState } from '../network/socket';
 
 function WebGLFailure() {
   return <p role="alert">WebGL reception unavailable. Enable hardware acceleration or try another browser, then reload.</p>;
@@ -18,7 +20,12 @@ class ReceptionBoundary extends Component<{ children: ReactNode }, { failed: boo
   static getDerivedStateFromError() { return { failed: true }; }
   render() { return this.state.failed ? <WebGLFailure /> : this.props.children; }
 }
-function ReceptionContent() {
+
+export interface ReceptionPreviewProps {
+  multiplayer?: boolean;
+}
+
+function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const [avatar, setAvatar] = useState<AvatarResource>();
   const [room, setRoom] = useState<ReceptionResource>();
   const [status, setStatus] = useState<'loading' | 'ready' | 'avatar-error' | 'room-error' | 'webgl-error'>('loading');
@@ -31,6 +38,84 @@ function ReceptionContent() {
   const dialogTitleId = useId();
   const ready = useCallback(() => setStatus(current => current === 'loading' ? 'ready' : current), []);
   const failed = useCallback(() => { release.current(); setStatus('webgl-error'); }, []);
+
+  // Multiplayer state
+  const [joined, setJoined] = useState(!multiplayer);
+  const [nickname, setNickname] = useState('');
+  const [remotePlayers, setRemotePlayers] = useState<Record<string, PlayerState>>({});
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  useEffect(() => {
+    if (!multiplayer) return;
+
+    socket.on('room-joined', ({ players, messages: history }) => {
+      const playersMap: Record<string, PlayerState> = {};
+      players.forEach((p: PlayerState) => {
+        playersMap[p.id] = p;
+      });
+      setRemotePlayers(playersMap);
+      if (history) setMessages(history);
+    });
+
+    socket.on('player-joined', (player: PlayerState) => {
+      setRemotePlayers(prev => ({ ...prev, [player.id]: player }));
+    });
+
+    socket.on('player-moved', (data: { id: string; position: [number, number, number]; rotation: number; animation: string }) => {
+      setRemotePlayers(prev => {
+        if (!prev[data.id]) return prev;
+        return {
+          ...prev,
+          [data.id]: {
+            ...prev[data.id],
+            position: data.position,
+            rotation: data.rotation,
+            animation: data.animation,
+          },
+        };
+      });
+    });
+
+    socket.on('player-left', ({ id }: { id: string }) => {
+      setRemotePlayers(prev => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    });
+
+    socket.on('chat-message', (msg: ChatMessage) => {
+      setMessages(prev => [...prev, msg]);
+    });
+
+    return () => {
+      socket.off('room-joined');
+      socket.off('player-joined');
+      socket.off('player-moved');
+      socket.off('player-left');
+      socket.off('chat-message');
+    };
+  }, [multiplayer]);
+
+  const handleJoin = useCallback((name: string) => {
+    setNickname(name);
+    setJoined(true);
+    socket.connect();
+    socket.emit('join-room', {
+      roomCode: 'global',
+      nickname: name,
+    });
+  }, []);
+
+  const handleSendMessage = useCallback((content: string) => {
+    socket.emit('chat-message', { content });
+  }, []);
+
+  const handleAvatarMove = useCallback((pos: [number, number, number], rot: number, anim: string) => {
+    if (multiplayer && socket.connected) {
+      socket.emit('player-move', { position: pos, rotation: rot, animation: anim });
+    }
+  }, [multiplayer]);
 
   const triggerInteraction = useCallback((id: ReceptionInteractionId) => {
     if (status !== 'ready' || !controls.consumeTap()) return;
@@ -85,7 +170,6 @@ function ReceptionContent() {
     loadAvatar(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
       .then(resource => accept(resource, setAvatar)).catch(() => reject('avatar-error'));
     loadReception().then(resource => accept(resource, setRoom)).catch(() => reject('room-error'));
-    // GLTF downloads cannot be aborted: every obsolete result is disposed, never mounted.
     return cleanup;
   }, [failed]);
 
@@ -93,6 +177,9 @@ function ReceptionContent() {
   if (status === 'avatar-error' || status === 'room-error') return <p role="alert">
     The original {status === 'avatar-error' ? 'avatar' : 'reception'} could not be loaded. Check the local model file and reload.
   </p>;
+
+  const onlineCount = Object.keys(remotePlayers).length + (joined ? 1 : 0);
+
   return (
     <div className="reception-stage">
       {status !== 'ready' && (
@@ -124,10 +211,13 @@ function ReceptionContent() {
               onInteract={triggerInteraction}
               onReady={ready}
               onFailure={failed}
+              remotePlayers={multiplayer ? remotePlayers : undefined}
+              onAvatarMove={multiplayer ? handleAvatarMove : undefined}
             />
           </Canvas>
         )}
       </div>
+
       {noticeboardOpen && (
         <div role="dialog" aria-modal="true" aria-labelledby={dialogTitleId} className="reception-dialog">
           <h2 id={dialogTitleId}>Reception noticeboard</h2>
@@ -135,12 +225,24 @@ function ReceptionContent() {
           <button ref={closeButtonRef} type="button" onClick={closeNoticeboard}>Close noticeboard</button>
         </div>
       )}
+
+      {multiplayer && (
+        <ChatOverlay
+          joined={joined}
+          onJoin={handleJoin}
+          messages={messages}
+          onSendMessage={handleSendMessage}
+          onlineCount={onlineCount}
+        />
+      )}
+
       <p role="status" aria-live="polite" className="reception-hud">
         {interactionNote ?? controls.feedback}
       </p>
     </div>
   );
 }
-export function ReceptionPreview() {
-  return <ReceptionBoundary><ReceptionContent /></ReceptionBoundary>;
+
+export function ReceptionPreview(props: ReceptionPreviewProps) {
+  return <ReceptionBoundary><ReceptionContent {...props} /></ReceptionBoundary>;
 }
