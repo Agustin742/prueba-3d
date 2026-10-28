@@ -1,6 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from './socket';
 
+function formatTime(isoString?: string): string {
+  if (!isoString) {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  }
+  try {
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return '';
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  } catch {
+    return '';
+  }
+}
+
 export interface ChatOverlayProps {
   joined: boolean;
   onJoin(nickname: string): void;
@@ -89,8 +105,14 @@ export function ChatOverlay({
               <div className="chat-empty">No hay mensajes todavía. ¡Saludá!</div>
             ) : (
               messages.map((msg, i) => (
-                <div key={msg.id || i} className="chat-message-item">
-                  <span className="chat-sender">{msg.sender}:</span>
+                <div
+                  key={msg.id || i}
+                  className={`chat-message-item ${msg.isSystem ? 'chat-message-system' : ''}`}
+                >
+                  <div className="chat-message-header">
+                    <span className="chat-sender">{msg.sender}</span>
+                    <span className="chat-time">{formatTime(msg.createdAt)}</span>
+                  </div>
                   <span className="chat-text">{msg.content}</span>
                 </div>
               ))
@@ -118,4 +140,3 @@ export function ChatOverlay({
     </div>
   );
 }
-

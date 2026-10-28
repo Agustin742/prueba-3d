@@ -48,20 +48,26 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [bubbles, setBubbles] = useState<Record<string, string>>({});
   const bubbleTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const messageTimestamps = useRef<number[]>([]);
 
+  // Show or append bubble text; resets duration timer
   const showBubble = useCallback((sender: string, text: string) => {
-    setBubbles(prev => ({ ...prev, [sender]: text }));
+    setBubbles(prev => {
+      const existing = prev[sender];
+      const combined = existing ? `${existing}\n${text}` : text;
+      return { ...prev, [sender]: combined };
+    });
     if (bubbleTimers.current[sender]) {
       clearTimeout(bubbleTimers.current[sender]);
     }
-    // High-visibility display for 5.5 seconds
+    // High-visibility display for 6 seconds, timer resets on each message
     bubbleTimers.current[sender] = setTimeout(() => {
       setBubbles(prev => {
         const next = { ...prev };
         delete next[sender];
         return next;
       });
-    }, 5500);
+    }, 6000);
   }, []);
 
   useEffect(() => {
@@ -76,7 +82,6 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       if (history && Array.isArray(history) && history.length > 0) {
         setMessages(prev => {
           const combined = [...history];
-          // Keep any optimistic local messages not yet in DB history
           prev.forEach(localM => {
             if (!combined.some(h => h.id === localM.id || (h.content === localM.content && h.sender === localM.sender))) {
               combined.push(localM);
@@ -167,20 +172,38 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   }, []);
 
   const handleSendMessage = useCallback((content: string) => {
+    const now = Date.now();
+    // Anti-spam rule: Maximum 5 messages in 10 seconds
+    messageTimestamps.current = messageTimestamps.current.filter(t => now - t < 10000);
+
+    if (messageTimestamps.current.length >= 5) {
+      const warningMsg: ChatMessage = {
+        id: `spam-${now}`,
+        sender: 'Sistema',
+        content: '⚠️ Enviaste muchos mensajes seguidos. Esperá unos segundos antes de volver a escribir.',
+        createdAt: new Date().toISOString(),
+        isSystem: true,
+      };
+      setMessages(prev => [...prev, warningMsg]);
+      return;
+    }
+
+    messageTimestamps.current.push(now);
+
     const senderName = nickname || 'Yo';
-    const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const localId = `local-${now}-${Math.random().toString(36).slice(2, 6)}`;
     const newMsg: ChatMessage = {
       id: localId,
       sender: senderName,
       content,
       createdAt: new Date().toISOString(),
     };
-    // 1. Optimistic update: shows up in the chat feed instantly
+    // 1. Optimistic update
     setMessages(prev => [...prev, newMsg]);
-    // 2. Show bubble above local avatar
+    // 2. Show bubble above avatar
     showBubble(senderName, content);
 
-    // 3. Emit via socket to broadcast and persist in Postgres
+    // 3. Emit via socket
     if (!socket.connected) {
       socket.connect();
     }

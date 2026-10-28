@@ -14,6 +14,7 @@ export interface ChatMessage {
   sender: string;
   content: string;
   createdAt?: string;
+  isSystem?: boolean;
 }
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
@@ -21,4 +22,3 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
 export const socket: Socket = io(SERVER_URL, {
   autoConnect: false,
 });
-

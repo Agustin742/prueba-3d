@@ -5,24 +5,28 @@ function wrapText(
   text: string,
   maxWidth: number,
 ): string[] {
-  const words = text.split(' ');
+  const paragraphs = text.split('\n');
   const lines: string[] = [];
-  let currentLine = '';
 
-  for (const word of words) {
-    const testLine = currentLine ? `${currentLine} ${word}` : word;
-    const width = ctx.measureText(testLine).width;
-    if (width > maxWidth && currentLine) {
+  for (const paragraph of paragraphs) {
+    const words = paragraph.split(' ');
+    let currentLine = '';
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const width = ctx.measureText(testLine).width;
+      if (width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) {
       lines.push(currentLine);
-      currentLine = word;
-    } else {
-      currentLine = testLine;
     }
   }
-  if (currentLine) {
-    lines.push(currentLine);
-  }
-  return lines.slice(0, 3);
+  // Keep the most recent 4 lines so the bubble fits harmoniously
+  return lines.slice(-4);
 }
 
 export function createAvatarBillboard(
@@ -30,7 +34,6 @@ export function createAvatarBillboard(
   bubbleText?: string | null,
   isSelf = false,
 ) {
-  // Ultra sharp 1024x512 canvas for high-DPI displays
   const canvas = document.createElement('canvas');
   canvas.width = 1024;
   canvas.height = 512;
@@ -70,20 +73,20 @@ export function createAvatarBillboard(
 
     // 2. Draw Chat Bubble if there is an active message
     if (bubbleText) {
-      ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
-      const maxBubbleWidth = 860;
+      ctx.font = 'bold 34px system-ui, -apple-system, sans-serif';
+      const maxBubbleWidth = 880;
       const lines = wrapText(ctx, bubbleText, maxBubbleWidth - 60);
-      const lineHeight = 46;
-      const bubbleHeight = Math.max(90, lines.length * lineHeight + 40);
+      const lineHeight = 44;
+      const bubbleHeight = Math.max(90, lines.length * lineHeight + 44);
       const measuredLineWidths = lines.map((l) => ctx.measureText(l).width);
       const textBlockWidth = Math.max(...measuredLineWidths, 160);
       const bubbleWidth = Math.min(maxBubbleWidth, textBlockWidth + 70);
       const bubbleX = (1024 - bubbleWidth) / 2;
       const bubbleY = nameY - bubbleHeight - 24;
 
-      // Outer drop shadow for strong contrast against any background
+      // Outer drop shadow
       ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = 16;
+      ctx.shadowBlur = 18;
       ctx.shadowOffsetY = 6;
 
       // Bubble Body (Solid pure white card)
@@ -96,7 +99,7 @@ export function createAvatarBillboard(
       }
       ctx.fill();
 
-      // Reset shadow for clean borders and text
+      // Reset shadow
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
       ctx.shadowOffsetY = 0;
@@ -106,7 +109,7 @@ export function createAvatarBillboard(
       ctx.lineWidth = 4.5;
       ctx.stroke();
 
-      // Bubble Pointer Triangle pointing down to the name tag
+      // Pointer Triangle
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       ctx.moveTo(512 - 16, bubbleY + bubbleHeight - 1);
@@ -123,7 +126,7 @@ export function createAvatarBillboard(
       ctx.lineTo(512 + 16, bubbleY + bubbleHeight);
       ctx.stroke();
 
-      // High-contrast bold dark text inside the bubble
+      // Text inside the bubble
       ctx.fillStyle = '#110c18';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -138,7 +141,6 @@ export function createAvatarBillboard(
   const material = new SpriteMaterial({ map: texture, depthTest: false });
   const sprite = new Sprite(material);
 
-  // Scaled up significantly for clear readability in orthographic room view
   sprite.scale.set(4.4, 2.2, 1);
   sprite.position.y = 2.7;
   return sprite;

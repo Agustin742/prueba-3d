@@ -237,17 +237,40 @@ button {
   gap: 3px;
   box-shadow: 0 1px 4px rgba(56, 47, 63, 0.08);
 }
+.chat-message-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
 .chat-sender {
   font-weight: 750;
   font-size: 0.8rem;
   color: #8e603d;
   letter-spacing: 0.02em;
 }
+.chat-time {
+  font-size: 0.75rem;
+  color: #9a8c9e;
+  font-variant-numeric: tabular-nums;
+}
 .chat-text {
   color: #1a1024;
   font-size: 0.9rem;
   line-height: 1.35;
   word-break: break-word;
+}
+.chat-message-system {
+  background: #fff8e6;
+  border-left-color: #f59e0b;
+}
+.chat-message-system .chat-sender {
+  color: #b45309;
+}
+.chat-message-system .chat-text {
+  color: #92400e;
+  font-size: 0.82rem;
+  font-weight: 500;
 }
 .chat-form {
   display: flex;
