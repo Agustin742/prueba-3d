@@ -25,8 +25,10 @@ class PromotionTests(unittest.TestCase):
         for base, head, accepted in [
             ('develop', 'docs/work', True), ('develop', 'feat/tasks', True),
             ('test', 'develop', True), ('main', 'test', True),
+            ('main', 'feat/interactive-room-foundation', True),
+            ('main', 'docs/work', True),
             ('test', 'docs/work', False), ('test', 'main', False),
-            ('main', 'develop', False), ('main', 'docs/work', False),
+            ('main', 'develop', False),
         ]:
             with self.subTest(base=base, head=head):
                 assignments = f'BASE_REF={shlex.quote(base)}; HEAD_REF={shlex.quote(head)};\n'

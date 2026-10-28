@@ -38,7 +38,7 @@ The product rules develop the expected behavior for rooms/permissions, tasks, co
 
 ## Promotion flow
 
-Work branches enter `develop` through reviewed pull requests. Changes are promoted by pull request from `develop` to `test`, then from `test` to `main`. See [Git workflow](rules/git-workflow.md) for commit and merge conventions. CI runs for pull requests targeting `develop`, `test`, or `main` and pushes to `develop`. Work branches may target `develop`; only `develop` may target `test`, and only `test` may target `main`.
+Work branches enter `develop` or `main` through reviewed pull requests. When using the promotion flow, changes are promoted by pull request from `develop` to `test`, then from `test` to `main`. See [Git workflow](rules/git-workflow.md) for commit and merge conventions. CI runs for pull requests targeting `develop`, `test`, or `main` and pushes to `develop`. Work branches may target `develop` or `main`; only `develop` may target `test`, and `develop` cannot target `main` directly without `test`.
 
 ## CI
 

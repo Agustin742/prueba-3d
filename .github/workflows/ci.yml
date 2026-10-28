@@ -22,7 +22,11 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
         run: |
           case "$BASE_REF:$HEAD_REF" in
-            develop:*|test:develop|main:test) ;;
+            main:develop)
+              echo "Pull requests into '$BASE_REF' must come from the promotion branch (got '$HEAD_REF')." >&2
+              exit 1
+              ;;
+            develop:*|test:develop|main:*) ;;
             *)
               echo "Pull requests into '$BASE_REF' must come from the promotion branch (got '$HEAD_REF')." >&2
               exit 1

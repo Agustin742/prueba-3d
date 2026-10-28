@@ -8,7 +8,7 @@ Use short-lived work branches, reviewed pull requests, and traceable commits. Th
 |---|---|---|
 | `develop` | Integrate reviewed work | Short-lived work branches |
 | `test` | Validate an integrated candidate | `develop` only |
-| `main` | Stable, validated version | `test` only |
+| `main` | Stable, validated version | `test` or short-lived work branches |
 
 - Contributors **MUST** branch from an up-to-date `develop` and use English names such as `feat/task-board`, `fix/login-error`, or `docs/setup`.
 - Changes **MUST** enter shared branches through pull requests, not direct pushes.
@@ -50,7 +50,7 @@ docs(rules): document pull request reviews
 
 ## Current automation boundary
 
-[CI](../.github/workflows/ci.yml) checks pull requests into `develop`, `test`, and `main`, and pushes to `develop`. Work branches may target `develop`; promotion pull requests into `test` must come from `develop`, and those into `main` must come from `test`.
+[CI](../.github/workflows/ci.yml) checks pull requests into `develop`, `test`, and `main`, and pushes to `develop`. Work branches may target `develop` or `main`; promotion pull requests into `test` must come from `develop`, and `develop` cannot target `main` directly without `test`.
 
 The `checks` job validates tracked Markdown inline internal links/ATX heading anchors, runs CI-tooling regression tests, and validates the workflow with actionlint 1.7.7. External links and code examples are excluded from link validation. Whitespace validation uses `git diff --check` against the PR base SHA or push's previous SHA (empty tree for an initial push), not a retroactive document policy or a clean working-tree comparison. Package/lockfile detection and conditional application install/tests remain separate; an absent package or test script is reported, not treated as a passed application suite.
 
