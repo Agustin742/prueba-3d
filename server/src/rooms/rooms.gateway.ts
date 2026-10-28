@@ -20,6 +20,7 @@ interface PlayerState {
 }
 
 @WebSocketGateway({
+  maxHttpBufferSize: 10 * 1024 * 1024,
   cors: {
     origin: '*',
   },
@@ -32,6 +33,13 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(private readonly roomsService: RoomsService) {}
 
+  private broadcastRoomRoster(roomCode: string) {
+    const roomPlayers = Array.from(this.players.values()).filter(
+      p => p.roomCode === roomCode,
+    );
+    this.server.to(roomCode).emit('room-players', roomPlayers);
+  }
+
   handleConnection(client: Socket) {
     // client connected
   }
@@ -41,6 +49,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (player) {
       this.players.delete(client.id);
       this.server.to(player.roomCode).emit('player-left', { id: client.id });
+      this.broadcastRoomRoster(player.roomCode);
     }
   }
 
@@ -61,7 +70,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       await this.roomsService.getOrCreateRoom(roomCode);
     } catch (e) {
-      console.warn('[RoomsGateway] getOrCreateRoom DB fallback:', e);
+      console.warn('[RoomsGateway] getOrCreateRoom DB fallback');
     }
 
     client.join(roomCode);
@@ -86,19 +95,20 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       messages = await this.roomsService.getMessages(roomCode);
     } catch (e) {
-      console.warn('[RoomsGateway] getMessages DB fallback:', e);
+      console.warn('[RoomsGateway] getMessages DB fallback');
     }
 
     // Send init packet to the joining client
-    console.log(`[RoomsGateway] Player "${nickname}" (${client.id}) joined "${roomCode}". History messages: ${messages.length}`);
+    console.log(`[RoomsGateway] Player "${nickname}" (${client.id}) joined "${roomCode}". Peers: ${existingPlayers.length}`);
     client.emit('room-joined', {
       self: playerState,
       players: existingPlayers,
       messages,
     });
 
-    // Notify other clients in the room
+    // Notify other clients in the room and broadcast authoritative roster
     client.to(roomCode).emit('player-joined', playerState);
+    this.broadcastRoomRoster(roomCode);
   }
 
   @SubscribeMessage('player-move')
@@ -148,6 +158,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       };
       this.players.set(client.id, player);
       client.join(roomCode);
+      this.broadcastRoomRoster(roomCode);
     }
 
     try {
@@ -164,7 +175,6 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         createdAt: saved.createdAt,
       });
     } catch (err) {
-      console.error('[RoomsGateway] DB error, broadcasting fallback:', err);
       this.server.to(roomCode).emit('chat-message', {
         id: String(Date.now()),
         sender,
@@ -172,5 +182,45 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         createdAt: new Date().toISOString(),
       });
     }
+  }
+
+  @SubscribeMessage('hud-item-created')
+  handleHudItemCreated(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() item: Record<string, unknown>,
+  ) {
+    const player = this.players.get(client.id);
+    const roomCode = player?.roomCode || (typeof item?.roomCode === 'string' ? item.roomCode : 'global');
+    client.to(roomCode).emit('hud-item-created', item);
+  }
+
+  @SubscribeMessage('hud-item-updated')
+  handleHudItemUpdated(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() patch: Record<string, unknown>,
+  ) {
+    const player = this.players.get(client.id);
+    const roomCode = player?.roomCode || 'global';
+    client.to(roomCode).emit('hud-item-updated', patch);
+  }
+
+  @SubscribeMessage('hud-item-deleted')
+  handleHudItemDeleted(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { id: string },
+  ) {
+    const player = this.players.get(client.id);
+    const roomCode = player?.roomCode || 'global';
+    client.to(roomCode).emit('hud-item-deleted', payload);
+  }
+
+  @SubscribeMessage('hud-item-replied')
+  handleHudItemReplied(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: Record<string, unknown>,
+  ) {
+    const player = this.players.get(client.id);
+    const roomCode = player?.roomCode || 'global';
+    client.to(roomCode).emit('hud-item-replied', payload);
   }
 }

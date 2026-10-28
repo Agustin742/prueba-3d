@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { Box3, Group, OrthographicCamera, SkinnedMesh, Vector3, type Intersection } from 'three';
+import { Box3, Group, OrthographicCamera, SkinnedMesh, Vector3, type Intersection, type Object3D } from 'three';
 import type { AvatarResource } from '../avatar/load-avatar';
 import { useSceneLifecycle } from '../avatar/use-scene-lifecycle';
 import type { ReceptionResource } from './load-reception';
@@ -16,6 +16,7 @@ export interface ReceptionSceneProps {
   tick(dt: number): NavigationState;
   onSelect(point: Point | null): void;
   onInteract?(id: ReceptionInteractionId): void;
+  onSelectAvatar?(targetNickname: string): void;
   onReady(): void;
   onFailure(): void;
   nickname?: string;
@@ -23,6 +24,24 @@ export interface ReceptionSceneProps {
   bubbles?: Record<string, string>;
   remotePlayers?: Record<string, PlayerState>;
   onAvatarMove?(position: [number, number, number], rotation: number, animation: string): void;
+}
+
+/** Resolve whether a 3D raycast intersection hit a remote or reception avatar. */
+export function avatarInteractionTarget(hit?: Intersection): string | null {
+  if (!hit) return null;
+  let current: Object3D | null = hit.object;
+  while (current) {
+    if (current.userData?.isAvatar && typeof current.userData.avatarNickname === 'string' && current.userData.avatarNickname.length > 0) {
+      return current.userData.avatarNickname;
+    }
+    if (current.name === 'reception-avatar-root') {
+      return typeof current.userData?.avatarNickname === 'string' && current.userData.avatarNickname.length > 0
+        ? current.userData.avatarNickname
+        : 'Recepción';
+    }
+    current = current.parent;
+  }
+  return null;
 }
 
 /** Only the foremost actual tile top may become a floor intent. No furniture flattening. */
@@ -39,6 +58,7 @@ export function ReceptionScene({
   tick,
   onSelect,
   onInteract,
+  onSelectAvatar,
   onReady,
   onFailure,
   nickname,
@@ -59,6 +79,7 @@ export function ReceptionScene({
 
   // Attach billboard (name + chat bubble) to local avatar root
   useEffect(() => {
+    root.userData = { ...root.userData, isAvatar: true, avatarNickname: nickname || 'Recepción' };
     if (!nickname) return;
     const billboard = createAvatarBillboard(nickname, bubbleText, true);
     root.add(billboard);
@@ -188,6 +209,11 @@ export function ReceptionScene({
     const interactionId = receptionInteractionTarget(event.intersections[0]);
     if (interactionId && onInteract) {
       onInteract(interactionId);
+      return;
+    }
+    const avatarTarget = avatarInteractionTarget(event.intersections[0]);
+    if (avatarTarget && onSelectAvatar) {
+      onSelectAvatar(avatarTarget);
       return;
     }
     onSelect(floorDestination(event.intersections[0]));

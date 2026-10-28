@@ -64,9 +64,11 @@ export function RemotePlayer({ nickname, position, rotation, animation, bubbleTe
     return { player: clone, mixer: mx, actions: acts };
   }, [scene, animations]);
 
-  // Manage billboard sprite (name + bubble) attached to root
+  // Manage billboard sprite (name + bubble) attached to root and tag for 3D avatar click
   useEffect(() => {
-    const billboard = createAvatarBillboard(nickname || 'Compañero', bubbleText, false);
+    const resolvedName = nickname || 'Compañero';
+    root.userData = { ...root.userData, isAvatar: true, avatarNickname: resolvedName };
+    const billboard = createAvatarBillboard(resolvedName, bubbleText, false);
     root.add(billboard);
     return () => {
       root.remove(billboard);
