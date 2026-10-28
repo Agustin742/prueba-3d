@@ -15,7 +15,7 @@ export async function loadAvatar(reducedMotion: boolean): Promise<AvatarResource
   const mixer = new AnimationMixer(scene);
   const idle = animations.find(clip => clip.name === 'Idle');
   if (idle && !reducedMotion) mixer.clipAction(idle).play();
-  const walk = animations.find(clip => clip.name === 'Walk');
+  const run = animations.find(clip => clip.name === 'Run');
   let moving = false;
   let disposed = false;
 
@@ -25,10 +25,11 @@ export async function loadAvatar(reducedMotion: boolean): Promise<AvatarResource
     setMoving(next) {
       if (disposed || reducedMotion || moving === next) return;
       moving = next;
-      const previous = next ? idle : walk;
-      const selected = next ? walk : idle;
-      if (previous) mixer.existingAction(previous)?.stop();
-      if (selected) mixer.clipAction(selected).reset().play();
+      const previous = next ? idle : run;
+      const selected = next ? run : idle;
+      // Cross-fade so the pose blends between clips instead of cutting in one frame.
+      if (previous) mixer.existingAction(previous)?.fadeOut(0.2);
+      if (selected) mixer.clipAction(selected).reset().fadeIn(0.2).play();
     },
     update: delta => { if (!disposed) mixer.update(Math.min(delta, 0.1)); },
     dispose() {
