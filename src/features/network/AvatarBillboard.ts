@@ -1,5 +1,23 @@
 import { CanvasTexture, Sprite, SpriteMaterial } from 'three';
 
+// =========================================================================
+// CONFIGURACIÓN VISUAL DEL GLOBO Y APODO
+// Podés ajustar estos valores para cambiar el tamaño y escala a tu gusto:
+// =========================================================================
+export const BILLBOARD_CONFIG = {
+  // Escala del sprite 3D en el mundo
+  scaleX: 5.4,          // Ancho del globo en el espacio 3D
+  scaleY: 2.7,          // Alto del globo en el espacio 3D
+  heightY: 2.85,        // Altura sobre los pies del personaje
+
+  // Tipografía en el canvas
+  bubbleFontSize: 42,   // Tamaño de letra del texto del mensaje
+  nameFontSize: 36,     // Tamaño de letra del apodo
+  lineHeight: 50,       // Separación entre líneas
+  maxBubbleWidth: 900,  // Ancho máximo del globo de texto
+};
+// =========================================================================
+
 function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -25,7 +43,7 @@ function wrapText(
       lines.push(currentLine);
     }
   }
-  // Keep the most recent 4 lines so the bubble fits harmoniously
+  // Permitir hasta 4 líneas visibles
   return lines.slice(-4);
 }
 
@@ -42,15 +60,15 @@ export function createAvatarBillboard(
   if (ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Draw Name Tag Pill at bottom center
+    // 1. Etiqueta con el Apodo (Pill en la parte inferior)
     const nameY = bubbleText ? 410 : 380;
-    ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
-    const nameWidth = Math.max(200, ctx.measureText(name).width + 60);
+    ctx.font = `bold ${BILLBOARD_CONFIG.nameFontSize}px system-ui, -apple-system, sans-serif`;
+    const nameWidth = Math.max(220, ctx.measureText(name).width + 60);
     const nameX = (1024 - nameWidth) / 2;
     const nameHeight = 64;
     const radius = 18;
 
-    // Background pill
+    // Fondo del nombre
     ctx.fillStyle = isSelf ? 'rgba(38, 70, 58, 0.96)' : 'rgba(32, 24, 38, 0.94)';
     ctx.beginPath();
     if (ctx.roundRect) {
@@ -60,74 +78,73 @@ export function createAvatarBillboard(
     }
     ctx.fill();
 
-    // Name border
+    // Borde del nombre
     ctx.strokeStyle = isSelf ? '#5eead4' : '#f59e0b';
     ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Name text
+    // Texto del nombre
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(name, 512, nameY + nameHeight / 2 + 1);
 
-    // 2. Draw Chat Bubble if there is an active message
+    // 2. Globito de Diálogo (si hay mensaje activo)
     if (bubbleText) {
-      ctx.font = 'bold 34px system-ui, -apple-system, sans-serif';
-      const maxBubbleWidth = 880;
-      const lines = wrapText(ctx, bubbleText, maxBubbleWidth - 60);
-      const lineHeight = 44;
-      const bubbleHeight = Math.max(90, lines.length * lineHeight + 44);
+      ctx.font = `bold ${BILLBOARD_CONFIG.bubbleFontSize}px system-ui, -apple-system, sans-serif`;
+      const lines = wrapText(ctx, bubbleText, BILLBOARD_CONFIG.maxBubbleWidth - 60);
+      const lineHeight = BILLBOARD_CONFIG.lineHeight;
+      const bubbleHeight = Math.max(100, lines.length * lineHeight + 46);
       const measuredLineWidths = lines.map((l) => ctx.measureText(l).width);
-      const textBlockWidth = Math.max(...measuredLineWidths, 160);
-      const bubbleWidth = Math.min(maxBubbleWidth, textBlockWidth + 70);
+      const textBlockWidth = Math.max(...measuredLineWidths, 180);
+      const bubbleWidth = Math.min(BILLBOARD_CONFIG.maxBubbleWidth, textBlockWidth + 80);
       const bubbleX = (1024 - bubbleWidth) / 2;
       const bubbleY = nameY - bubbleHeight - 24;
 
-      // Outer drop shadow
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = 18;
-      ctx.shadowOffsetY = 6;
+      // Sombra profunda para destacar contra cualquier fondo
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 8;
 
-      // Bubble Body (Solid pure white card)
+      // Cuerpo blanco sólido del globo
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       if (ctx.roundRect) {
-        ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 20);
+        ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 22);
       } else {
         ctx.rect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
       }
       ctx.fill();
 
-      // Reset shadow
+      // Resetear sombra para bordes y texto definidos
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
       ctx.shadowOffsetY = 0;
 
-      // Thick Dark Border
-      ctx.strokeStyle = '#1e162a';
-      ctx.lineWidth = 4.5;
+      // Borde oscuro y grueso
+      ctx.strokeStyle = '#1a1024';
+      ctx.lineWidth = 5;
       ctx.stroke();
 
-      // Pointer Triangle
+      // Puntero triangular apuntando al nombre
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.moveTo(512 - 16, bubbleY + bubbleHeight - 1);
-      ctx.lineTo(512 + 16, bubbleY + bubbleHeight - 1);
-      ctx.lineTo(512, bubbleY + bubbleHeight + 18);
+      ctx.moveTo(512 - 18, bubbleY + bubbleHeight - 1);
+      ctx.lineTo(512 + 18, bubbleY + bubbleHeight - 1);
+      ctx.lineTo(512, bubbleY + bubbleHeight + 20);
       ctx.closePath();
       ctx.fill();
 
-      ctx.strokeStyle = '#1e162a';
-      ctx.lineWidth = 4.5;
+      ctx.strokeStyle = '#1a1024';
+      ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.moveTo(512 - 16, bubbleY + bubbleHeight);
-      ctx.lineTo(512, bubbleY + bubbleHeight + 18);
-      ctx.lineTo(512 + 16, bubbleY + bubbleHeight);
+      ctx.moveTo(512 - 18, bubbleY + bubbleHeight);
+      ctx.lineTo(512, bubbleY + bubbleHeight + 20);
+      ctx.lineTo(512 + 18, bubbleY + bubbleHeight);
       ctx.stroke();
 
-      // Text inside the bubble
-      ctx.fillStyle = '#110c18';
+      // Texto en negrita de alto contraste
+      ctx.fillStyle = '#100a18';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const textStartY = bubbleY + bubbleHeight / 2 - ((lines.length - 1) * lineHeight) / 2;
@@ -141,7 +158,7 @@ export function createAvatarBillboard(
   const material = new SpriteMaterial({ map: texture, depthTest: false });
   const sprite = new Sprite(material);
 
-  sprite.scale.set(4.4, 2.2, 1);
-  sprite.position.y = 2.7;
+  sprite.scale.set(BILLBOARD_CONFIG.scaleX, BILLBOARD_CONFIG.scaleY, 1);
+  sprite.position.y = BILLBOARD_CONFIG.heightY;
   return sprite;
 }

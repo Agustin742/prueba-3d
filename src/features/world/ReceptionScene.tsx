@@ -48,10 +48,14 @@ export function ReceptionScene({
   onAvatarMove,
 }: ReceptionSceneProps) {
   useSceneLifecycle(onReady, onFailure);
-  const { camera, size } = useThree();
+  const { camera, size, gl } = useThree();
   const root = useMemo(() => new Group(), [avatar]);
   const lastSendTime = useRef(0);
   const wasMoving = useRef(false);
+
+  // Zoom control state: 1.0 is full-room limit, up to 2.4x close-up
+  const minZoomRef = useRef(1);
+  const zoomFactorRef = useRef(1);
 
   // Attach billboard (name + chat bubble) to local avatar root
   useEffect(() => {
@@ -97,9 +101,67 @@ export function ReceptionScene({
       for (const z of [bounds.min.z, bounds.max.z]) viewBounds.expandByPoint(new Vector3(x, y, z).applyMatrix4(camera.matrixWorldInverse));
     }
     const span = viewBounds.getSize(new Vector3());
-    camera.zoom = 0.9 * Math.min(size.width / Math.max(span.x, 1), size.height / Math.max(span.y, 1));
+    const baseZoom = 0.9 * Math.min(size.width / Math.max(span.x, 1), size.height / Math.max(span.y, 1));
+    minZoomRef.current = baseZoom;
+    camera.zoom = baseZoom * zoomFactorRef.current;
     camera.updateProjectionMatrix();
   }, [camera, room, size.width, size.height]);
+
+  // Mouse wheel zoom & mobile pinch-to-zoom
+  useEffect(() => {
+    const dom = gl?.domElement;
+    if (!dom || !(camera instanceof OrthographicCamera)) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const delta = -event.deltaY * 0.0012;
+      // Clamped between 1.0 (authored room limit) and 2.4 (close-up)
+      zoomFactorRef.current = Math.min(2.4, Math.max(1.0, zoomFactorRef.current + delta));
+      camera.zoom = minZoomRef.current * zoomFactorRef.current;
+      camera.updateProjectionMatrix();
+    };
+
+    let initialPinchDistance = 0;
+    let initialZoomFactor = 1.0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length === 2) {
+        const touch1 = event.touches[0];
+        const touch2 = event.touches[1];
+        initialPinchDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+        initialZoomFactor = zoomFactorRef.current;
+      }
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (event.touches.length === 2 && initialPinchDistance > 0) {
+        event.preventDefault();
+        const touch1 = event.touches[0];
+        const touch2 = event.touches[1];
+        const currentDistance = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+        const ratio = currentDistance / initialPinchDistance;
+        zoomFactorRef.current = Math.min(2.4, Math.max(1.0, initialZoomFactor * ratio));
+        camera.zoom = minZoomRef.current * zoomFactorRef.current;
+        camera.updateProjectionMatrix();
+      }
+    };
+
+    const handleTouchEnd = () => {
+      initialPinchDistance = 0;
+    };
+
+    dom.addEventListener('wheel', handleWheel, { passive: false });
+    dom.addEventListener('touchstart', handleTouchStart, { passive: true });
+    dom.addEventListener('touchmove', handleTouchMove, { passive: false });
+    dom.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+    return () => {
+      dom.removeEventListener('wheel', handleWheel);
+      dom.removeEventListener('touchstart', handleTouchStart);
+      dom.removeEventListener('touchmove', handleTouchMove);
+      dom.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [camera, gl]);
 
   useFrame((_, delta) => {
     const { position } = tick(delta);
