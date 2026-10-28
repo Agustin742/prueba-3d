@@ -58,7 +58,11 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const roomCode = data.roomCode?.trim() || 'global';
     const nickname = data.nickname?.trim() || `Player-${client.id.slice(0, 4)}`;
 
-    await this.roomsService.getOrCreateRoom(roomCode);
+    try {
+      await this.roomsService.getOrCreateRoom(roomCode);
+    } catch (e) {
+      console.warn('[RoomsGateway] getOrCreateRoom DB fallback:', e);
+    }
 
     client.join(roomCode);
 
@@ -66,7 +70,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       id: client.id,
       roomCode,
       nickname,
-      position: data.position || [0.25, 0, 1.55],
+      position: data.position || [0, 0, 2],
       rotation: data.rotation || 0,
       animation: 'idle',
     };
@@ -78,7 +82,12 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     // Fetch recent chat messages from DB
-    const messages = await this.roomsService.getMessages(roomCode);
+    let messages: any[] = [];
+    try {
+      messages = await this.roomsService.getMessages(roomCode);
+    } catch (e) {
+      console.warn('[RoomsGateway] getMessages DB fallback:', e);
+    }
 
     // Send init packet to the joining client
     client.emit('room-joined', {
@@ -119,22 +128,48 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('chat-message')
   async handleChatMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { content: string },
+    @MessageBody() data: { content: string; sender?: string },
   ) {
-    const player = this.players.get(client.id);
-    if (!player || !data.content?.trim()) return;
+    if (!data?.content?.trim()) return;
 
-    const saved = await this.roomsService.saveMessage(
-      player.roomCode,
-      player.nickname,
-      data.content.trim(),
-    );
+    let player = this.players.get(client.id);
+    const roomCode = player?.roomCode || 'global';
+    const sender = player?.nickname || data.sender?.trim() || `Player-${client.id.slice(0, 4)}`;
 
-    this.server.to(player.roomCode).emit('chat-message', {
-      id: saved.id,
-      sender: player.nickname,
-      content: saved.content,
-      createdAt: saved.createdAt,
-    });
+    if (!player) {
+      player = {
+        id: client.id,
+        roomCode,
+        nickname: sender,
+        position: [0, 0, 2],
+        rotation: 0,
+        animation: 'idle',
+      };
+      this.players.set(client.id, player);
+      client.join(roomCode);
+    }
+
+    try {
+      const saved = await this.roomsService.saveMessage(
+        roomCode,
+        sender,
+        data.content.trim(),
+      );
+
+      this.server.to(roomCode).emit('chat-message', {
+        id: saved.id,
+        sender,
+        content: saved.content,
+        createdAt: saved.createdAt,
+      });
+    } catch (err) {
+      console.error('[RoomsGateway] DB error, broadcasting fallback:', err);
+      this.server.to(roomCode).emit('chat-message', {
+        id: String(Date.now()),
+        sender,
+        content: data.content.trim(),
+        createdAt: new Date().toISOString(),
+      });
+    }
   }
 }

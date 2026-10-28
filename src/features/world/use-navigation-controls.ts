@@ -6,7 +6,7 @@ const uiTarget = (target: EventTarget | null) => target instanceof Element
   && !!target.closest('input, textarea, select, button, a, [contenteditable], [role="dialog"], dialog');
 
 /** One navigation snapshot owner; rendering consumes tick results without a second position. */
-export function useNavigationControls(active: boolean, radius?: number) {
+export function useNavigationControls(active: boolean, radius?: number, cameraOriented = false) {
   const container = useRef<HTMLDivElement>(null);
   // Footprint is fixed for this mounted controller; a different avatar requires a new view.
   const [navigation] = useState(() => createNavigation(undefined, { radius }));
@@ -61,8 +61,12 @@ export function useNavigationControls(active: boolean, radius?: number) {
     tapTarget(point: Point | null) { if (tap.current) { tap.current = false; target(point); } },
     tick(dt: number) {
       if (!available()) { if (keys.current.size || state.current.path.length) stop(); return state.current; }
-      const x = Number(keys.current.has('d')) - Number(keys.current.has('a'));
-      const z = Number(keys.current.has('s')) - Number(keys.current.has('w'));
+      const rawX = Number(keys.current.has('d')) - Number(keys.current.has('a'));
+      const rawZ = Number(keys.current.has('s')) - Number(keys.current.has('w'));
+      // When cameraOriented is true, maps WASD relative to the isometric camera at (14, 14, 14):
+      // W moves up on screen, S moves down, A moves left, D moves right.
+      const x = cameraOriented ? rawX + rawZ : rawX;
+      const z = cameraOriented ? rawZ - rawX : rawZ;
       const seconds = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
       const routed = state.current.path.length > 0;
       state.current = x || z ? navigation.move(state.current, { x, z }, seconds) : navigation.advance(state.current, seconds);
@@ -97,5 +101,3 @@ export function useNavigationControls(active: boolean, radius?: number) {
     },
   };
 }
-
-export type NavigationControls = ReturnType<typeof useNavigationControls>;

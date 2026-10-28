@@ -34,7 +34,9 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const release = useRef<() => void>(() => {});
-  const controls = useNavigationControls(status === 'ready', receptionAvatarRadius);
+
+  // Controls: cameraOriented = true so W is screen UP, S is screen DOWN, A is screen LEFT, D is screen RIGHT
+  const controls = useNavigationControls(status === 'ready', receptionAvatarRadius, true);
   const dialogTitleId = useId();
   const ready = useCallback(() => setStatus(current => current === 'loading' ? 'ready' : current), []);
   const failed = useCallback(() => { release.current(); setStatus('webgl-error'); }, []);
@@ -44,6 +46,22 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const [nickname, setNickname] = useState('');
   const [remotePlayers, setRemotePlayers] = useState<Record<string, PlayerState>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [bubbles, setBubbles] = useState<Record<string, string>>({});
+  const bubbleTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const showBubble = useCallback((sender: string, text: string) => {
+    setBubbles(prev => ({ ...prev, [sender]: text }));
+    if (bubbleTimers.current[sender]) {
+      clearTimeout(bubbleTimers.current[sender]);
+    }
+    bubbleTimers.current[sender] = setTimeout(() => {
+      setBubbles(prev => {
+        const next = { ...prev };
+        delete next[sender];
+        return next;
+      });
+    }, 4500);
+  }, []);
 
   useEffect(() => {
     if (!multiplayer) return;
@@ -54,7 +72,9 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
         playersMap[p.id] = p;
       });
       setRemotePlayers(playersMap);
-      if (history) setMessages(history);
+      if (history && Array.isArray(history)) {
+        setMessages(history);
+      }
     });
 
     socket.on('player-joined', (player: PlayerState) => {
@@ -85,7 +105,13 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     });
 
     socket.on('chat-message', (msg: ChatMessage) => {
-      setMessages(prev => [...prev, msg]);
+      setMessages(prev => {
+        if (msg.id && prev.some(m => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+      if (msg.sender && msg.content) {
+        showBubble(msg.sender, msg.content);
+      }
     });
 
     return () => {
@@ -95,12 +121,31 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       socket.off('player-left');
       socket.off('chat-message');
     };
-  }, [multiplayer]);
+  }, [multiplayer, showBubble]);
+
+  // Handle socket auto-reconnection
+  useEffect(() => {
+    if (!multiplayer) return;
+    const onConnect = () => {
+      if (joined && nickname) {
+        socket.emit('join-room', {
+          roomCode: 'global',
+          nickname,
+        });
+      }
+    };
+    socket.on('connect', onConnect);
+    return () => {
+      socket.off('connect', onConnect);
+    };
+  }, [multiplayer, joined, nickname]);
 
   const handleJoin = useCallback((name: string) => {
     setNickname(name);
     setJoined(true);
-    socket.connect();
+    if (!socket.connected) {
+      socket.connect();
+    }
     socket.emit('join-room', {
       roomCode: 'global',
       nickname: name,
@@ -108,8 +153,10 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   }, []);
 
   const handleSendMessage = useCallback((content: string) => {
-    socket.emit('chat-message', { content });
-  }, []);
+    const senderName = nickname || 'Yo';
+    socket.emit('chat-message', { content, sender: senderName });
+    showBubble(senderName, content);
+  }, [nickname, showBubble]);
 
   const handleAvatarMove = useCallback((pos: [number, number, number], rot: number, anim: string) => {
     if (multiplayer && socket.connected) {
@@ -211,6 +258,9 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
               onInteract={triggerInteraction}
               onReady={ready}
               onFailure={failed}
+              nickname={nickname}
+              bubbleText={bubbles[nickname]}
+              bubbles={bubbles}
               remotePlayers={multiplayer ? remotePlayers : undefined}
               onAvatarMove={multiplayer ? handleAvatarMove : undefined}
             />

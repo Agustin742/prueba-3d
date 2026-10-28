@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Box3, Group, OrthographicCamera, SkinnedMesh, Vector3, type Intersection } from 'three';
 import type { AvatarResource } from '../avatar/load-avatar';
@@ -7,6 +7,7 @@ import type { ReceptionResource } from './load-reception';
 import type { NavigationState, Point } from './navigation';
 import { receptionInteractionTarget, type ReceptionInteractionId } from './reception-interactions';
 import { RemotePlayer } from '../network/RemotePlayer';
+import { createAvatarBillboard } from '../network/AvatarBillboard';
 import type { PlayerState } from '../network/socket';
 
 export interface ReceptionSceneProps {
@@ -17,6 +18,9 @@ export interface ReceptionSceneProps {
   onInteract?(id: ReceptionInteractionId): void;
   onReady(): void;
   onFailure(): void;
+  nickname?: string;
+  bubbleText?: string | null;
+  bubbles?: Record<string, string>;
   remotePlayers?: Record<string, PlayerState>;
   onAvatarMove?(position: [number, number, number], rotation: number, animation: string): void;
 }
@@ -37,6 +41,9 @@ export function ReceptionScene({
   onInteract,
   onReady,
   onFailure,
+  nickname,
+  bubbleText,
+  bubbles,
   remotePlayers,
   onAvatarMove,
 }: ReceptionSceneProps) {
@@ -45,6 +52,18 @@ export function ReceptionScene({
   const root = useMemo(() => new Group(), [avatar]);
   const lastSendTime = useRef(0);
   const wasMoving = useRef(false);
+
+  // Attach billboard (name + chat bubble) to local avatar root
+  useEffect(() => {
+    if (!nickname) return;
+    const billboard = createAvatarBillboard(nickname, bubbleText, true);
+    root.add(billboard);
+    return () => {
+      root.remove(billboard);
+      billboard.material.map?.dispose();
+      billboard.material.dispose();
+    };
+  }, [nickname, bubbleText, root]);
 
   useLayoutEffect(() => {
     const originalPosition = avatar.scene.position.clone();
@@ -65,7 +84,6 @@ export function ReceptionScene({
       avatar.scene.position.copy(originalPosition);
       avatar.scene.updateMatrixWorld(true);
     };
-    // Attach/detach only; the loader retains sole ownership of the scene's resources.
   }, [avatar, root]);
 
   useLayoutEffect(() => {
@@ -88,7 +106,6 @@ export function ReceptionScene({
     const dx = position.x - root.position.x; const dz = position.z - root.position.z;
     const moving = Math.hypot(dx, dz) > 1e-8;
     if (moving) root.rotation.y = Math.atan2(dx, dz);
-    // Copy the core's result exactly: never lerp a straight chord across route corners.
     root.position.set(position.x, 0, position.z);
     avatar.setMoving?.(moving); avatar.update(delta);
 
@@ -127,6 +144,7 @@ export function ReceptionScene({
           position={rp.position}
           rotation={rp.rotation}
           animation={rp.animation}
+          bubbleText={bubbles?.[rp.nickname]}
         />
       ))}
     </group>

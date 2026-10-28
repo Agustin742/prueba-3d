@@ -5,13 +5,11 @@ import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import {
   AnimationMixer,
   Box3,
-  CanvasTexture,
   Group,
   MathUtils,
-  Sprite,
-  SpriteMaterial,
   Vector3,
 } from 'three';
+import { createAvatarBillboard } from './AvatarBillboard';
 
 export function turnTowardsAngle(current: number, target: number, step: number): number {
   let diff = (target - current) % (Math.PI * 2);
@@ -20,43 +18,15 @@ export function turnTowardsAngle(current: number, target: number, step: number):
   return Math.abs(diff) <= step ? target : current + Math.sign(diff) * step;
 }
 
-function createNameTagSprite(name: string, bgColor = 'rgba(20, 24, 30, 0.75)') {
-  const canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 64;
-  const ctx = canvas.getContext('2d');
-  if (ctx) {
-    ctx.fillStyle = bgColor;
-    ctx.beginPath();
-    if (ctx.roundRect) {
-      ctx.roundRect(8, 8, 240, 48, 12);
-    } else {
-      ctx.rect(8, 8, 240, 48);
-    }
-    ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 22px system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(name, 128, 32);
-  }
-
-  const texture = new CanvasTexture(canvas);
-  const material = new SpriteMaterial({ map: texture, depthTest: false });
-  const sprite = new Sprite(material);
-  sprite.scale.set(1.4, 0.35, 1);
-  sprite.position.y = 2.2;
-  return sprite;
-}
-
 export interface RemotePlayerProps {
   nickname: string;
   position: [number, number, number];
   rotation: number;
   animation?: string;
+  bubbleText?: string | null;
 }
 
-export function RemotePlayer({ nickname, position, rotation, animation }: RemotePlayerProps) {
+export function RemotePlayer({ nickname, position, rotation, animation, bubbleText }: RemotePlayerProps) {
   const { scene, animations } = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}models/character.glb`);
   const root = useMemo(() => new Group(), []);
 
@@ -82,11 +52,19 @@ export function RemotePlayer({ nickname, position, rotation, animation }: Remote
 
     if (acts.idle) acts.idle.play();
 
-    const nameTag = createNameTagSprite(nickname || 'Compañero');
-    clone.add(nameTag);
-
     return { player: clone, mixer: mx, actions: acts };
-  }, [scene, animations, nickname]);
+  }, [scene, animations]);
+
+  // Manage billboard sprite (name + bubble) attached to root
+  useEffect(() => {
+    const billboard = createAvatarBillboard(nickname || 'Compañero', bubbleText, false);
+    root.add(billboard);
+    return () => {
+      root.remove(billboard);
+      billboard.material.map?.dispose();
+      billboard.material.dispose();
+    };
+  }, [nickname, bubbleText, root]);
 
   const currentActionRef = useRef(actions.idle);
 
@@ -123,4 +101,3 @@ export function RemotePlayer({ nickname, position, rotation, animation }: Remote
 
   return <primitive object={root} />;
 }
-
