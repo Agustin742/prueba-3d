@@ -144,7 +144,10 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
         if (isDuplicate) return prev;
         return [...prev, msg];
       });
-      if (msg.sender && msg.content) {
+
+      // Avoid showing bubble twice: local sender already rendered bubble optimistically in handleSendMessage
+      const isSelf = msg.sender === (nickname || savedNick) || msg.sender === 'Yo';
+      if (msg.sender && msg.content && !isSelf) {
         showBubble(msg.sender, msg.content);
       }
     };
