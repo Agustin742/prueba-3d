@@ -1,0 +1,1768 @@
+{
+  "version": 1,
+  "status": "integration-candidate",
+  "bodies": [
+    {
+      "id": "male",
+      "path": "/models/avatars/male/body.glb",
+      "rigFamily": "male-v1",
+      "hair": [
+        {
+          "id": "classic-short",
+          "label": "Corto clÃ¡sico",
+          "path": "/models/avatars/male/hair-classic-short.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "fade",
+          "label": "Degradado",
+          "path": "/models/avatars/male/hair-fade.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "afro",
+          "label": "Afro",
+          "path": "/models/avatars/male/hair-afro.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "dreads",
+          "label": "Rastas",
+          "path": "/models/avatars/male/hair-dreads.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "long-tied",
+          "label": "Largo recogido",
+          "path": "/models/avatars/male/hair-long-tied.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        }
+      ],
+      "tops": [
+        {
+          "id": "tshirt",
+          "label": "Remera",
+          "path": "/models/avatars/male/top-tshirt.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "hoodie",
+          "label": "Buzo con capucha",
+          "path": "/models/avatars/male/top-hoodie.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "shirt",
+          "label": "Camisa",
+          "path": "/models/avatars/male/top-shirt.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "tank",
+          "label": "Musculosa",
+          "path": "/models/avatars/male/top-tank.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "jacket",
+          "label": "Campera",
+          "path": "/models/avatars/male/top-jacket.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        }
+      ],
+      "accessories": [
+        {
+          "id": "round-glasses",
+          "label": "Anteojos redondos",
+          "path": "/models/avatars/male/accessory-round-glasses.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "square-glasses",
+          "label": "Anteojos cuadrados",
+          "path": "/models/avatars/male/accessory-square-glasses.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "cap",
+          "label": "Gorra",
+          "path": "/models/avatars/male/accessory-cap.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "headphones",
+          "label": "Auriculares",
+          "path": "/models/avatars/male/accessory-headphones.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "backpack",
+          "label": "Mochila",
+          "path": "/models/avatars/male/accessory-backpack.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-pelvis.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 34,
+            "tolerance": 1e-05
+          }
+        }
+      ]
+    },
+    {
+      "id": "female",
+      "path": "/models/avatars/female/body.glb",
+      "rigFamily": "female-v1",
+      "hair": [
+        {
+          "id": "original",
+          "label": "Original",
+          "path": "/models/avatars/female/hair-original.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "bob",
+          "label": "Bob",
+          "path": "/models/avatars/female/hair-bob.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "high-ponytail",
+          "label": "Cola alta",
+          "path": "/models/avatars/female/hair-high-ponytail.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "bun",
+          "label": "Rodete",
+          "path": "/models/avatars/female/hair-bun.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "afro",
+          "label": "Afro",
+          "path": "/models/avatars/female/hair-afro.glb",
+          "slot": "hair",
+          "tintMaterials": [
+            "AvatarHairTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        }
+      ],
+      "tops": [
+        {
+          "id": "tshirt",
+          "label": "Remera",
+          "path": "/models/avatars/female/top-tshirt.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "hoodie",
+          "label": "Buzo con capucha",
+          "path": "/models/avatars-hem-correction/female/top-hoodie.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "blouse",
+          "label": "Blusa",
+          "path": "/models/avatars/female/top-blouse.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "tank",
+          "label": "Musculosa",
+          "path": "/models/avatars/female/top-tank.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "jacket",
+          "label": "Campera",
+          "path": "/models/avatars/female/top-jacket.glb",
+          "slot": "top",
+          "tintMaterials": [
+            "AvatarTopTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        }
+      ],
+      "accessories": [
+        {
+          "id": "glasses",
+          "label": "Anteojos",
+          "path": "/models/avatars/female/accessory-glasses.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "cap",
+          "label": "Gorra",
+          "path": "/models/avatars/female/accessory-cap.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "headphones",
+          "label": "Auriculares",
+          "path": "/models/avatars/female/accessory-headphones.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "earrings",
+          "label": "Aros",
+          "path": "/models/avatars/female/accessory-earrings.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        },
+        {
+          "id": "handbag",
+          "label": "Cartera",
+          "path": "/models/avatars/female/accessory-handbag.glb",
+          "slot": "accessory",
+          "tintMaterials": [
+            "AvatarAccessoryTint"
+          ],
+          "detailMaterials": [
+            "AvatarDetail"
+          ],
+          "assembly": {
+            "ordered_joints": [
+              [
+                "DEF-pelvis.L",
+                "DEF-glute.L",
+                "DEF-pelvis.R",
+                "DEF-glute.R",
+                "DEF-shoulder.L",
+                "DEF-shoulder.R",
+                "DEF-spine",
+                "DEF-spine.001",
+                "DEF-spine.002",
+                "DEF-bust.L",
+                "DEF-bust.R",
+                "DEF-spine.003",
+                "DEF-spine.004",
+                "DEF-spine.005",
+                "DEF-spine.006",
+                "DEF-hair_back",
+                "DEF-hair_front.L",
+                "DEF-hair_front.R",
+                "DEF-thigh.L",
+                "DEF-thigh.L.001",
+                "DEF-shin.L",
+                "DEF-shin.L.001",
+                "DEF-foot.L",
+                "DEF-toe.L",
+                "DEF-thigh.R",
+                "DEF-thigh.R.001",
+                "DEF-shin.R",
+                "DEF-shin.R.001",
+                "DEF-foot.R",
+                "DEF-toe.R",
+                "DEF-upper_arm.L",
+                "DEF-upper_arm.L.001",
+                "DEF-forearm.L",
+                "DEF-forearm.L.001",
+                "DEF-hand.L",
+                "DEF-upper_arm.R",
+                "DEF-upper_arm.R.001",
+                "DEF-forearm.R",
+                "DEF-forearm.R.001",
+                "DEF-hand.R",
+                "neutral_bone"
+              ]
+            ],
+            "remap": "Map names in each module skin order to this body; preserve module inverse binds and mesh bind transforms; reject mismatches at 1e-5. Never substitute differently sized body Skeleton.",
+            "shared_joints": 41,
+            "tolerance": 1e-05
+          }
+        }
+      ]
+    }
+  ],
+  "assembly": {
+    "contract": "One body rig and AnimationMixer per avatar. Modules are not animation roots.",
+    "transforms": "Retain authored transforms; apply world placement/scale to one common parent.",
+    "slots": "One hair, one top, zero or one accessory. none is a UI option, not an asset.",
+    "bodyMeshes": [
+      "Body",
+      "Head",
+      "Pants",
+      "boots",
+      "ears",
+      "eyes",
+      "smile"
+    ],
+    "femaleAdditionalMeshes": [
+      "Eyelashes"
+    ],
+    "fallback": "Keep original baseline until candidate fit is accepted; never hide Body to mask clipping."
+  },
+  "validationScope": "Structural exports and sampled Blender renders; corrected female hoodie length/topology and sampled front/rear motion reviewed. Browser and whole-catalogue animated fit remain pending."
+}
