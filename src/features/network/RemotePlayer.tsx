@@ -7,6 +7,7 @@ import {
   Box3,
   Group,
   MathUtils,
+  SkinnedMesh,
   Vector3,
 } from 'three';
 import { createAvatarBillboard } from './AvatarBillboard';
@@ -43,14 +44,22 @@ export function RemotePlayer({ nickname, position, rotation, animation, bubbleTe
 
     const mx = new AnimationMixer(clone);
     const idleClip = animations.find(clip => clip.name === 'Idle' || clip.name.toLowerCase() === 'idle');
-    const walkClip = animations.find(clip => clip.name === 'Walk' || clip.name.toLowerCase() === 'run');
+    const walkClip = animations.find(clip => clip.name === 'Walk' || clip.name.toLowerCase() === 'walk');
 
     const acts = {
       idle: idleClip ? mx.clipAction(idleClip) : null,
       walk: walkClip ? mx.clipAction(walkClip) : null,
     };
 
-    if (acts.idle) acts.idle.play();
+    if (acts.idle) {
+      acts.idle.play();
+    }
+
+    clone.traverse(node => {
+      if (node instanceof SkinnedMesh) {
+        node.skeleton.update();
+      }
+    });
 
     return { player: clone, mixer: mx, actions: acts };
   }, [scene, animations]);
@@ -67,16 +76,23 @@ export function RemotePlayer({ nickname, position, rotation, animation, bubbleTe
   }, [nickname, bubbleText, root]);
 
   const currentActionRef = useRef(actions.idle);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
     root.add(player);
-    root.position.set(position[0], 0, position[2]);
+    if (!isInitializedRef.current) {
+      root.position.set(position[0], 0, position[2]);
+      if (typeof rotation === 'number') {
+        root.rotation.y = rotation;
+      }
+      isInitializedRef.current = true;
+    }
     return () => {
       root.remove(player);
       mixer.stopAllAction();
       mixer.uncacheRoot(player);
     };
-  }, [player, root, mixer, position]);
+  }, [player, root, mixer]);
 
   useFrame((_, delta) => {
     // Smoothly interpolate position towards target
@@ -90,8 +106,10 @@ export function RemotePlayer({ nickname, position, rotation, animation, bubbleTe
 
     const isMoving = animation === 'run' || animation === 'walk';
     const nextAction = isMoving ? actions.walk : actions.idle;
-    if (nextAction && nextAction !== currentActionRef.current) {
-      currentActionRef.current?.fadeOut(0.2);
+    if (nextAction && (!nextAction.isRunning() || nextAction !== currentActionRef.current)) {
+      if (currentActionRef.current && currentActionRef.current !== nextAction) {
+        currentActionRef.current.fadeOut(0.2);
+      }
       nextAction.reset().fadeIn(0.2).play();
       currentActionRef.current = nextAction;
     }
