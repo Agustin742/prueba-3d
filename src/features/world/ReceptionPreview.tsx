@@ -54,13 +54,14 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     if (bubbleTimers.current[sender]) {
       clearTimeout(bubbleTimers.current[sender]);
     }
+    // High-visibility display for 5.5 seconds
     bubbleTimers.current[sender] = setTimeout(() => {
       setBubbles(prev => {
         const next = { ...prev };
         delete next[sender];
         return next;
       });
-    }, 4500);
+    }, 5500);
   }, []);
 
   useEffect(() => {
@@ -72,8 +73,17 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
         playersMap[p.id] = p;
       });
       setRemotePlayers(playersMap);
-      if (history && Array.isArray(history)) {
-        setMessages(history);
+      if (history && Array.isArray(history) && history.length > 0) {
+        setMessages(prev => {
+          const combined = [...history];
+          // Keep any optimistic local messages not yet in DB history
+          prev.forEach(localM => {
+            if (!combined.some(h => h.id === localM.id || (h.content === localM.content && h.sender === localM.sender))) {
+              combined.push(localM);
+            }
+          });
+          return combined;
+        });
       }
     });
 
@@ -106,7 +116,11 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
 
     socket.on('chat-message', (msg: ChatMessage) => {
       setMessages(prev => {
-        if (msg.id && prev.some(m => m.id === msg.id)) return prev;
+        const isDuplicate = prev.some(
+          m => (m.id && m.id === msg.id)
+            || (m.sender === msg.sender && m.content === msg.content && Math.abs(new Date(m.createdAt || 0).getTime() - new Date(msg.createdAt || 0).getTime()) < 4000)
+        );
+        if (isDuplicate) return prev;
         return [...prev, msg];
       });
       if (msg.sender && msg.content) {
@@ -154,8 +168,23 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
 
   const handleSendMessage = useCallback((content: string) => {
     const senderName = nickname || 'Yo';
-    socket.emit('chat-message', { content, sender: senderName });
+    const localId = `local-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const newMsg: ChatMessage = {
+      id: localId,
+      sender: senderName,
+      content,
+      createdAt: new Date().toISOString(),
+    };
+    // 1. Optimistic update: shows up in the chat feed instantly
+    setMessages(prev => [...prev, newMsg]);
+    // 2. Show bubble above local avatar
     showBubble(senderName, content);
+
+    // 3. Emit via socket to broadcast and persist in Postgres
+    if (!socket.connected) {
+      socket.connect();
+    }
+    socket.emit('chat-message', { content, sender: senderName });
   }, [nickname, showBubble]);
 
   const handleAvatarMove = useCallback((pos: [number, number, number], rot: number, anim: string) => {

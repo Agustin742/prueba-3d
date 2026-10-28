@@ -22,7 +22,7 @@ function wrapText(
   if (currentLine) {
     lines.push(currentLine);
   }
-  return lines.slice(0, 3); // Max 3 lines
+  return lines.slice(0, 3);
 }
 
 export function createAvatarBillboard(
@@ -30,23 +30,25 @@ export function createAvatarBillboard(
   bubbleText?: string | null,
   isSelf = false,
 ) {
+  // Ultra sharp 1024x512 canvas for high-DPI displays
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 256;
+  canvas.width = 1024;
+  canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
   if (ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 1. Draw Name Tag Pill at the bottom center
-    const nameY = bubbleText ? 200 : 190;
-    ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
-    const nameWidth = Math.max(120, ctx.measureText(name).width + 36);
-    const nameX = (512 - nameWidth) / 2;
-    const nameHeight = 44;
-    const radius = 12;
+    // 1. Draw Name Tag Pill at bottom center
+    const nameY = bubbleText ? 410 : 380;
+    ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
+    const nameWidth = Math.max(200, ctx.measureText(name).width + 60);
+    const nameX = (1024 - nameWidth) / 2;
+    const nameHeight = 64;
+    const radius = 18;
 
-    ctx.fillStyle = isSelf ? 'rgba(59, 82, 73, 0.9)' : 'rgba(40, 34, 46, 0.88)';
+    // Background pill
+    ctx.fillStyle = isSelf ? 'rgba(38, 70, 58, 0.96)' : 'rgba(32, 24, 38, 0.94)';
     ctx.beginPath();
     if (ctx.roundRect) {
       ctx.roundRect(nameX, nameY, nameWidth, nameHeight, radius);
@@ -56,68 +58,78 @@ export function createAvatarBillboard(
     ctx.fill();
 
     // Name border
-    ctx.strokeStyle = isSelf ? '#62cfc7' : '#af7b52';
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = isSelf ? '#5eead4' : '#f59e0b';
+    ctx.lineWidth = 4;
     ctx.stroke();
 
     // Name text
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(name, 256, nameY + nameHeight / 2);
+    ctx.fillText(name, 512, nameY + nameHeight / 2 + 1);
 
     // 2. Draw Chat Bubble if there is an active message
     if (bubbleText) {
-      ctx.font = '500 22px system-ui, -apple-system, sans-serif';
-      const maxBubbleWidth = 440;
-      const lines = wrapText(ctx, bubbleText, maxBubbleWidth - 40);
-      const lineHeight = 28;
-      const bubbleHeight = Math.max(60, lines.length * lineHeight + 26);
+      ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
+      const maxBubbleWidth = 860;
+      const lines = wrapText(ctx, bubbleText, maxBubbleWidth - 60);
+      const lineHeight = 46;
+      const bubbleHeight = Math.max(90, lines.length * lineHeight + 40);
       const measuredLineWidths = lines.map((l) => ctx.measureText(l).width);
-      const textBlockWidth = Math.max(...measuredLineWidths, 80);
-      const bubbleWidth = Math.min(maxBubbleWidth, textBlockWidth + 40);
-      const bubbleX = (512 - bubbleWidth) / 2;
-      const bubbleY = nameY - bubbleHeight - 16;
+      const textBlockWidth = Math.max(...measuredLineWidths, 160);
+      const bubbleWidth = Math.min(maxBubbleWidth, textBlockWidth + 70);
+      const bubbleX = (1024 - bubbleWidth) / 2;
+      const bubbleY = nameY - bubbleHeight - 24;
 
-      // Bubble Body (white card with soft shadow)
+      // Outer drop shadow for strong contrast against any background
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetY = 6;
+
+      // Bubble Body (Solid pure white card)
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
       if (ctx.roundRect) {
-        ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 14);
+        ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 20);
       } else {
         ctx.rect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
       }
       ctx.fill();
 
-      // Bubble Border
-      ctx.strokeStyle = '#af7b52';
-      ctx.lineWidth = 2.5;
+      // Reset shadow for clean borders and text
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+
+      // Thick Dark Border
+      ctx.strokeStyle = '#1e162a';
+      ctx.lineWidth = 4.5;
       ctx.stroke();
 
-      // Bubble Pointer Triangle
+      // Bubble Pointer Triangle pointing down to the name tag
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.moveTo(256 - 10, bubbleY + bubbleHeight - 1);
-      ctx.lineTo(256 + 10, bubbleY + bubbleHeight - 1);
-      ctx.lineTo(256, bubbleY + bubbleHeight + 11);
+      ctx.moveTo(512 - 16, bubbleY + bubbleHeight - 1);
+      ctx.lineTo(512 + 16, bubbleY + bubbleHeight - 1);
+      ctx.lineTo(512, bubbleY + bubbleHeight + 18);
       ctx.closePath();
       ctx.fill();
 
-      ctx.strokeStyle = '#af7b52';
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#1e162a';
+      ctx.lineWidth = 4.5;
       ctx.beginPath();
-      ctx.moveTo(256 - 10, bubbleY + bubbleHeight);
-      ctx.lineTo(256, bubbleY + bubbleHeight + 11);
-      ctx.lineTo(256 + 10, bubbleY + bubbleHeight);
+      ctx.moveTo(512 - 16, bubbleY + bubbleHeight);
+      ctx.lineTo(512, bubbleY + bubbleHeight + 18);
+      ctx.lineTo(512 + 16, bubbleY + bubbleHeight);
       ctx.stroke();
 
-      // Message lines
-      ctx.fillStyle = '#2e2633';
+      // High-contrast bold dark text inside the bubble
+      ctx.fillStyle = '#110c18';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const textStartY = bubbleY + bubbleHeight / 2 - ((lines.length - 1) * lineHeight) / 2;
       lines.forEach((line, index) => {
-        ctx.fillText(line, 256, textStartY + index * lineHeight);
+        ctx.fillText(line, 512, textStartY + index * lineHeight);
       });
     }
   }
@@ -125,8 +137,9 @@ export function createAvatarBillboard(
   const texture = new CanvasTexture(canvas);
   const material = new SpriteMaterial({ map: texture, depthTest: false });
   const sprite = new Sprite(material);
-  sprite.scale.set(2.4, 1.2, 1);
-  sprite.position.y = 2.4;
+
+  // Scaled up significantly for clear readability in orthographic room view
+  sprite.scale.set(4.4, 2.2, 1);
+  sprite.position.y = 2.7;
   return sprite;
 }
-

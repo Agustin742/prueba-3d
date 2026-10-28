@@ -211,34 +211,43 @@ button {
   cursor: pointer;
 }
 .chat-messages {
-  height: 11rem;
+  height: 13rem;
   overflow-y: auto;
-  padding: 0.65rem 0.85rem;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
   font-size: 0.85rem;
+  background: #fdfbf7;
 }
 .chat-empty {
   color: #9f91aa;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-style: italic;
   margin: auto;
   text-align: center;
 }
 .chat-message-item {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  line-height: 1.35;
-  word-break: break-word;
+  flex-direction: column;
+  background: #ffffff;
+  border-left: 4px solid #af7b52;
+  border-radius: 6px;
+  padding: 6px 10px;
+  gap: 3px;
+  box-shadow: 0 1px 4px rgba(56, 47, 63, 0.08);
 }
 .chat-sender {
-  font-weight: 700;
-  color: #af7b52;
+  font-weight: 750;
+  font-size: 0.8rem;
+  color: #8e603d;
+  letter-spacing: 0.02em;
 }
 .chat-text {
-  color: #382f3f;
+  color: #1a1024;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  word-break: break-word;
 }
 .chat-form {
   display: flex;
