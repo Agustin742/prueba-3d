@@ -10,6 +10,7 @@ import {
 import { receptionAvatarRadius } from './reception-layout';
 import { useNavigationControls } from './use-navigation-controls';
 import { ChatOverlay } from '../network/ChatOverlay';
+import { filterProfanityPlain } from '../network/profanity-filter';
 import { socket, type ChatMessage, type PlayerState } from '../network/socket';
 
 function WebGLFailure() {
@@ -52,6 +53,14 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const [joined, setJoined] = useState(!multiplayer || Boolean(savedNick));
   const [nickname, setNickname] = useState(savedNick);
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const [filterProfanity, setFilterProfanity] = useState(() => {
+    try {
+      const stored = localStorage.getItem('chat_filter_profanity');
+      return stored !== null ? stored === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
   const [remotePlayers, setRemotePlayers] = useState<Record<string, PlayerState>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [bubbles, setBubbles] = useState<Record<string, string>>({});
@@ -148,7 +157,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       // Avoid showing bubble twice: local sender already rendered bubble optimistically in handleSendMessage
       const isSelf = msg.sender === (nickname || savedNick) || msg.sender === 'Yo';
       if (msg.sender && msg.content && !isSelf) {
-        showBubble(msg.sender, msg.content);
+        showBubble(msg.sender, filterProfanityPlain(msg.content, filterProfanity));
       }
     };
 
@@ -245,7 +254,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     // 1. Optimistic update: appears in UI immediately
     setMessages(prev => [...prev, newMsg]);
     // 2. Show bubble above avatar
-    showBubble(senderName, content);
+    showBubble(senderName, filterProfanityPlain(content, filterProfanity));
 
     // 3. Emit via socket to broadcast and persist in Postgres
     if (!socket.connected) {
@@ -382,6 +391,8 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
           onlineCount={onlineCount}
           currentNickname={nickname}
           isConnected={isConnected}
+          filterProfanity={filterProfanity}
+          onToggleFilterProfanity={setFilterProfanity}
         />
       )}
 

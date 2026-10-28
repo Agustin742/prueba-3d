@@ -328,3 +328,110 @@ button {
 .chat-send-btn:hover {
   background: #8e603d;
 }
+.chat-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.72rem;
+  color: #7b6d85;
+  cursor: pointer;
+  user-select: none;
+  margin-left: 2px;
+}
+.chat-filter-toggle input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #af7b52;
+  width: 0.8rem;
+  height: 0.8rem;
+}
+.profanity-replacement {
+  font-weight: 850;
+  color: #1e3a8a;
+  background: rgba(30, 58, 138, 0.08);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+.chat-form {
+  position: relative;
+}
+.chat-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.chat-emoji-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-right: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease;
+}
+.chat-emoji-toggle-btn:hover:not(:disabled) {
+  transform: scale(1.15);
+}
+.chat-emoji-toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.emoji-picker-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0.5rem;
+  right: 0.5rem;
+  background: #ffffff;
+  border: 1px solid rgba(175, 123, 82, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(56, 47, 63, 0.16);
+  padding: 6px 8px 8px;
+  z-index: 50;
+}
+.emoji-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #8e603d;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(175, 123, 82, 0.15);
+}
+.emoji-picker-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #9a8c9e;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+}
+.emoji-picker-close:hover {
+  color: #382f3f;
+}
+.emoji-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+.emoji-item-btn {
+  background: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 4px;
+  transition: background 0.15s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.emoji-item-btn:hover {
+  background: #fff0d8;
+  transform: scale(1.2);
+}
