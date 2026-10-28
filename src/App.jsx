@@ -4,6 +4,38 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import * as THREE from 'three';
 import { moveWithCollisions, turnTowardsAngle } from './movement.js';
+import { RemotePlayer } from './RemotePlayer.jsx';
+import { ChatOverlay } from './ChatOverlay.jsx';
+import { socket } from './socket.js';
+
+function createNameTagSprite(name, bgColor = 'rgba(20, 24, 30, 0.75)') {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.fillStyle = bgColor;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(8, 8, 240, 48, 12);
+    } else {
+      ctx.rect(8, 8, 240, 48);
+    }
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 22px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name, 128, 32);
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(1.4, 0.35, 1);
+  sprite.position.y = 2.1;
+  return sprite;
+}
 
 function FittedCamera() {
   const { camera, size } = useThree();
@@ -51,7 +83,7 @@ const FURNITURE_HITBOXES = [
 ];
 const MOVEMENT_KEYS = new Set(['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright']);
 
-function Player({ onNearChange, onInteract }) {
+function Player({ nickname, onNearChange, onInteract, onMove }) {
   const { scene, animations } = useLoader(GLTFLoader, '/models/character.glb');
   const player = useMemo(() => {
     const clone = cloneSkinned(scene);
@@ -68,8 +100,13 @@ function Player({ onNearChange, onInteract }) {
         part.receiveShadow = true;
       }
     });
+
+    const nameTag = createNameTagSprite(nickname || 'Yo', 'rgba(43, 61, 54, 0.85)');
+    clone.add(nameTag);
+
     return clone;
-  }, [scene]);
+  }, [scene, nickname]);
+
   const idleClip = useMemo(() => animations.find((clip) => clip.name.toLowerCase() === 'idle'), [animations]);
   const runClip = useMemo(() => animations.find((clip) => clip.name.toLowerCase() === 'run'), [animations]);
   const animationController = useRef(null);
@@ -77,6 +114,9 @@ function Player({ onNearChange, onInteract }) {
   const nearBookcase = useRef(false);
   const interactRef = useRef(onInteract);
   interactRef.current = onInteract;
+
+  const lastSendTime = useRef(0);
+  const wasMoving = useRef(false);
 
   useEffect(() => {
     const mixer = new THREE.AnimationMixer(player);
@@ -96,6 +136,10 @@ function Player({ onNearChange, onInteract }) {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // Don't capture movement if typing in an input
+      if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+      }
       const key = event.key.toLowerCase();
       if (MOVEMENT_KEYS.has(key)) {
         event.preventDefault();
@@ -129,7 +173,6 @@ function Player({ onNearChange, onInteract }) {
       const length = Math.hypot(horizontal, vertical);
       horizontal /= length;
       vertical /= length;
-      // Controls follow the fixed camera: up moves toward the back of the room.
       const moveX = (horizontal + vertical) * Math.SQRT1_2;
       const moveZ = (vertical - horizontal) * Math.SQRT1_2;
       const nextPosition = moveWithCollisions(
@@ -143,7 +186,16 @@ function Player({ onNearChange, onInteract }) {
       position.z = nextPosition.z;
       const targetAngle = Math.atan2(moveX, moveZ);
       player.rotation.y = turnTowardsAngle(player.rotation.y, targetAngle, delta);
+
+      const now = performance.now();
+      if (now - lastSendTime.current > 50) {
+        lastSendTime.current = now;
+        onMove?.([position.x, position.y, position.z], player.rotation.y, 'run');
+      }
+    } else if (wasMoving.current) {
+      onMove?.([position.x, position.y, position.z], player.rotation.y, 'idle');
     }
+    wasMoving.current = moving;
 
     const controller = animationController.current;
     if (controller) {
@@ -166,7 +218,7 @@ function Player({ onNearChange, onInteract }) {
   return <primitive object={player} />;
 }
 
-function Room({ onNearChange, onInteract }) {
+function Room({ nickname, remotePlayers, onNearChange, onInteract, onMove }) {
   const floorTexture = useLoader(THREE.TextureLoader, '/textures/wood-floor.jpg');
   floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
   floorTexture.repeat.set(3, 2.5);
@@ -205,15 +257,34 @@ function Room({ onNearChange, onInteract }) {
       <Model file="/models/bookcaseOpen.glb" position={[-3.8, 0, -3.5]} size={2.5} />
       <Model file="/models/loungeSofa.glb" position={[2.45, 0, -2.55]} size={2.8} rotation={Math.PI} />
       <Model file="/models/tableCoffee.glb" position={[2.45, 0, -0.8]} size={1.45} />
-      <Player onNearChange={onNearChange} onInteract={onInteract} />
+
+      {/* Local Player */}
+      <Player nickname={nickname} onNearChange={onNearChange} onInteract={onInteract} onMove={onMove} />
+
+      {/* Remote Players */}
+      {Object.values(remotePlayers).map((rp) => (
+        <RemotePlayer
+          key={rp.id}
+          nickname={rp.nickname}
+          position={rp.position}
+          rotation={rp.rotation}
+          animation={rp.animation}
+        />
+      ))}
     </>
   );
 }
 
 export default function App() {
+  const [joined, setJoined] = useState(false);
+  const [nickname, setNickname] = useState('');
+  const [remotePlayers, setRemotePlayers] = useState({});
+  const [messages, setMessages] = useState([]);
+
   const [nearBookcase, setNearBookcase] = useState(false);
   const [message, setMessage] = useState('');
   const messageTimer = useRef();
+
   const handleInteract = useCallback(() => {
     setMessage('A little corner for stories.');
     window.clearTimeout(messageTimer.current);
@@ -221,6 +292,7 @@ export default function App() {
   }, []);
 
   useEffect(() => () => window.clearTimeout(messageTimer.current), []);
+
   const handleNearChange = useCallback((near) => {
     setNearBookcase(near);
     if (!near) {
@@ -229,6 +301,76 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    socket.on('room-joined', ({ players, messages: history }) => {
+      const playersMap = {};
+      players.forEach((p) => {
+        playersMap[p.id] = p;
+      });
+      setRemotePlayers(playersMap);
+      if (history) setMessages(history);
+    });
+
+    socket.on('player-joined', (player) => {
+      setRemotePlayers((prev) => ({ ...prev, [player.id]: player }));
+    });
+
+    socket.on('player-moved', (data) => {
+      setRemotePlayers((prev) => {
+        if (!prev[data.id]) return prev;
+        return {
+          ...prev,
+          [data.id]: {
+            ...prev[data.id],
+            position: data.position,
+            rotation: data.rotation,
+            animation: data.animation,
+          },
+        };
+      });
+    });
+
+    socket.on('player-left', ({ id }) => {
+      setRemotePlayers((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    });
+
+    socket.on('chat-message', (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    return () => {
+      socket.off('room-joined');
+      socket.off('player-joined');
+      socket.off('player-moved');
+      socket.off('player-left');
+      socket.off('chat-message');
+    };
+  }, []);
+
+  const handleJoin = (name) => {
+    setNickname(name);
+    setJoined(true);
+    socket.connect();
+    socket.emit('join-room', {
+      roomCode: 'global',
+      nickname: name,
+    });
+  };
+
+  const handleSendMessage = (content) => {
+    socket.emit('chat-message', { content });
+  };
+
+  const handleMove = useCallback((position, rotation, animation) => {
+    socket.emit('player-move', { position, rotation, animation });
+  }, []);
+
+  const onlineCount = Object.keys(remotePlayers).length + (joined ? 1 : 0);
+
   return (
     <main className="page-shell">
       <header className="room-header">
@@ -236,8 +378,11 @@ export default function App() {
           <p className="eyebrow">A small place to pause</p>
           <h1>A Quiet Corner</h1>
         </div>
-        <p className="room-note">A room in three dimensions</p>
+        <p className="room-note">
+          {joined ? `Conectado como ${nickname}` : 'Sala compartida en tiempo real'}
+        </p>
       </header>
+
       <section className="room-frame" aria-label="Three-dimensional furnished room">
         <Canvas
           shadows
@@ -248,9 +393,25 @@ export default function App() {
         >
           <FittedCamera />
           <Suspense fallback={null}>
-            <Room onNearChange={handleNearChange} onInteract={handleInteract} />
+            <Room
+              nickname={nickname}
+              remotePlayers={remotePlayers}
+              onNearChange={handleNearChange}
+              onInteract={handleInteract}
+              onMove={handleMove}
+            />
           </Suspense>
         </Canvas>
+
+        {/* Modal & Chat Overlay */}
+        <ChatOverlay
+          joined={joined}
+          onJoin={handleJoin}
+          messages={messages}
+          onSendMessage={handleSendMessage}
+          onlineCount={onlineCount}
+        />
+
         <div
           className={`interaction-message${message ? ' interaction-result' : nearBookcase ? ' interaction-prompt' : ''}`}
           role="status"

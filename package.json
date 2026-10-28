@@ -6,7 +6,11 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "node --test"
+    "test": "node --test",
+    "server:start": "pnpm.cmd --filter server start:dev",
+    "server:build": "pnpm.cmd --filter server build",
+    "db:up": "docker compose up -d",
+    "db:migrate": "pnpm.cmd --filter server prisma:migrate"
   },
   "dependencies": {
     "@react-three/fiber": "^8.17.10",

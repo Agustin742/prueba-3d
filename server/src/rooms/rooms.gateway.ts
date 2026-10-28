@@ -55,7 +55,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       rotation?: number;
     },
   ) {
-    const roomCode = data.roomCode?.trim() || 'default-room';
+    const roomCode = data.roomCode?.trim() || 'global';
     const nickname = data.nickname?.trim() || `Player-${client.id.slice(0, 4)}`;
 
     await this.roomsService.getOrCreateRoom(roomCode);
