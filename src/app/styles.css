@@ -194,8 +194,16 @@ button {
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 50%;
+  background: #9ca3af;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.online-indicator.online {
   background: #22c55e;
   box-shadow: 0 0 6px #22c55e;
+}
+.online-indicator.offline {
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
 }
 .online-count {
   font-size: 0.8rem;

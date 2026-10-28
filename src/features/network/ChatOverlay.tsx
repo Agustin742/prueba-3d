@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from './socket';
+import { getSenderColor } from './sender-color';
 
 function formatTime(isoString?: string): string {
   if (!isoString) {
@@ -25,6 +26,7 @@ export interface ChatOverlayProps {
   onSendMessage(content: string): void;
   onlineCount: number;
   currentNickname?: string;
+  isConnected?: boolean;
 }
 
 export function ChatOverlay({
@@ -35,6 +37,7 @@ export function ChatOverlay({
   onSendMessage,
   onlineCount,
   currentNickname,
+  isConnected = true,
 }: ChatOverlayProps) {
   const [nicknameInput, setNicknameInput] = useState(currentNickname || '');
   const [chatInput, setChatInput] = useState('');
@@ -89,9 +92,14 @@ export function ChatOverlay({
     <div className="chat-container">
       <div className="chat-header" onClick={() => setIsChatOpen(!isChatOpen)}>
         <div className="chat-header-title">
-          <span className="online-indicator"></span>
+          <span
+            className={`online-indicator ${isConnected ? 'online' : 'offline'}`}
+            title={isConnected ? 'Conectado al servidor' : 'Desconectado del servidor (levantá el backend)'}
+          />
           <span>Recepción</span>
-          <span className="online-count">({onlineCount} online)</span>
+          <span className="online-count">
+            {isConnected ? `(${onlineCount} online)` : '(desconectado)'}
+          </span>
           {currentNickname && onChangeNickname && (
             <button
               type="button"
@@ -119,20 +127,31 @@ export function ChatOverlay({
         <>
           <div className="chat-messages">
             {messages.length === 0 ? (
-              <div className="chat-empty">No hay mensajes todavía. ¡Saludá!</div>
+              <div className="chat-empty">
+                {isConnected ? 'No hay mensajes todavía. ¡Saludá!' : 'Conectando con el servidor...'}
+              </div>
             ) : (
-              messages.map((msg, i) => (
-                <div
-                  key={msg.id || i}
-                  className={`chat-message-item ${msg.isSystem ? 'chat-message-system' : ''}`}
-                >
-                  <div className="chat-message-header">
-                    <span className="chat-sender">{msg.sender}</span>
-                    <span className="chat-time">{formatTime(msg.createdAt)}</span>
+              messages.map((msg, i) => {
+                const senderColor = msg.isSystem ? undefined : getSenderColor(msg.sender);
+                return (
+                  <div
+                    key={msg.id || i}
+                    className={`chat-message-item ${msg.isSystem ? 'chat-message-system' : ''}`}
+                    style={senderColor ? { borderLeftColor: senderColor } : undefined}
+                  >
+                    <div className="chat-message-header">
+                      <span
+                        className="chat-sender"
+                        style={senderColor ? { color: senderColor } : undefined}
+                      >
+                        {msg.sender}
+                      </span>
+                      <span className="chat-time">{formatTime(msg.createdAt)}</span>
+                    </div>
+                    <span className="chat-text">{msg.content}</span>
                   </div>
-                  <span className="chat-text">{msg.content}</span>
-                </div>
-              ))
+                );
+              })
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -141,14 +160,15 @@ export function ChatOverlay({
             <input
               type="text"
               className="chat-input"
-              placeholder="Escribí un mensaje..."
+              placeholder={isConnected ? 'Escribí un mensaje...' : 'Servidor desconectado...'}
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
               onKeyUp={(e) => e.stopPropagation()}
               maxLength={120}
+              disabled={!isConnected}
             />
-            <button type="submit" className="chat-send-btn">
+            <button type="submit" className="chat-send-btn" disabled={!isConnected}>
               Enviar
             </button>
           </form>

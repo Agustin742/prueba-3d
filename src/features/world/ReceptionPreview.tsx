@@ -41,7 +41,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const ready = useCallback(() => setStatus(current => current === 'loading' ? 'ready' : current), []);
   const failed = useCallback(() => { release.current(); setStatus('webgl-error'); }, []);
 
-  // Multiplayer state with persistent session nickname
+  // Persistent session nickname
   const [savedNick] = useState(() => {
     try {
       return typeof window !== 'undefined' ? (localStorage.getItem('avatar_nickname') || '') : '';
@@ -51,6 +51,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   });
   const [joined, setJoined] = useState(!multiplayer || Boolean(savedNick));
   const [nickname, setNickname] = useState(savedNick);
+  const [isConnected, setIsConnected] = useState(socket.connected);
   const [remotePlayers, setRemotePlayers] = useState<Record<string, PlayerState>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [bubbles, setBubbles] = useState<Record<string, string>>({});
@@ -77,34 +78,26 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     }, 6000);
   }, []);
 
-  // Socket connection and auto-join if nickname is saved
+  // Single unified socket lifecycle
   useEffect(() => {
     if (!multiplayer) return;
 
-    const emitJoin = (nameToJoin: string) => {
-      socket.emit('join-room', {
-        roomCode: 'global',
-        nickname: nameToJoin,
-      });
+    const onConnect = () => {
+      setIsConnected(true);
+      const activeName = nickname || savedNick;
+      if (activeName) {
+        socket.emit('join-room', {
+          roomCode: 'global',
+          nickname: activeName,
+        });
+      }
     };
 
-    if (savedNick) {
-      if (socket.connected) {
-        emitJoin(savedNick);
-      } else {
-        socket.once('connect', () => emitJoin(savedNick));
-      }
-    }
+    const onDisconnect = () => {
+      setIsConnected(false);
+    };
 
-    if (!socket.connected) {
-      socket.connect();
-    }
-  }, [multiplayer, savedNick]);
-
-  useEffect(() => {
-    if (!multiplayer) return;
-
-    socket.on('room-joined', ({ players, messages: history }) => {
+    const onRoomJoined = ({ players, messages: history }: { players: PlayerState[]; messages: ChatMessage[] }) => {
       const playersMap: Record<string, PlayerState> = {};
       players.forEach((p: PlayerState) => {
         playersMap[p.id] = p;
@@ -113,13 +106,13 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       if (history && Array.isArray(history)) {
         setMessages(history);
       }
-    });
+    };
 
-    socket.on('player-joined', (player: PlayerState) => {
+    const onPlayerJoined = (player: PlayerState) => {
       setRemotePlayers(prev => ({ ...prev, [player.id]: player }));
-    });
+    };
 
-    socket.on('player-moved', (data: { id: string; position: [number, number, number]; rotation: number; animation: string }) => {
+    const onPlayerMoved = (data: { id: string; position: [number, number, number]; rotation: number; animation: string }) => {
       setRemotePlayers(prev => {
         if (!prev[data.id]) return prev;
         return {
@@ -132,17 +125,17 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
           },
         };
       });
-    });
+    };
 
-    socket.on('player-left', ({ id }: { id: string }) => {
+    const onPlayerLeft = ({ id }: { id: string }) => {
       setRemotePlayers(prev => {
         const next = { ...prev };
         delete next[id];
         return next;
       });
-    });
+    };
 
-    socket.on('chat-message', (msg: ChatMessage) => {
+    const onChatMessage = (msg: ChatMessage) => {
       setMessages(prev => {
         const isDuplicate = prev.some(
           m => (m.id && m.id === msg.id)
@@ -154,33 +147,41 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       if (msg.sender && msg.content) {
         showBubble(msg.sender, msg.content);
       }
-    });
-
-    return () => {
-      socket.off('room-joined');
-      socket.off('player-joined');
-      socket.off('player-moved');
-      socket.off('player-left');
-      socket.off('chat-message');
     };
-  }, [multiplayer, showBubble]);
 
-  // Handle socket auto-reconnection
-  useEffect(() => {
-    if (!multiplayer) return;
-    const onConnect = () => {
-      if (joined && nickname) {
+    // Register all event listeners
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('room-joined', onRoomJoined);
+    socket.on('player-joined', onPlayerJoined);
+    socket.on('player-moved', onPlayerMoved);
+    socket.on('player-left', onPlayerLeft);
+    socket.on('chat-message', onChatMessage);
+
+    // Initial connection or join
+    if (!socket.connected) {
+      socket.connect();
+    } else {
+      setIsConnected(true);
+      const activeName = nickname || savedNick;
+      if (activeName) {
         socket.emit('join-room', {
           roomCode: 'global',
-          nickname,
+          nickname: activeName,
         });
       }
-    };
-    socket.on('connect', onConnect);
+    }
+
     return () => {
       socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('room-joined', onRoomJoined);
+      socket.off('player-joined', onPlayerJoined);
+      socket.off('player-moved', onPlayerMoved);
+      socket.off('player-left', onPlayerLeft);
+      socket.off('chat-message', onChatMessage);
     };
-  }, [multiplayer, joined, nickname]);
+  }, [multiplayer, nickname, savedNick, showBubble]);
 
   const handleJoin = useCallback((name: string) => {
     setNickname(name);
@@ -238,12 +239,12 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       content,
       createdAt: new Date().toISOString(),
     };
-    // 1. Optimistic update
+    // 1. Optimistic update: appears in UI immediately
     setMessages(prev => [...prev, newMsg]);
     // 2. Show bubble above avatar
     showBubble(senderName, content);
 
-    // 3. Emit via socket
+    // 3. Emit via socket to broadcast and persist in Postgres
     if (!socket.connected) {
       socket.connect();
     }
@@ -377,6 +378,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
           onSendMessage={handleSendMessage}
           onlineCount={onlineCount}
           currentNickname={nickname}
+          isConnected={isConnected}
         />
       )}
 
