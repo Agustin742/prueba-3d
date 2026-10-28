@@ -1,0 +1,28 @@
+{
+  "title": "Tu avatar, antes de entrar",
+  "brief": "Three responsive entry-menu design alternatives for S1, S2, S4, S5 and S6. Each exposes the approved female/male catalogue, one accessory or none, hair and garment colors, nickname and entry CTA. Inline SVG is explicitly a flat mockup: color and text update live, but catalogue silhouettes and 3D fitting are not simulated. Browser-only retention is explained as intended application behavior; these demos deliberately write no storage and perform no navigation. Changing model resets catalogue selections; color and nickname remain. No body-shape controls or account saving. Existing styles and art direction guide these proposals, not an established design system. Canvas opening and ODD Log updates belong to the parent.",
+  "feature": "odd/tasks/avatar-customization.md",
+  "artboards": [
+    {
+      "file": "01-dressing-room.html",
+      "title": "Vestidor dividido",
+      "tradeoff": "Recommended: side-by-side preview and complete editing form make comparison and revisiting choices immediate. Native selects keep the menu compact and keyboard-friendly, but hide the full catalogue until opened. Stacks vertically on mobile, so the preview is no longer continuously visible while editing lower fields. More initial information than the other directions.",
+      "width": 1280,
+      "height": 1040
+    },
+    {
+      "file": "02-category-dock.html",
+      "title": "Tu look, a mano",
+      "tradeoff": "A compact, centered card puts the preview above three category buttons with visible radio choices. Less simultaneous information and a shorter editing surface; comparing categories requires switching panels. Buttons use normal Tab/Enter semantics and aria-pressed, not ARIA tab semantics. Selected category remains active on model change. Controls wrap instead of creating horizontal mobile overflow.",
+      "width": 1280,
+      "height": 1080
+    },
+    {
+      "file": "03-guided-welcome.html",
+      "title": "Hacelo a tu manera",
+      "tradeoff": "Three freely revisitable steps reduce first-visit decision load and put nickname/retention explanation at confirmation. More clicks for returning visitors and less simultaneous overview. Step navigation moves focus to the updated heading. Mobile turns the left rail into a wrapping horizontal step list and keeps natural document scrolling.",
+      "width": 1280,
+      "height": 960
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu vestidor · Dirección 01</title>
+<style>
+:root{font-family:system-ui,sans-serif;color:#382f3f;background:#fff9eb;line-height:1.5;--hair:#6c4d48;--cloth:#5b4f96}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit;color:inherit}button,input,select{min-height:46px;border:1px solid #af7b52;border-radius:12px;background:#fff9eb;padding:10px 14px}button{cursor:pointer}button:hover{background:#fff0d8}:focus-visible{outline:3px solid #382f3f;outline-offset:4px}header,main,footer{max-width:1100px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{font-weight:800}.eyebrow{font-size:.76rem;letter-spacing:.13em;text-transform:uppercase;font-weight:750}h1{font-size:clamp(2rem,4vw,3.3rem);line-height:1.1;letter-spacing:-.04em;margin:14px 0}h2{font-size:1.1rem;margin-top:0}p{margin:8px 0 18px}.tag{background:#62cfc7;padding:6px 12px;border-radius:30px;font-size:.8rem;font-weight:700}main{display:grid;grid-template-columns:1fr 1.05fr;gap:36px;padding-top:0}.preview{border:1px solid #af7b52;border-radius:120px 120px 28px 28px;background:#fff0d8;padding:28px;text-align:center;align-self:start;position:sticky;top:24px}.preview svg{width:100%;height:300px;display:block}.preview figcaption{font-size:.8rem;max-width:30ch;margin:12px auto}.name{display:block;font-size:1.4rem;font-weight:800}.summary{font-size:.88rem;overflow-wrap:anywhere}.hair{fill:var(--hair)}.cloth{fill:var(--cloth)}.panel{background:#fff9eb;border-top:1px solid #af7b52;padding-top:22px}fieldset{border:0;padding:0;margin:0 0 22px;min-width:0}legend{font-weight:750;margin-bottom:10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:flex;flex-direction:column;gap:7px;min-width:0}.field span{font-size:.85rem;font-weight:650}select,input{width:100%;max-width:100%}.types{display:flex;flex-wrap:wrap;gap:10px}.types label{border:1px solid #af7b52;border-radius:12px;padding:10px 18px;display:flex;align-items:center;gap:9px;min-height:46px}.types input{width:18px;min-height:18px;accent-color:#382f3f}.types label:has(:checked){background:#62cfc7;border:2px solid #382f3f;padding:9px 17px}small{font-size:.8rem}.entry{border-top:1px solid #af7b52;margin-top:24px;padding-top:20px}.primary{background:#62cfc7;border:2px solid #382f3f;font-weight:800;width:100%;margin-top:16px}.notice{font-size:.8rem;margin-top:14px}#result{font-weight:700;min-height:24px}footer{font-size:.8rem;display:flex;justify-content:space-between;gap:16px}noscript{display:block;padding:20px}@media(max-width:720px){header,main,footer{padding:18px}main{grid-template-columns:1fr;gap:22px}.preview{position:static;margin:0;border-radius:30px}.preview svg{height:210px}.grid{grid-template-columns:1fr}footer{flex-wrap:wrap}h1{font-size:2.2rem}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header><span class="brand">Oficina virtual / Bienvenida</span><span class="tag">01 · Vestidor</span></header>
+<main>
+<section aria-labelledby="intro"><span class="eyebrow">Antes de entrar</span><h1 id="intro">Un lugar para vos.<br>Un look bien tuyo.</h1><p>Elegí cómo querés aparecer en la oficina.</p>
+<figure class="preview"><svg viewBox="0 0 260 300" role="img" aria-label="Ilustración plana de avatar; mockup, no modelo 3D"><ellipse cx="130" cy="279" rx="69" ry="12" fill="#e9c99b"/><path d="M102 235v28m56-28v28" stroke="#353849" stroke-width="22" stroke-linecap="round"/><path d="M88 164q-20 30-12 73m96-73q20 30 12 73" fill="none" stroke="#f8c6af" stroke-width="16" stroke-linecap="round"/><path class="cloth" d="M96 149q34-12 68 0l9 94q-43 12-86 0z"/><rect x="79" y="45" width="102" height="104" rx="30" fill="#f8c6af"/><path class="hair" d="M77 91V66q0-35 52-35t54 35v26l-20-22q-30 14-66 0z"/><g fill="#382f3f"><circle cx="111" cy="105" r="3"/><circle cx="150" cy="105" r="3"/></g><path d="M120 119q10 10 21 0" fill="none" stroke="#382f3f" stroke-width="2" stroke-linecap="round"/></svg><span class="name" id="preview-name">Tu avatar</span><p class="summary" id="summary" aria-live="polite"></p><figcaption>Mockup ilustrado · Los colores cambian en vivo. El calce 3D de las piezas no está representado.</figcaption></figure></section>
+<form id="customize" class="panel">
+<h2>Armá tu combinación</h2>
+<fieldset><legend>Modelo de avatar</legend><div class="types"><label><input type="radio" name="body" value="female" checked> Femenino</label><label><input type="radio" name="body" value="male"> Masculino</label></div></fieldset>
+<div class="grid"><label class="field"><span>Peinado · 5 opciones</span><select id="hair" name="hair"></select></label><label class="field"><span>Prenda · 5 opciones</span><select id="garment" name="garment"></select></label><label class="field"><span>Accesorio · 5 + ninguno</span><select id="accessory" name="accessory"></select></label><div><small>Un accesorio a la vez.<br>También podés elegir ninguno.</small></div></div>
+<fieldset style="margin-top:24px"><legend>Sumale color</legend><div class="grid"><label class="field"><span>Color del pelo</span><select id="hair-color" name="hairColor"><option value="#6c4d48">Castaño</option><option value="#af6d63">Cobrizo</option><option value="#e5ad58">Dorado</option><option value="#353849">Oscuro</option><option value="#c77daa">Malva</option></select></label><label class="field"><span>Color de la ropa</span><select id="cloth-color" name="clothColor"><option value="#5b4f96">Violeta</option><option value="#75b7da">Celeste</option><option value="#f2c85c">Amarillo</option><option value="#efa5ae">Rosa</option><option value="#7eba8b">Verde</option><option value="#f4e6d2">Crema</option></select></label></div></fieldset>
+<div class="entry"><label class="field" for="nickname"><span>¿Cómo te llamás? · Apodo obligatorio</span><input id="nickname" name="nickname" required placeholder="Tu apodo" autocomplete="off"></label><p class="notice">Al entrar, tu selección se recordará solo en este navegador. No se guarda en una cuenta ni se comparte entre dispositivos. Si borrás los datos del navegador, se pierde.</p><button class="primary" type="submit">Entrar a la oficina →</button><p id="result" role="status"></p><small>Demo de diseño: no entra a una sala ni guarda datos.</small></div>
+</form>
+</main><footer><span>Sin apuro. Elegí lo que te represente.</span><span>Dirección 01 / Vista completa</span></footer>
+<noscript>Esta maqueta necesita JavaScript para mostrar el catálogo interactivo. No se cargan recursos externos.</noscript>
+<script>
+const catalogue = {
+ female: {hair:['Original femenino','Bob','Cola alta','Rodete','Rulos / afro'],garment:['Remera','Buzo con capucha','Blusa','Musculosa','Campera'],accessory:['Anteojos','Gorra','Auriculares','Aros','Cartera']},
+ male: {hair:['Corto clásico','Degradado','Rulos / afro','Rastas','Largo atado'],garment:['Remera','Buzo con capucha','Camisa','Musculosa','Campera'],accessory:['Anteojos redondos','Anteojos cuadrados','Gorra','Auriculares','Mochila']}
+};
+const form = document.getElementById('customize');
+const get = id => document.getElementById(id);
+function populate(body){
+ for(const key of ['hair','garment','accessory']){
+  const options = key === 'accessory' ? ['Sin accesorio',...catalogue[body][key]] : catalogue[body][key];
+  get(key).replaceChildren(...options.map(label => new Option(label,label)));
+ }
+ update();
+}
+function update(){
+ document.documentElement.style.setProperty('--hair',get('hair-color').value);
+ document.documentElement.style.setProperty('--cloth',get('cloth-color').value);
+ get('preview-name').textContent=get('nickname').value.trim() || 'Tu avatar';
+ get('summary').textContent=[get('hair').value,get('garment').value,get('accessory').value].join(' · ');
+ get('result').textContent='';
+}
+form.addEventListener('change',event=>{if(event.target.name==='body')populate(event.target.value);else update();});
+get('nickname').addEventListener('input',update);
+form.addEventListener('submit',event=>{event.preventDefault();if(!get('nickname').value.trim()){get('result').textContent='Escribí tu apodo para continuar.';get('nickname').focus();return;}get('result').textContent='¡Todo listo, '+get('nickname').value.trim()+'! En la app, acá entrarías a la oficina. Esta demo no guarda datos.';});
+populate('female');
+</script>
+</body>
+</html>

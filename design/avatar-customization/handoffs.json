@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "chosen": "01-dressing-room.html",
+  "handoffs": {
+    "01-dressing-room.html": {
+      "status": "in_progress",
+      "queued": false,
+      "sentAt": "2026-10-28T20:03:53.510Z",
+      "startedAt": "2026-10-28T20:04:21.216Z",
+      "implementedAt": null,
+      "feature": "odd/tasks/avatar-customization.md",
+      "note": "Dirección elegida por el usuario. Comienza preparación del catálogo modular e implementación React/Three.js; todavía no es una pantalla funcional del juego."
+    }
+  }
+}
