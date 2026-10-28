@@ -90,6 +90,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     // Send init packet to the joining client
+    console.log(`[RoomsGateway] Player "${nickname}" (${client.id}) joined "${roomCode}". History messages: ${messages.length}`);
     client.emit('room-joined', {
       self: playerState,
       players: existingPlayers,

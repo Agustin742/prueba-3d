@@ -202,6 +202,20 @@ button {
   font-weight: 400;
   color: #7b6d85;
 }
+.chat-change-nick-btn {
+  background: none;
+  border: 1px dashed rgba(175, 123, 82, 0.4);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.72rem;
+  color: #8e603d;
+  cursor: pointer;
+  margin-left: 2px;
+}
+.chat-change-nick-btn:hover {
+  background: rgba(175, 123, 82, 0.12);
+  border-color: #8e603d;
+}
 .chat-toggle-btn {
   background: none;
   border: none;

@@ -20,19 +20,23 @@ function formatTime(isoString?: string): string {
 export interface ChatOverlayProps {
   joined: boolean;
   onJoin(nickname: string): void;
+  onChangeNickname?(): void;
   messages: ChatMessage[];
   onSendMessage(content: string): void;
   onlineCount: number;
+  currentNickname?: string;
 }
 
 export function ChatOverlay({
   joined,
   onJoin,
+  onChangeNickname,
   messages,
   onSendMessage,
   onlineCount,
+  currentNickname,
 }: ChatOverlayProps) {
-  const [nicknameInput, setNicknameInput] = useState('');
+  const [nicknameInput, setNicknameInput] = useState(currentNickname || '');
   const [chatInput, setChatInput] = useState('');
   const [isChatOpen, setIsChatOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -86,8 +90,21 @@ export function ChatOverlay({
       <div className="chat-header" onClick={() => setIsChatOpen(!isChatOpen)}>
         <div className="chat-header-title">
           <span className="online-indicator"></span>
-          <span>Recepción en vivo</span>
+          <span>Recepción</span>
           <span className="online-count">({onlineCount} online)</span>
+          {currentNickname && onChangeNickname && (
+            <button
+              type="button"
+              className="chat-change-nick-btn"
+              title="Cambiar apodo"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChangeNickname();
+              }}
+            >
+              cambiar
+            </button>
+          )}
         </div>
         <button
           type="button"

@@ -41,9 +41,16 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const ready = useCallback(() => setStatus(current => current === 'loading' ? 'ready' : current), []);
   const failed = useCallback(() => { release.current(); setStatus('webgl-error'); }, []);
 
-  // Multiplayer state
-  const [joined, setJoined] = useState(!multiplayer);
-  const [nickname, setNickname] = useState('');
+  // Multiplayer state with persistent session nickname
+  const [savedNick] = useState(() => {
+    try {
+      return typeof window !== 'undefined' ? (localStorage.getItem('avatar_nickname') || '') : '';
+    } catch {
+      return '';
+    }
+  });
+  const [joined, setJoined] = useState(!multiplayer || Boolean(savedNick));
+  const [nickname, setNickname] = useState(savedNick);
   const [remotePlayers, setRemotePlayers] = useState<Record<string, PlayerState>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [bubbles, setBubbles] = useState<Record<string, string>>({});
@@ -70,6 +77,30 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     }, 6000);
   }, []);
 
+  // Socket connection and auto-join if nickname is saved
+  useEffect(() => {
+    if (!multiplayer) return;
+
+    const emitJoin = (nameToJoin: string) => {
+      socket.emit('join-room', {
+        roomCode: 'global',
+        nickname: nameToJoin,
+      });
+    };
+
+    if (savedNick) {
+      if (socket.connected) {
+        emitJoin(savedNick);
+      } else {
+        socket.once('connect', () => emitJoin(savedNick));
+      }
+    }
+
+    if (!socket.connected) {
+      socket.connect();
+    }
+  }, [multiplayer, savedNick]);
+
   useEffect(() => {
     if (!multiplayer) return;
 
@@ -79,16 +110,8 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
         playersMap[p.id] = p;
       });
       setRemotePlayers(playersMap);
-      if (history && Array.isArray(history) && history.length > 0) {
-        setMessages(prev => {
-          const combined = [...history];
-          prev.forEach(localM => {
-            if (!combined.some(h => h.id === localM.id || (h.content === localM.content && h.sender === localM.sender))) {
-              combined.push(localM);
-            }
-          });
-          return combined;
-        });
+      if (history && Array.isArray(history)) {
+        setMessages(history);
       }
     });
 
@@ -162,13 +185,30 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const handleJoin = useCallback((name: string) => {
     setNickname(name);
     setJoined(true);
-    if (!socket.connected) {
+    try {
+      localStorage.setItem('avatar_nickname', name);
+    } catch {}
+
+    const emitJoin = () => {
+      socket.emit('join-room', {
+        roomCode: 'global',
+        nickname: name,
+      });
+    };
+
+    if (socket.connected) {
+      emitJoin();
+    } else {
+      socket.once('connect', emitJoin);
       socket.connect();
     }
-    socket.emit('join-room', {
-      roomCode: 'global',
-      nickname: name,
-    });
+  }, []);
+
+  const handleChangeNickname = useCallback(() => {
+    try {
+      localStorage.removeItem('avatar_nickname');
+    } catch {}
+    setJoined(false);
   }, []);
 
   const handleSendMessage = useCallback((content: string) => {
@@ -332,9 +372,11 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
         <ChatOverlay
           joined={joined}
           onJoin={handleJoin}
+          onChangeNickname={handleChangeNickname}
           messages={messages}
           onSendMessage={handleSendMessage}
           onlineCount={onlineCount}
+          currentNickname={nickname}
         />
       )}
 
