@@ -1,0 +1,89 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #382f3f;
+  background: #fff9eb;
+  line-height: 1.5;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+}
+.app-shell {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+.reception-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.preview {
+  height: clamp(20rem, 55vh, 36rem);
+  background: #fff0d8;
+  border: 1px solid #af7b52;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.reception {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  touch-action: none;
+}
+button {
+  font: inherit;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid #af7b52;
+  border-radius: 0.5rem;
+  color: inherit;
+  background: #fff0d8;
+  cursor: pointer;
+}
+:focus-visible {
+  outline: 2px solid #62cfc7;
+  outline-offset: -2px;
+}
+.reception-loading,
+.reception-hud {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 0.45rem 0.9rem;
+  background: rgba(255, 249, 235, 0.92);
+  border: 1px solid #af7b52;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.reception-loading {
+  top: 1rem;
+}
+.reception-hud {
+  bottom: 1rem;
+}
+.reception-dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 24rem;
+  padding: 1.25rem;
+  background: #fff9eb;
+  border: 2px solid #62cfc7;
+  border-radius: 0.85rem;
+  box-shadow: 0 12px 32px rgba(56, 47, 63, 0.18);
+}
+.reception-dialog h2 {
+  margin-top: 0;
+}
+[role='alert'] {
+  max-width: 32rem;
+  margin: 2rem auto;
+  border-left: 0.25rem solid #382f3f;
+  padding: 1rem;
+  background: #fff0d8;
+}
