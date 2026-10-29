@@ -28,6 +28,7 @@ export interface ReceptionPreviewProps {
 
 function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
   const [avatar, setAvatar] = useState<AvatarResource>();
+  const [npc, setNpc] = useState<AvatarResource>();
   const [room, setRoom] = useState<ReceptionResource>();
   const [status, setStatus] = useState<'loading' | 'ready' | 'avatar-error' | 'room-error' | 'webgl-error'>('loading');
   const [interactionNote, setInteractionNote] = useState<string | null>(null);
@@ -321,6 +322,9 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     };
     loadAvatar(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
       .then(resource => accept(resource, setAvatar)).catch(() => reject('avatar-error'));
+    // The NPC is decoration: a failed download leaves the reception without it and never blocks readiness.
+    loadAvatar(window.matchMedia('(prefers-reduced-motion: reduce)').matches, 'models/npc/monkey.glb')
+      .then(resource => accept(resource, setNpc)).catch(() => {});
     loadReception().then(resource => accept(resource, setRoom)).catch(() => reject('room-error'));
     return cleanup;
   }, [failed]);
@@ -358,6 +362,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
             <ReceptionScene
               avatar={avatar}
               room={room}
+              npc={npc}
               tick={controls.tick}
               onSelect={point => { setInteractionNote(null); controls.tapTarget(point); }}
               onInteract={triggerInteraction}

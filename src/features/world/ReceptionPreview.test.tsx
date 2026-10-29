@@ -12,7 +12,7 @@ vi.mock('@react-three/fiber', () => ({ Canvas: ({ children, onPointerMissed }: {
   if (renderer.crashes) throw new Error('renderer failed');
   return <div data-testid="canvas" onClick={onPointerMissed}>{children}</div>;
 } }));
-vi.mock('./ReceptionScene', () => ({ ReceptionScene: ({ onReady, onFailure, tick, onSelect, onInteract }: { onReady(): void; onFailure(): void; tick(dt: number): { position: { z: number } }; onSelect(point: { x: number; y: number; z: number }): void; onInteract?(id: 'counter-bell' | 'noticeboard' | 'waiting-seat' | 'portal-doorway'): void }) => <>
+vi.mock('./ReceptionScene', () => ({ ReceptionScene: ({ onReady, onFailure, tick, onSelect, onInteract, npc }: { npc?: unknown; onReady(): void; onFailure(): void; tick(dt: number): { position: { z: number } }; onSelect(point: { x: number; y: number; z: number }): void; onInteract?(id: 'counter-bell' | 'noticeboard' | 'waiting-seat' | 'portal-doorway'): void }) => <>
   <button onClick={event => { event.stopPropagation(); onReady(); }}>Rendered</button>
   <button onClick={event => { event.stopPropagation(); onFailure(); }}>Context loss</button>
   <span data-testid="floor" onPointerUp={() => onSelect({ x: 3, y: 0, z: 2 })}>Floor</span>
@@ -21,11 +21,14 @@ vi.mock('./ReceptionScene', () => ({ ReceptionScene: ({ onReady, onFailure, tick
   <span data-testid="prop-noticeboard" onPointerUp={() => onInteract?.('noticeboard')}>Noticeboard 3D</span>
   <button onClick={event => { event.stopPropagation(); screen.getByTestId('position').textContent = String(tick(0.1).position.z); }}>Tick</button>
   <span data-testid="position" />
+  {npc ? <span data-testid="npc" /> : null}
 </> }));
 let resolveAvatar: (value: AvatarResource) => void;
 let resolveRoom: (value: ReceptionResource) => void;
 let rejectAvatar: (error: Error) => void;
 let rejectRoom: (error: Error) => void;
+let resolveNpc: (value: AvatarResource) => void;
+let rejectNpc: (error: Error) => void;
 const avatar = () => ({ scene: new Group(), dispose: vi.fn(), update: vi.fn() } as unknown as AvatarResource);
 const room = () => ({ scene: new Group(), dispose: vi.fn() });
 beforeEach(() => {
@@ -39,7 +42,9 @@ beforeEach(() => {
   });
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({ getExtension: () => null } as unknown as ReturnType<HTMLCanvasElement['getContext']>);
   vi.stubGlobal('matchMedia', () => ({ matches: false }));
-  vi.mocked(loadAvatar).mockReturnValue(new Promise((yes, no) => { resolveAvatar = yes; rejectAvatar = no; }));
+  const avatarPromise = new Promise<AvatarResource>((yes, no) => { resolveAvatar = yes; rejectAvatar = no; });
+  const npcPromise = new Promise<AvatarResource>((yes, no) => { resolveNpc = yes; rejectNpc = no; });
+  vi.mocked(loadAvatar).mockImplementation((_reducedMotion, path) => path ? npcPromise : avatarPromise);
   vi.mocked(loadReception).mockReturnValue(new Promise((yes, no) => { resolveRoom = yes; rejectRoom = no; }));
 });
 async function loaded() { await act(async () => { resolveAvatar(avatar()); resolveRoom(room()); }); }
@@ -148,4 +153,26 @@ it('interacts directly with 3D reception objects, opens the Noticeboard dialog o
   fireEvent.click(closeButton);
   expect(screen.queryByRole('dialog')).toBeNull();
   expect(document.activeElement).toBe(region);
+});
+
+it('loads the NPC model in parallel and renders it without gating readiness on it', async () => {
+  const n = avatar(); const { unmount } = render(<ReceptionPreview />);
+  expect(loadAvatar).toHaveBeenCalledWith(false, 'models/npc/monkey.glb');
+  await loaded();
+  expect(screen.getByTestId('canvas')).toBeDefined(); expect(screen.queryByTestId('npc')).toBeNull();
+  fireEvent.click(screen.getByText('Rendered'));
+  await act(async () => resolveNpc(n));
+  expect(screen.getByTestId('npc')).toBeDefined(); expect(n.dispose).not.toHaveBeenCalled();
+  unmount(); expect(n.dispose).toHaveBeenCalledOnce();
+});
+it('still renders the reception without an NPC when its download fails, keeping the other assets', async () => {
+  const a = avatar(); const r = room(); render(<ReceptionPreview />);
+  await act(async () => { rejectNpc(new Error('missing npc')); resolveAvatar(a); resolveRoom(r); });
+  expect(screen.queryByRole('alert')).toBeNull(); expect(screen.getByTestId('canvas')).toBeDefined();
+  expect(screen.queryByTestId('npc')).toBeNull(); expect(a.dispose).not.toHaveBeenCalled(); expect(r.dispose).not.toHaveBeenCalled();
+});
+it('releases a late NPC when the reception is already gone', async () => {
+  const n = avatar(); const { unmount } = render(<ReceptionPreview />); unmount();
+  await act(async () => resolveNpc(n));
+  expect(n.dispose).toHaveBeenCalledOnce();
 });
