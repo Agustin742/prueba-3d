@@ -1,6 +1,8 @@
 import { io, Socket } from 'socket.io-client';
+import type { AvatarConfiguration } from '../avatar/AvatarCustomizer';
 
 export interface PlayerState {
+  appearance?: AvatarConfiguration;
   id: string;
   roomCode: string;
   nickname: string;

@@ -9,6 +9,13 @@ import type { AvatarResource } from '../avatar/load-avatar';
 import { createNavigation } from './navigation';
 import { receptionAvatarRadius } from './reception-layout';
 import { ReceptionScene, floorDestination } from './ReceptionScene';
+import type { RemotePlayerProps } from '../network/RemotePlayer';
+import type { PlayerState } from '../network/socket';
+
+const remote = vi.hoisted(() => ({ render: vi.fn() }));
+vi.mock('../network/RemotePlayer', () => ({ RemotePlayer: (props: RemotePlayerProps) => {
+  remote.render(props); return null;
+} }));
 
 const renderer = vi.hoisted(() => ({ frames: [] as ((state: unknown, dt: number) => void)[], width: 1000, height: 600 }));
 const camera = new OrthographicCamera(-500, 500, 300, -300, 0.1, 100);
@@ -18,6 +25,19 @@ vi.mock('@react-three/fiber', () => ({
   useThree: () => ({ camera, size: { width: renderer.width, height: renderer.height }, gl: { domElement: canvas } }),
 }));
 beforeEach(() => { renderer.frames = []; renderer.width = 1000; renderer.height = 600; });
+
+it('forwards optional appearance and canonical presence props without fabricating legacy appearance', () => {
+  const appearance = { body: 'female' as const, hairId: 'bob', topId: 'blouse', accessoryId: null, hairColor: '#6c4d48', clothingColor: '#75b7da', nickname: 'Draft' };
+  const base = { roomCode: 'room', position: [1, 0, 2] as [number, number, number], rotation: 1, animation: 'run' };
+  const remotePlayers = {
+    configured: { ...base, id: 'configured', nickname: 'Canonical', appearance },
+    legacy: { ...base, id: 'legacy', nickname: 'Legacy' },
+  };
+  const avatar = { scene: new Group(), update: vi.fn() } as unknown as AvatarResource;
+  render(<ReceptionScene avatar={avatar} room={{ scene: new Group(), dispose: vi.fn() }} tick={() => createNavigation().spawn()!} onSelect={vi.fn()} onReady={vi.fn()} onFailure={vi.fn()} remotePlayers={remotePlayers as Record<string, PlayerState>} bubbles={{ Canonical: 'Hi' }} />);
+  expect(remote.render).toHaveBeenCalledWith(expect.objectContaining({ nickname: 'Canonical', appearance, position: base.position, rotation: 1, animation: 'run', bubbleText: 'Hi' }));
+  expect(remote.render).toHaveBeenCalledWith(expect.objectContaining({ nickname: 'Legacy', appearance: undefined }));
+});
 
 it('selects only the nearest genuine floor top, never furniture, walls, avatar, or off-floor', () => {
   const mesh = new Mesh(); mesh.userData.name = 'ITReception_Tile 0-0';

@@ -11,6 +11,8 @@ import {
   Vector3,
 } from 'three';
 import { createAvatarBillboard } from './AvatarBillboard';
+import { ConfiguredRemotePlayer } from './ConfiguredRemotePlayer';
+import type { AvatarConfiguration } from '../avatar/AvatarCustomizer';
 
 export function turnTowardsAngle(current: number, target: number, step: number): number {
   let diff = (target - current) % (Math.PI * 2);
@@ -20,6 +22,7 @@ export function turnTowardsAngle(current: number, target: number, step: number):
 }
 
 export interface RemotePlayerProps {
+  appearance?: AvatarConfiguration;
   nickname: string;
   position: [number, number, number];
   rotation: number;
@@ -27,7 +30,14 @@ export interface RemotePlayerProps {
   bubbleText?: string | null;
 }
 
-export function RemotePlayer({ nickname, position, rotation, animation, bubbleText }: RemotePlayerProps) {
+export function RemotePlayer(props: RemotePlayerProps) {
+  if (props.appearance === undefined) return <LegacyRemotePlayer {...props} />;
+  return <ConfiguredRemotePlayer {...props} fallback={
+    <LegacyRemotePlayer {...props} nickname={`${props.nickname || 'Compañero'} (apariencia no disponible)`} />
+  } />;
+}
+
+function LegacyRemotePlayer({ nickname, position, rotation, animation, bubbleText }: RemotePlayerProps) {
   const { scene, animations } = useLoader(GLTFLoader, `${import.meta.env.BASE_URL}models/character.glb`);
   const root = useMemo(() => new Group(), []);
 

@@ -203,6 +203,7 @@ export function ReceptionScene({
         <RemotePlayer
           key={rp.id}
           nickname={rp.nickname}
+          appearance={rp.appearance}
           position={rp.position}
           rotation={rp.rotation}
           animation={rp.animation}
