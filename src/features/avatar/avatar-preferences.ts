@@ -23,7 +23,7 @@ export function validateAvatarConfiguration(value: unknown, catalogue: Appearanc
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
   const config = value as Record<string, unknown>;
   const { body, hairId, topId, accessoryId, hairColor, clothingColor, nickname } = config;
-  if (body !== 'male' || typeof hairId !== 'string' || typeof topId !== 'string'
+  if ((body !== 'male' && body !== 'female') || typeof hairId !== 'string' || typeof topId !== 'string'
     || (accessoryId !== null && typeof accessoryId !== 'string') || typeof hairColor !== 'string'
     || typeof clothingColor !== 'string' || typeof nickname !== 'string') return null;
   const selected = catalogue.bodies.find(item => item.id === body);

@@ -2,7 +2,7 @@ import { useId, useRef, useState, type ReactNode } from 'react';
 import type { AvatarConfiguration as BaseAvatarConfiguration } from './avatar-appearance';
 import './avatar-customizer.css';
 
-export type AvatarBody = 'male';
+export type AvatarBody = BaseAvatarConfiguration['body'];
 export interface AvatarOption { id: string; label: string }
 export interface AvatarCatalogue {
   hair: readonly AvatarOption[];
@@ -58,14 +58,29 @@ export function AvatarCustomizer(props: AvatarCustomizerProps) {
   const nicknameInput = useRef<HTMLInputElement>(null);
   const [attempted, setAttempted] = useState(false);
   const configuration: AvatarConfiguration = { body, hairId, topId, accessoryId, hairColor, clothingColor, nickname };
-  const catalogue = catalogues.male;
+  const catalogue = catalogues[body];
   const has = (options: readonly AvatarOption[], value: string) => options.some(option => option.id === value);
-  const slotsValid = body === 'male' && has(catalogue.hair, hairId) && has(catalogue.tops, topId)
-    && (accessoryId === null || has(catalogue.accessories, accessoryId))
-    && has(hairColors, hairColor) && has(clothingColors, clothingColor);
+  const valid = (value: AvatarConfiguration) => {
+    const choices = catalogues[value.body];
+    return has(choices.hair, value.hairId) && has(choices.tops, value.topId)
+      && (value.accessoryId === null || has(choices.accessories, value.accessoryId))
+      && has(hairColors, value.hairColor) && has(clothingColors, value.clothingColor);
+  };
+  const slotsValid = valid(configuration);
   const blocked = status !== 'ready' || Boolean(pending) || Boolean(error) || !slotsValid;
   const nicknameInvalid = attempted && !nickname.trim();
-  const update = (patch: Partial<AvatarConfiguration>) => { if (!pending) onChange({ ...configuration, ...patch }); };
+  const update = (patch: Partial<AvatarConfiguration>) => {
+    const next = { ...configuration, ...patch };
+    if (!pending && valid(next)) onChange(next);
+  };
+  const selectBody = (next: AvatarBody) => {
+    if (next === body) return;
+    const choices = catalogues[next];
+    update({ body: next,
+      hairId: has(choices.hair, hairId) ? hairId : choices.hair[0]?.id ?? '',
+      topId: has(choices.tops, topId) ? topId : choices.tops[0]?.id ?? '',
+      accessoryId: accessoryId !== null && has(choices.accessories, accessoryId) ? accessoryId : null });
+  };
   const selectedLabel = (options: readonly AvatarOption[], value: string) => options.find(option => option.id === value)?.label;
 
   return <section className="avatar-customizer" aria-labelledby={`${id}-intro`}
@@ -97,7 +112,13 @@ export function AvatarCustomizer(props: AvatarCustomizerProps) {
           if (!blocked) onEnter({ ...configuration, nickname: nickname.trim() });
         }}>
         <h2 id={`${id}-form`}>Armá tu combinación</h2>
-        <p>Por ahora vestimos únicamente el avatar original.</p>
+        <fieldset disabled={pending}>
+          <legend>Modelo de avatar</legend>
+          <div className="avatar-customizer__bodies">
+            <label><input type="radio" name={`${id}-body`} checked={body === 'female'} onChange={() => selectBody('female')} /> Femenino</label>
+            <label><input type="radio" name={`${id}-body`} checked={body === 'male'} onChange={() => selectBody('male')} /> Masculino</label>
+          </div>
+        </fieldset>
         <fieldset disabled={pending}>
           <legend>Pelo, ropa y accesorios</legend>
           <div className="avatar-customizer__grid">

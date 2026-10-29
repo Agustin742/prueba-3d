@@ -18,7 +18,7 @@ it('loads defaults and legacy nickname read-only, then roundtrips explicit confi
   expect(loadAvatarPreferences(catalogue, store).configuration).toEqual(config);
   expect(store.setItem).toHaveBeenCalledExactlyOnceWith(appearancePreferenceKey, JSON.stringify({ version: 1, configuration: config }));
 });
-it.each([{ body: 'female' }, { hairId: 'bob' }, { topId: 'tshirt' }, { accessoryId: 'earrings' }, { accessoryId: '' }, { hairColor: 'red' }, { clothingColor: '#ffffff' }, { nickname: 1 }])('rejects excluded or invalid preferences %j without overwriting', patch => {
+it.each([{ body: 'unknown' }, { hairId: 'bob' }, { topId: 'tshirt' }, { accessoryId: 'earrings' }, { accessoryId: '' }, { hairColor: 'red' }, { clothingColor: '#ffffff' }, { nickname: 1 }])('rejects excluded or invalid preferences %j without overwriting', patch => {
   const value = { ...config, ...patch };
   const store = storage(JSON.stringify({ version: 1, configuration: value }));
   expect(validateAvatarConfiguration(value, catalogue)).toBeNull();
@@ -29,6 +29,27 @@ it.each([{ body: 'female' }, { hairId: 'bob' }, { topId: 'tshirt' }, { accessory
 it.each(['{', 'null', '{"version":2}', '{"version":1,"configuration":{}}'])('falls back read-only for corrupt data %s', raw => {
   const store = storage(raw);
   expect(loadAvatarPreferences(catalogue, store).warning).toBeTruthy(); expect(store.setItem).not.toHaveBeenCalled();
+});
+it('roundtrips every approved female slot read-only until explicit save', () => {
+  const female = { ...defaultAvatarConfiguration(catalogue, 'female'), nickname: 'Luna' };
+  expect(female).toMatchObject({ body: 'female', hairId: 'original', topId: 'tshirt' });
+  for (const hairId of ['original', 'afro']) for (const topId of ['tshirt', 'hoodie', 'tank'])
+    for (const accessoryId of [null, 'glasses', 'cap', 'headphones', 'earrings']) {
+      const value = { ...female, hairId, topId, accessoryId, hairColor: '#c77daa', clothingColor: '#7eba8b' };
+      const store = storage(JSON.stringify({ version: 1, configuration: value }));
+      expect(loadAvatarPreferences(catalogue, store)).toEqual({ configuration: value });
+      expect(store.setItem).not.toHaveBeenCalled();
+      expect(saveAvatarPreferences(value, catalogue, store)).toEqual({ saved: true });
+      expect(loadAvatarPreferences(catalogue, store)).toEqual({ configuration: value });
+    }
+});
+it.each([{ hairId: 'dreads' }, { topId: 'unknown' }, { accessoryId: 'backpack' }, { hairColor: 'red' }, { clothingColor: '#ffffff' }])('rejects invalid female combinations read-only %j', patch => {
+  const value = { ...config, body: 'female', hairId: 'original', topId: 'tshirt', ...patch };
+  const store = storage(JSON.stringify({ version: 1, configuration: value }));
+  expect(validateAvatarConfiguration(value, catalogue)).toBeNull();
+  expect(loadAvatarPreferences(catalogue, store).warning).toBeTruthy();
+  expect(saveAvatarPreferences(value, catalogue, store).saved).toBe(false);
+  expect(store.setItem).not.toHaveBeenCalled();
 });
 it('handles blocked getter, unavailable storage and quota failure without losing the draft', () => {
   const blocked = { getItem: () => { throw Error('blocked'); }, setItem: () => { throw Error('quota'); } };

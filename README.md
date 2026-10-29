@@ -24,7 +24,7 @@ pnpm exec vitest run src/features/avatar
 
 ### Local wardrobe
 
-The entry screen dresses the original avatar with additive cosmetics: afro or dreads, hoodie or tank, and one accessory (round/square glasses, cap, headphones or backpack) or none. Hair and garment colors affect only the added modules. The original body, rig, animation controller, reception movement and NPC are unchanged. Female modules are deferred because their rig is incompatible; no replacement body is loaded.
+The entry screen offers Masculino and Femenino. Masculino keeps the original character with afro/dreads, hoodie/tank, and round/square glasses, cap, headphones or backpack. Femenino reuses the previously authored female body with original/afro hair, tshirt/hoodie/tank, and glasses, cap, headphones or earrings. Both allow one accessory or none. Switching bodies retains shared valid choices and falls back to approved choices when needed; incompatible accessories clear. Hair and garment colors affect only added modules. The original male body and rig, shared animation controller, reception movement and NPC are unchanged. The female body has its own compatible rig and uses that same Run/Idle controller, not the old Walk-only implementation.
 
 Drag the preview horizontally to rotate it, or focus the preview rotation group and use Left/Right arrows and Home. Enter a nickname and wait for the current preview to be ready before entering the reception. Startup reduced-motion preferences are respected. Failed loads block entry; reload after resolving the cause.
 

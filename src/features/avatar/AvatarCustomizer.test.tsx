@@ -4,7 +4,7 @@ import { expect, it, vi } from 'vitest';
 import manifest from '../../../public/models/avatars/integration-catalogue.json';
 import { parseAppearanceCatalogue, toAppearanceChoices } from './avatar-catalogue';
 import { AvatarCustomizer, type AvatarCustomizerProps } from './AvatarCustomizer';
-import { defaultAvatarConfiguration } from './avatar-preferences';
+import { defaultAvatarConfiguration, validateAvatarConfiguration } from './avatar-preferences';
 
 const catalogue = parseAppearanceCatalogue(manifest);
 const catalogues = toAppearanceChoices(catalogue);
@@ -20,17 +20,48 @@ function setup(overrides: Partial<AvatarCustomizerProps> = {}) {
 }
 const change = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
 const submit = () => fireEvent.submit(screen.getByRole('form', { name: 'Armá tu combinación' }));
-it('retains the preview and native choices for only the nine approved original-avatar modules', () => {
+it('retains the preview and native choices for the approved male modules', () => {
   const { onChange } = setup();
   expect(screen.getByText('Vista 3D del padre')).toBeTruthy();
-  expect(screen.queryByRole('radio')).toBeNull();
+  expect((screen.getByRole('radio', { name: 'Masculino' }) as HTMLInputElement).checked).toBe(true);
   for (const [label, count] of [['Peinado', 2], ['Prenda', 2], ['Accesorio', 6]] as const)
     expect(within(screen.getByLabelText(label)).getAllByRole('option')).toHaveLength(count);
-  for (const name of ['Femenino', 'Bob', 'Remera', 'Aros', 'Campera']) expect(screen.queryByRole('option', { name })).toBeNull();
+  for (const name of ['Bob', 'Remera', 'Aros', 'Campera']) expect(screen.queryByRole('option', { name })).toBeNull();
   change('Peinado', 'dreads'); change('Prenda', 'tank'); change('Accesorio', 'backpack');
   change('Color del pelo', '#c77daa'); change('Color de la ropa', '#7eba8b');
   expect(onChange).toHaveBeenLastCalledWith({ ...initial, hairId: 'dreads', topId: 'tank', accessoryId: 'backpack', hairColor: '#c77daa', clothingColor: '#7eba8b' });
   change('Accesorio', ''); expect(onChange.mock.lastCall?.[0].accessoryId).toBeNull();
+});
+it('switches both ways using approved choices, retaining shared slots and falling back atomically', () => {
+  const { onChange, onEnter } = setup();
+  change('Color del pelo', '#c77daa'); change('Color de la ropa', '#7eba8b');
+  change('Peinado', 'dreads'); change('Accesorio', 'backpack');
+  fireEvent.click(screen.getByRole('radio', { name: 'Femenino' }));
+  expect(onChange.mock.lastCall?.[0]).toEqual({ ...initial, body: 'female', hairId: 'original',
+    accessoryId: null, hairColor: '#c77daa', clothingColor: '#7eba8b' });
+  for (const [label, ids] of [['Peinado', ['original', 'afro']], ['Prenda', ['tshirt', 'hoodie', 'tank']],
+    ['Accesorio', ['', 'glasses', 'cap', 'headphones', 'earrings']]] as const) {
+    expect(within(screen.getByLabelText(label)).getAllByRole('option').map(option => (option as HTMLOptionElement).value)).toEqual(ids);
+    for (const value of ids) change(label, value);
+  }
+  change('Peinado', 'original'); change('Prenda', 'tshirt'); change('Accesorio', 'earrings');
+  submit(); expect(onEnter.mock.lastCall?.[0]).toMatchObject({ body: 'female', hairId: 'original', topId: 'tshirt', accessoryId: 'earrings' });
+  fireEvent.click(screen.getByRole('radio', { name: 'Masculino' }));
+  expect(onChange.mock.lastCall?.[0]).toMatchObject({ body: 'male', hairId: 'afro', topId: 'hoodie', accessoryId: null });
+  for (const accessory of ['cap', 'headphones']) {
+    change('Prenda', 'tank'); change('Accesorio', accessory);
+    for (const name of ['Femenino', 'Masculino']) {
+      fireEvent.click(screen.getByRole('radio', { name }));
+      expect(onChange.mock.lastCall?.[0]).toEqual({ ...initial, body: name === 'Femenino' ? 'female' : 'male',
+        topId: 'tank', accessoryId: accessory, hairColor: '#c77daa', clothingColor: '#7eba8b' });
+    }
+  }
+  for (const [value] of onChange.mock.calls) expect(validateAvatarConfiguration(value, catalogue)).not.toBeNull();
+});
+it('does not emit a body switch when its required catalogue slots are empty', () => {
+  const { onChange } = setup({ catalogues: { ...catalogues, female: { ...catalogues.female, hair: [] } } });
+  fireEvent.click(screen.getByRole('radio', { name: 'Femenino' }));
+  expect(onChange).not.toHaveBeenCalled();
 });
 it('focuses blank nickname errors and confirms the trimmed draft without writing storage', () => {
   const write = vi.spyOn(Storage.prototype, 'setItem');
@@ -59,7 +90,7 @@ it('keeps owner-controlled values and resumes confirmation after readiness recov
   expect(onEnter).toHaveBeenCalledWith({ ...initial, hairId: 'dreads', nickname: 'Sol' });
 });
 it.each([{ hair: [] }, { hair: [{ id: 'removed', label: 'Otro catálogo' }] }])('blocks empty or stale catalogue selections', ({ hair }) => {
-  const { onEnter } = setup({ catalogues: { male: { ...catalogues.male, hair } } }); submit();
+  const { onEnter } = setup({ catalogues: { ...catalogues, male: { ...catalogues.male, hair } } }); submit();
   expect(screen.getByRole('alert').textContent).toMatch(/opciones disponibles/);
   expect(onEnter).not.toHaveBeenCalled();
 });
@@ -71,7 +102,7 @@ it('preserves editing on failure and displays honest storage feedback', () => {
 it('disables native controls while confirmation is pending', () => {
   setup({ pending: true });
   expect(screen.getByRole('textbox').matches(':disabled')).toBe(true);
-  for (const choice of screen.getAllByRole('combobox')) expect(choice.matches(':disabled')).toBe(true);
+  for (const choice of [...screen.getAllByRole('combobox'), ...screen.getAllByRole('radio')]) expect(choice.matches(':disabled')).toBe(true);
 });
 it('isolates world keyboard shortcuts without cancelling native input', () => {
   const worldKey = vi.fn();
