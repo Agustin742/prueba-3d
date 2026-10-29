@@ -4,6 +4,7 @@ const quarter = Math.PI / 2;
 
 // Placements reproduce reception.glb from its modules (Three world space, pivot at module bottom-centre).
 export const receptionRoom: RoomDefinition = Object.freeze({
+  floor: Object.freeze({ minX: -5.39, maxX: 5.39, minZ: -4.716, maxZ: 4.716 }),
   placements: Object.freeze<Placement[]>([
     ...checkerGrid({
       origin: [-4.725, 4.05], step: 1.35, cols: 8, rows: 7, y: -0.05, base: 'floor-tile-pale', accent: 'floor-tile-cream',

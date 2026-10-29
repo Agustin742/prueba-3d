@@ -3,7 +3,7 @@ import type { RoomDefinition } from './room-definition';
 import type { RoomModuleId } from './room-modules';
 
 /** Clones share geometry and materials with the templates, so disposal stays with the template owner. */
-export function composeRoom(definition: RoomDefinition, templates: ReadonlyMap<RoomModuleId, Group>): Group {
+export function composeRoom(definition: Pick<RoomDefinition, 'placements'>, templates: ReadonlyMap<RoomModuleId, Group>): Group {
   const room = new Group();
   for (const { module, position, yaw = 0 } of definition.placements) {
     const template = templates.get(module);

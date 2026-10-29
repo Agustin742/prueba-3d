@@ -1,7 +1,10 @@
 import type { RoomModuleId } from './room-modules';
 
 export type Placement = Readonly<{ module: RoomModuleId; position: readonly [number, number, number]; yaw?: number }>;
-export type RoomDefinition = Readonly<{ placements: readonly Placement[] }>;
+export type Rectangle = Readonly<{ minX: number; maxX: number; minZ: number; maxZ: number }>;
+export type Layout = Readonly<{ floor: Rectangle; obstacles: readonly (Rectangle & { readonly id: string })[] }>;
+/** The walkable floor stays explicit: it is a hand-tuned envelope inside the tiles, not their union. */
+export type RoomDefinition = Readonly<{ floor: Rectangle; placements: readonly Placement[] }>;
 
 const round4 = (value: number) => Math.round(value * 1e4) / 1e4;
 
