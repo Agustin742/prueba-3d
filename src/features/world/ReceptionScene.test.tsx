@@ -7,7 +7,7 @@ import { Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, OrthographicCamera, 
 import { beforeEach, expect, it, vi } from 'vitest';
 import type { AvatarResource } from '../avatar/load-avatar';
 import { createNavigation } from './navigation';
-import { receptionAvatarRadius } from './reception-layout';
+import { receptionAvatarRadius, receptionNpcPlacement } from './reception-layout';
 import { ReceptionScene, floorDestination } from './ReceptionScene';
 
 const renderer = vi.hoisted(() => ({ frames: [] as ((state: unknown, dt: number) => void)[], width: 1000, height: 600 }));
@@ -83,6 +83,23 @@ it('anchors actual bounds at feet Y0/height2, follows core results without chord
   expect(avatar.dispose).not.toHaveBeenCalled();
 });
 
+it('turns the avatar gradually toward a new heading instead of snapping', () => {
+  const scene = new Group(); scene.add(new Mesh(new BoxGeometry(2, 4, 1), new MeshBasicMaterial()));
+  const avatar = { scene, update: vi.fn(), setMoving: vi.fn(), dispose: vi.fn() } as unknown as AvatarResource;
+  const room = new Group(); room.add(new Mesh(new BoxGeometry(11, 4, 10), new MeshBasicMaterial()));
+  const start = createNavigation().spawn()!;
+  let x = start.position.x;
+  // Each tick steps along -X, a heading of -PI/2 from the initial +Z facing.
+  const tick = vi.fn((dt: number) => { x -= dt; return { ...start, position: { ...start.position, x } }; });
+  render(<ReceptionScene avatar={avatar} room={{ scene: room, dispose: vi.fn() }} tick={tick} onSelect={vi.fn()} onReady={vi.fn()} onFailure={vi.fn()} />);
+  const root = scene.parent!.parent!;
+  act(() => { for (const frame of renderer.frames) frame({}, 0.016); });
+  expect(root.rotation.y).toBeLessThan(0);
+  expect(root.rotation.y).toBeGreaterThan(-Math.PI / 2 + 0.1);
+  act(() => { for (let i = 0; i < 60; i += 1) for (const frame of renderer.frames) frame({}, 0.016); });
+  expect(root.rotation.y).toBeCloseTo(-Math.PI / 2);
+});
+
 it('retains feet anchoring through StrictMode setup/cleanup without disposing resources', () => {
   const scene = new Group(); scene.add(new Mesh(new BoxGeometry(2, 4, 1), new MeshBasicMaterial()));
   const avatar = { scene, update: vi.fn(), dispose: vi.fn() } as unknown as AvatarResource;
@@ -91,6 +108,26 @@ it('retains feet anchoring through StrictMode setup/cleanup without disposing re
   const bounds = new Box3().setFromObject(scene.parent!.parent!, true);
   expect(bounds.min.y).toBeCloseTo(0); expect(bounds.max.y).toBeCloseTo(2);
   unmount(); expect(avatar.dispose).not.toHaveBeenCalled();
+});
+
+it('renders the optional NPC at its counter spot inside the room group, and nothing without one', () => {
+  const room = new Group(); room.add(new Mesh(new BoxGeometry(11, 4, 10), new MeshBasicMaterial()));
+  const avatarScene = new Group(); avatarScene.add(new Mesh(new BoxGeometry(2, 4, 1), new MeshBasicMaterial()));
+  const avatar = { scene: avatarScene, update: vi.fn(), dispose: vi.fn() } as unknown as AvatarResource;
+  const npcScene = new Group(); npcScene.add(new Mesh(new BoxGeometry(2, 4, 1), new MeshBasicMaterial()));
+  const npc = { scene: npcScene, update: vi.fn(), dispose: vi.fn() } as unknown as AvatarResource;
+  const props = { avatar, room: { scene: room, dispose: vi.fn() }, tick: () => createNavigation().spawn()!, onSelect: vi.fn(), onReady: vi.fn(), onFailure: vi.fn() };
+  const { rerender, unmount } = render(<ReceptionScene {...props} />);
+  expect(npcScene.parent).toBeNull();
+  rerender(<ReceptionScene {...props} npc={npc} />);
+  const npcRoot = npcScene.parent!.parent!;
+  expect(npcRoot.position.x).toBeCloseTo(receptionNpcPlacement.position[0]);
+  expect(npcRoot.position.z).toBeCloseTo(receptionNpcPlacement.position[1]);
+  expect(npcRoot.rotation.y).toBe(receptionNpcPlacement.yaw);
+  act(() => { for (const frame of renderer.frames) frame({}, 0.05); });
+  expect(npc.update).toHaveBeenCalledWith(0.05);
+  unmount();
+  expect(npc.dispose).not.toHaveBeenCalled();
 });
 
 async function parseAsset(path: string) {
@@ -117,7 +154,7 @@ it('anchors the original posed rig and distinguishes actual room ray hits (CPU e
   unmount(); avatar.dispose(); vi.restoreAllMocks();
 });
 
-it('encloses actual normalized Idle/Walk bounds at sampled poses and rotations in the reception footprint', async () => {
+it('encloses actual normalized Idle/Run bounds at sampled poses and rotations in the reception footprint', async () => {
   const gltf = await parseAsset('public/models/character.glb');
   vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValueOnce(gltf);
   const avatar = await loadAvatar(false);
@@ -127,7 +164,7 @@ it('encloses actual normalized Idle/Walk bounds at sampled poses and rotations i
   let largestRadius = 0;
   for (const moving of [false, true]) {
     avatar.setMoving!(moving);
-    const duration = gltf.animations.find(clip => clip.name === (moving ? 'Walk' : 'Idle'))!.duration;
+    const duration = gltf.animations.find(clip => clip.name === (moving ? 'Run' : 'Idle'))!.duration;
     // Both clips, 61 samples per cycle. update() caps dt, so accumulate substeps explicitly.
     for (let sample = 0; sample <= 60; sample++) {
       let remaining = duration / 60;
@@ -149,7 +186,7 @@ it('encloses actual normalized Idle/Walk bounds at sampled poses and rotations i
       }
     }
   }
-  console.info('Sampled Idle/Walk maximum normalized XZ box-corner radius:', largestRadius, '; reception effective radius:', receptionAvatarRadius);
+  console.info('Sampled Idle/Run maximum normalized XZ box-corner radius:', largestRadius, '; reception effective radius:', receptionAvatarRadius);
   unmount(); avatar.dispose(); vi.restoreAllMocks();
 });
 

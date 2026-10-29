@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "bodies": [{
+    "id": "male",
+    "hair": [
+      {"id":"afro","label":"Afro","path":"/models/avatars/male/hair-afro.glb","slot":"hair","tintMaterials":["AvatarHairTint"],"detailMaterials":[]},
+      {"id":"dreads","label":"Rastas","path":"/models/avatars/male/hair-dreads.glb","slot":"hair","tintMaterials":["AvatarHairTint"],"detailMaterials":[]}
+    ],
+    "tops": [
+      {"id":"hoodie","label":"Buzo con capucha","path":"/models/avatars/male/top-hoodie.glb","slot":"top","tintMaterials":["AvatarTopTint"],"detailMaterials":[]},
+      {"id":"tank","label":"Musculosa","path":"/models/avatars/male/top-tank.glb","slot":"top","tintMaterials":["AvatarTopTint"],"detailMaterials":[]}
+    ],
+    "accessories": [
+      {"id":"round-glasses","label":"Anteojos redondos","path":"/models/avatars/male/accessory-round-glasses.glb","slot":"accessory","tintMaterials":[],"detailMaterials":[]},
+      {"id":"square-glasses","label":"Anteojos cuadrados","path":"/models/avatars/male/accessory-square-glasses.glb","slot":"accessory","tintMaterials":[],"detailMaterials":[]},
+      {"id":"cap","label":"Gorra","path":"/models/avatars/male/accessory-cap.glb","slot":"accessory","tintMaterials":[],"detailMaterials":["AvatarDetail"]},
+      {"id":"headphones","label":"Auriculares","path":"/models/avatars/male/accessory-headphones.glb","slot":"accessory","tintMaterials":[],"detailMaterials":["AvatarDetail"]},
+      {"id":"backpack","label":"Mochila","path":"/models/avatars/male/accessory-backpack.glb","slot":"accessory","tintMaterials":[],"detailMaterials":["AvatarDetail"]}
+    ]
+  }, {
+    "id": "female",
+    "hair": [
+      {"id":"original","label":"Original","path":"/models/avatars/female/hair-original.glb","slot":"hair","tintMaterials":["AvatarHairTint"],"detailMaterials":[]},
+      {"id":"afro","label":"Afro","path":"/models/avatars/female/hair-afro.glb","slot":"hair","tintMaterials":["AvatarHairTint"],"detailMaterials":[]}
+    ],
+    "tops": [
+      {"id":"tshirt","label":"Remera","path":"/models/avatars/female/top-tshirt.glb","slot":"top","tintMaterials":["AvatarTopTint"],"detailMaterials":[]},
+      {"id":"hoodie","label":"Buzo con capucha","path":"/models/avatars-hem-correction/female/top-hoodie.glb","slot":"top","tintMaterials":["AvatarTopTint"],"detailMaterials":[]},
+      {"id":"tank","label":"Musculosa","path":"/models/avatars/female/top-tank.glb","slot":"top","tintMaterials":["AvatarTopTint"],"detailMaterials":[]}
+    ],
+    "accessories": [
+      {"id":"glasses","label":"Anteojos","path":"/models/avatars/female/accessory-glasses.glb","slot":"accessory","tintMaterials":[],"detailMaterials":[]},
+      {"id":"cap","label":"Gorra","path":"/models/avatars/female/accessory-cap.glb","slot":"accessory","tintMaterials":[],"detailMaterials":["AvatarDetail"]},
+      {"id":"headphones","label":"Auriculares","path":"/models/avatars/female/accessory-headphones.glb","slot":"accessory","tintMaterials":[],"detailMaterials":["AvatarDetail"]},
+      {"id":"earrings","label":"Aros","path":"/models/avatars/female/accessory-earrings.glb","slot":"accessory","tintMaterials":[],"detailMaterials":[]}
+    ]
+  }]
+}

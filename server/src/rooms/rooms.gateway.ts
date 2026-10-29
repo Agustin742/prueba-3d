@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { RoomsService } from './rooms.service';
+import { corsOrigin } from '../cors-origin';
 
 interface PlayerState {
   id: string;
@@ -22,7 +23,7 @@ interface PlayerState {
 @WebSocketGateway({
   maxHttpBufferSize: 10 * 1024 * 1024,
   cors: {
-    origin: '*',
+    origin: corsOrigin,
   },
 })
 export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
