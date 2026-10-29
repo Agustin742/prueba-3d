@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "bodies": [{
+    "id": "male",
+    "hair": [
+      {"id":"afro","label":"Afro","path":"/models/avatars/male/hair-afro.glb","slot":"hair","tintMaterials":["AvatarHairTint"],"detailMaterials":[]},
+      {"id":"dreads","label":"Rastas","path":"/models/avatars/male/hair-dreads.glb","slot":"hair","tintMaterials":["AvatarHairTint"],"detailMaterials":[]}
+    ],
+    "tops": [
+      {"id":"hoodie","label":"Buzo con capucha","path":"/models/avatars/male/top-hoodie.glb","slot":"top","tintMaterials":["AvatarTopTint"],"detailMaterials":[]},
+      {"id":"tank","label":"Musculosa","path":"/models/avatars/male/top-tank.glb","slot":"top","tintMaterials":["AvatarTopTint"],"detailMaterials":[]}
+    ],
+    "accessories": [
+      {"id":"round-glasses","label":"Anteojos redondos","path":"/models/avatars/male/accessory-round-glasses.glb","slot":"accessory","tintMaterials":[],"detailMaterials":[]},
+      {"id":"square-glasses","label":"Anteojos cuadrados","path":"/models/avatars/male/accessory-square-glasses.glb","slot":"accessory","tintMaterials":[],"detailMaterials":[]},
+      {"id":"cap","label":"Gorra","path":"/models/avatars/male/accessory-cap.glb","slot":"accessory","tintMaterials":[],"detailMaterials":["AvatarDetail"]},
+      {"id":"headphones","label":"Auriculares","path":"/models/avatars/male/accessory-headphones.glb","slot":"accessory","tintMaterials":[],"detailMaterials":["AvatarDetail"]},
+      {"id":"backpack","label":"Mochila","path":"/models/avatars/male/accessory-backpack.glb","slot":"accessory","tintMaterials":[],"detailMaterials":["AvatarDetail"]}
+    ]
+  }]
+}
