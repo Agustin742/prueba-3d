@@ -14,4 +14,10 @@ export const npcLines: readonly string[] = [
   'Ascacibaaaaar',
   'Riquelme deja el mate, se estan cagando a palos',
   'Soy alphonese',
+  'sabías que hay gente que no rindió el examen? me lo contó un lorito',
+  'rindan el examen',
+  'No revisen el chat',
+  'Gabi abri la asistenca, Gabi?'
+  'Alejo, Santi esta grabando?',
+  'Promptealo'
 ];
