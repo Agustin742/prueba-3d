@@ -22,14 +22,14 @@ function resources(scene: Group) {
   });
   return result;
 }
-function canonicalJoints(scene: Group) {
+function canonicalJoints(scene: Group, body: AvatarConfiguration['body']) {
   const joints = new Map<string, { bone: Bone; inverse: Matrix4 }>();
   scene.traverse(node => {
     if (!(node instanceof Bone)) return;
     if (joints.has(node.name)) throw Error('Duplicate original bone');
     joints.set(node.name, { bone: node, inverse: node.matrixWorld.clone().invert() });
   });
-  if (joints.size !== 34) throw Error('Unsupported original rig');
+  if (joints.size !== (body === 'male' ? 34 : 41)) throw Error('Unsupported original rig');
   scene.traverse(node => {
     if (node instanceof SkinnedMesh) node.skeleton.bones.forEach((bone, i) => {
       const joint = joints.get(bone.name);
@@ -55,17 +55,18 @@ function remap(source: SkinnedMesh, joints: ReturnType<typeof canonicalJoints>) 
 }
 /** Attach in rest pose, before the caller's first update. The public loader alone owns animation. */
 export async function loadCustomizedAvatar(configuration: AvatarConfiguration, input: AppearanceCatalogue, reducedMotion: boolean): Promise<AvatarResource> {
-  const body = parseAppearanceCatalogue(input).bodies[0];
-  if (configuration.body !== 'male' || ![configuration.hairColor, configuration.clothingColor].every(color => /^#[\da-f]{6}$/i.test(color))) throw Error('Invalid avatar configuration');
+  const body = parseAppearanceCatalogue(input).bodies.find(body => body.id === configuration.body);
+  if (!body || ![configuration.hairColor, configuration.clothingColor].every(color => /^#[\da-f]{6}$/i.test(color))) throw Error('Invalid avatar configuration');
   const select = (items: readonly AppearanceAsset[], id: string) => {
     const asset = items.find(item => item.id === id); if (!asset) throw Error('Unsupported avatar choice'); return asset;
   };
   const selected = [select(body.hair, configuration.hairId), select(body.tops, configuration.topId)];
   if (configuration.accessoryId !== null) selected.push(select(body.accessories, configuration.accessoryId));
-  const avatar = await loadAvatar(reducedMotion);
+  const avatar = body.id === 'female'
+    ? await loadAvatar(reducedMotion, 'models/avatars/female/body.glb') : await loadAvatar(reducedMotion);
   try {
     avatar.scene.updateMatrixWorld(true);
-    const joints = canonicalJoints(avatar.scene);
+    const joints = canonicalJoints(avatar.scene, body.id);
     // Sequential loads mean a failed module leaves no outstanding downloads to collect.
     for (const asset of selected) {
       const module = await new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}${asset.path.slice(1)}`);

@@ -1,5 +1,5 @@
 export interface AvatarConfiguration {
-  body: 'male';
+  body: 'male' | 'female';
   hairId: string;
   topId: string;
   accessoryId: string | null;
@@ -15,7 +15,7 @@ export interface AppearanceAsset {
   detailMaterials: readonly string[];
 }
 export interface AppearanceBody {
-  id: 'male';
+  id: AvatarConfiguration['body'];
   hair: readonly AppearanceAsset[];
   tops: readonly AppearanceAsset[];
   accessories: readonly AppearanceAsset[];
