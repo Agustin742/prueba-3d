@@ -1,5 +1,6 @@
-import { Mesh, Texture, type Group, type Material } from 'three';
+import { type Group } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { disposeResources } from './dispose-resources';
 
 export interface ReceptionResource { scene: Group; dispose(): void }
 
@@ -12,20 +13,7 @@ export async function loadReception(): Promise<ReceptionResource> {
     dispose() {
       if (disposed) return;
       disposed = true;
-      const geometries = new Set<Mesh['geometry']>();
-      const materials = new Set<Material>();
-      const textures = new Set<Texture>();
-      scene.traverse(node => {
-        if (!(node instanceof Mesh)) return;
-        geometries.add(node.geometry);
-        for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
-          materials.add(material);
-          for (const value of Object.values(material)) if (value instanceof Texture) textures.add(value);
-        }
-      });
-      geometries.forEach(value => value.dispose());
-      materials.forEach(value => value.dispose());
-      textures.forEach(value => value.dispose());
+      disposeResources([scene]);
     },
   };
 }
