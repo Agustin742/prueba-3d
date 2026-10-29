@@ -1,6 +1,6 @@
 # Frontend repository
 
-A local React/TypeScript/Vite + Three.js/React Three Fiber navigation study renders the reception and original `public/models/character.glb` directly in a clean full-viewport scene (`100vw × 100vh`), preserving materials, rig and Idle/Walk clips. Focus the reception for WASD, click/tap clear floor to move, or click/tap reception objects directly in 3D (counter/bell, noticeboard, waiting seat, portal doorway); `Escape` cancels movement or closes the noticeboard dialog.
+A local React/TypeScript/Vite + Three.js/React Three Fiber navigation study renders the reception and original `public/models/character.glb` directly in a clean full-viewport scene (`100vw × 100vh`), preserving materials, rig and Idle/Run animation behavior. Focus the reception for WASD, click/tap clear floor to move, or click/tap reception objects directly in 3D (counter/bell, noticeboard, waiting seat, portal doorway); `Escape` cancels movement or closes the noticeboard dialog.
 
 This is **not the finished product**: local object interactions (reception bell, noticeboard dialog, waiting seat, and unavailable portal doorway notice) provide local-only preview feedback; authentication, backend integration, persistent tasks, chat, business actions and multiplayer are absent. Other rooms remain deferred awaiting team review. See the [navigation guide](docs/development/reception-navigation.md) for provisional world-axis controls, collision ownership, bounded local interactions, loading/failure behavior and verification limits. The reception uses a conservative effective radius of 1.1 at avatar height 2; narrow passages, the counter recess and portal are deliberately unavailable rather than allowing the larger avatar to clip through.
 
@@ -20,11 +20,21 @@ pnpm preview
 pnpm exec vitest run src/features/avatar
 ```
 
-`pnpm-workspace.yaml` permits only esbuild's dependency build script. Keep the original GLB read-only. Do not substitute another avatar if loading fails. The study waits for both assets and announces readiness after a rendered frame, with distinct asset/WebGL failures; recovery is a manual reload after resolving the cause. Reduced motion requested at startup suppresses Idle/Walk animation while retaining local navigation.
+`pnpm-workspace.yaml` permits only esbuild's dependency build script. Keep the original GLB read-only. Do not substitute another avatar if loading fails. The study waits for both assets and announces readiness after a rendered frame, with distinct asset/WebGL failures; recovery is a manual reload after resolving the cause. Reduced motion requested at startup suppresses Idle/Run animation while retaining local navigation.
+
+### Local wardrobe
+
+The entry screen offers Masculino and Femenino. Masculino keeps the original character with afro/dreads, hoodie/tank, and round/square glasses, cap, headphones or backpack. Femenino reuses the previously authored female body with original/afro hair, tshirt/hoodie/tank, and glasses, cap, headphones or earrings. Both allow one accessory or none. Switching bodies retains shared valid choices and falls back to approved choices when needed; incompatible accessories clear. Hair and garment colors affect only added modules. The original male body and rig, shared animation controller, reception movement and NPC are unchanged. The female body has its own compatible rig and uses that same Run/Idle controller, not the old Walk-only implementation.
+
+Drag the preview horizontally to rotate it, or focus the preview rotation group and use Left/Right arrows and Home. Enter a nickname and wait for the current preview to be ready before entering the reception. Startup reduced-motion preferences are respected. Failed loads block entry; reload after resolving the cause.
+
+Confirmation attempts to remember the selection **only in this browser** (`avatar_appearance:v1`). Draft edits do not write storage. Invalid or obsolete preferences are not overwritten during loading; a storage failure is reported and does not prevent continuing this session. Cosmetics are local-only: other participants still see the original avatar. No account persistence, appearance synchronization, Blender experiments or modular-room changes are included.
+
+Real-browser acceptance is still pending for cosmetic fit during Idle/Run, accessory overlap, drag/touch rotation, and desktop/mobile readability. Automated checks do not establish visual acceptance.
 
 ### Ownership and verification limits
 
-`src/features/avatar/load-avatar.ts` remains the sole avatar scene/mixer/disposal owner, with optional `setMoving` selecting Walk/Idle and default calibration behavior retained. The separate reception loader owns room resources. `ReceptionPreview` owns both downloads/status and disposes obsolete results after errors/unmount; GLTF downloads cannot be aborted. `ReceptionScene` consumes the navigation controller's single state without interpolating across route corners. `AvatarPreview`, its lifecycle hook and existing tests remain unchanged. R3F owns the renderer; asset loaders explicitly release their resources.
+`src/features/avatar/load-avatar.ts` remains the sole avatar scene/mixer/disposal owner, with optional `setMoving` selecting Run/Idle and default calibration behavior retained. The separate reception loader owns room resources. `ReceptionPreview` owns both downloads/status and disposes obsolete results after errors/unmount; GLTF downloads cannot be aborted. `ReceptionScene` consumes the navigation controller's single state without interpolating across route corners. `AvatarPreview`, its lifecycle hook and existing tests remain unchanged. R3F owns the renderer; asset loaders explicitly release their resources.
 
 Vitest parses the actual GLBs, checks normalized pose/rotation envelopes, navigation, animation/resource contracts and rendered control/status/view arbitration with a simulated renderer. These checks do not prove real GPU rendering, full visual clearance or visual quality. Parent browser verification remains pending for movement/contact, avatar facing/animation, desktop/narrow framing and overflow, reduced motion, and failure/context-loss behavior; hardware touch/performance remain unverified. T2's independent verification remains unresolved and is not accepted by these checks.
 

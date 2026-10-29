@@ -1,6 +1,9 @@
 import { Component, useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { loadAvatar, type AvatarResource } from '../avatar/load-avatar';
+import { loadCustomizedAvatar } from '../avatar/load-customized-avatar';
+import type { AvatarConfiguration } from '../avatar/AvatarCustomizer';
+import type { AppearanceCatalogue } from '../avatar/avatar-appearance';
 import { loadReception, type ReceptionResource } from './load-reception';
 import { ReceptionScene } from './ReceptionScene';
 import {
@@ -24,9 +27,13 @@ class ReceptionBoundary extends Component<{ children: ReactNode }, { failed: boo
 
 export interface ReceptionPreviewProps {
   multiplayer?: boolean;
+  configuration?: AvatarConfiguration;
+  catalogue?: AppearanceCatalogue;
 }
 
-function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
+function ReceptionContent({ multiplayer = false, configuration, catalogue }: ReceptionPreviewProps) {
+  // Confirmed entry input is a mount-time seed, not an ongoing nickname override.
+  const [localEntry] = useState(() => configuration && catalogue ? { configuration, catalogue } : undefined);
   const [avatar, setAvatar] = useState<AvatarResource>();
   const [npc, setNpc] = useState<AvatarResource>();
   const [room, setRoom] = useState<ReceptionResource>();
@@ -45,6 +52,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
 
   // Persistent session nickname
   const [savedNick] = useState(() => {
+    if (localEntry) return localEntry.configuration.nickname;
     try {
       return typeof window !== 'undefined' ? (localStorage.getItem('avatar_nickname') || '') : '';
     } catch {
@@ -320,14 +328,17 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     const reject = (error: 'avatar-error' | 'room-error') => {
       if (active) { cleanup(); setStatus(error); }
     };
-    loadAvatar(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-      .then(resource => accept(resource, setAvatar)).catch(() => reject('avatar-error'));
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const localAvatar = localEntry
+      ? loadCustomizedAvatar(localEntry.configuration, localEntry.catalogue, reducedMotion)
+      : loadAvatar(reducedMotion);
+    localAvatar.then(resource => accept(resource, setAvatar)).catch(() => reject('avatar-error'));
     // The NPC is decoration: a failed download leaves the reception without it and never blocks readiness.
     loadAvatar(window.matchMedia('(prefers-reduced-motion: reduce)').matches, 'models/npc/monkey.glb')
       .then(resource => accept(resource, setNpc)).catch(() => {});
     loadReception().then(resource => accept(resource, setRoom)).catch(() => reject('room-error'));
     return cleanup;
-  }, [failed]);
+  }, [failed, localEntry]);
 
   if (status === 'webgl-error') return <WebGLFailure />;
   if (status === 'avatar-error' || status === 'room-error') return <p role="alert">
