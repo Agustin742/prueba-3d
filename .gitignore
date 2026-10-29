@@ -10,3 +10,5 @@ server/dist/
 .env
 .env.*
 !.env.example
+.agents/
+skills-lock.json

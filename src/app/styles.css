@@ -1,5 +1,5 @@
 :root {
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: #382f3f;
   background: #fff9eb;
   line-height: 1.5;
@@ -434,4 +434,1600 @@ button {
 .emoji-item-btn:hover {
   background: #fff0d8;
   transform: scale(1.2);
+}
+
+/* =========================================================
+   Enterprise Workspace HUD (Google Workspace / Gmail Style)
+   Palette: #FFFDF9, #FFF9EB, #FFF0D8, #AF7B52, #62CFC7, #382F3F
+   ========================================================= */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hud-svg-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.hud-avatar-monogram {
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #fff9eb;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+
+.hud-avatar-monogram.small {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.66rem;
+}
+
+/* Top Perimeter Floating Islands */
+.hud-top-islands {
+  position: absolute;
+  top: 0.85rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  pointer-events: none;
+  flex-wrap: wrap;
+}
+
+.hud-island {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.55rem;
+  background: rgba(255, 253, 249, 0.96);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(175, 123, 82, 0.42);
+  border-radius: 999px;
+  box-shadow: 0 4px 18px rgba(56, 47, 63, 0.1);
+}
+
+.hud-office-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: #382f3f;
+  padding: 0.22rem 0.6rem;
+  background: #fff0d8;
+  border-radius: 999px;
+}
+
+.hud-island-divider {
+  color: rgba(175, 123, 82, 0.5);
+  font-size: 0.85rem;
+}
+
+.hud-room-select {
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #382f3f;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.22rem 0.55rem;
+  cursor: pointer;
+}
+
+.hud-room-select:hover {
+  background: #fff0d8;
+}
+
+.hud-tray-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(175, 123, 82, 0.38);
+  background: #fff9eb;
+  color: #382f3f;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.hud-tray-toggle-btn:hover,
+.hud-tray-toggle-btn.active {
+  background: #fff0d8;
+  border-color: #62cfc7;
+}
+
+.hud-count-pill {
+  background: rgba(175, 123, 82, 0.16);
+  color: #382f3f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.04rem 0.45rem;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-unread-badge {
+  background: #e66861;
+  color: #fff9eb;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.04rem 0.42rem;
+  border-radius: 999px;
+}
+
+.hud-leave-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.34rem 0.85rem;
+  border-radius: 999px;
+  border: none;
+  background: #af7b52;
+  color: #fff9eb;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.15s ease;
+}
+
+.hud-leave-cta-btn:hover {
+  background: #8e603d;
+}
+
+.hud-island-presence {
+  position: relative;
+}
+
+.hud-presence-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(175, 123, 82, 0.35);
+  background: #fff9eb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #382f3f;
+}
+
+.hud-presence-trigger.active,
+.hud-presence-trigger:hover {
+  border-color: #62cfc7;
+  background: #fff0d8;
+}
+
+.hud-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.16rem 0.5rem 0.16rem 0.2rem;
+  background: #fff0d8;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.hud-user-name {
+  font-weight: 650;
+  color: #382f3f;
+}
+
+.hud-role-badge {
+  font-size: 0.68rem;
+  font-weight: 650;
+  padding: 0.06rem 0.42rem;
+  border-radius: 999px;
+  background: rgba(98, 207, 199, 0.28);
+  color: #214e4a;
+}
+
+/* Presence Dropdown */
+.hud-presence-dropdown {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  width: min(21rem, 90vw);
+  background: #fffdf9;
+  border: 1px solid rgba(175, 123, 82, 0.45);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px rgba(56, 47, 63, 0.16);
+  padding: 0.65rem;
+  z-index: 25;
+}
+
+.hud-presence-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(175, 123, 82, 0.18);
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: #382f3f;
+}
+
+.hud-presence-hint {
+  font-weight: 500;
+  color: #7b6d85;
+  font-size: 0.72rem;
+}
+
+.hud-presence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hud-presence-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: #fff9eb;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(175, 123, 82, 0.18);
+}
+
+.hud-presence-person {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #382f3f;
+}
+
+.hud-presence-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.hud-mini-action-btn {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: 0.38rem;
+  border: 1px solid rgba(175, 123, 82, 0.4);
+  background: #ffffff;
+  color: #382f3f;
+}
+
+.hud-mini-action-btn:hover {
+  background: #fff0d8;
+  border-color: #62cfc7;
+}
+
+/* Incoming Notification Toast (Workspace Style) */
+.hud-notification-banner {
+  position: absolute;
+  top: 4.35rem;
+  right: 1rem;
+  z-index: 16;
+  width: min(22rem, calc(100vw - 2rem));
+  background: #fffdf9;
+  border: 1px solid rgba(175, 123, 82, 0.45);
+  border-left: 4px solid #af7b52;
+  border-radius: 0.65rem;
+  padding: 0.75rem 0.9rem;
+  box-shadow: 0 10px 28px rgba(56, 47, 63, 0.18);
+  pointer-events: auto;
+}
+
+.hud-notification-banner.priority-high {
+  border-left-color: #e66861;
+}
+
+.hud-notification-banner.priority-medium {
+  border-left-color: #d9a520;
+}
+
+.hud-notification-banner.priority-low {
+  border-left-color: #65b96a;
+}
+
+.hud-notification-banner.kind-note {
+  border-left-color: #8b74bd;
+}
+
+.hud-notification-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.hud-notification-sender-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hud-notification-meta {
+  font-size: 0.8rem;
+  color: #52465c;
+}
+
+.hud-notification-close {
+  background: none;
+  border: none;
+  padding: 0 0.25rem;
+  font-size: 1.1rem;
+  color: #7b6d85;
+}
+
+.hud-notification-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  margin-bottom: 0.55rem;
+}
+
+.hud-notification-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: #382f3f;
+}
+
+.hud-notification-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hud-notification-open-btn {
+  padding: 0.28rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #af7b52;
+  color: #fff9eb;
+  border: none;
+  border-radius: 0.4rem;
+}
+
+/* Semantic Priority & Note Pills */
+.hud-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hud-badge-priority.high {
+  background: #fdecec;
+  border: 1px solid rgba(230, 104, 97, 0.55);
+  color: #991b1b;
+}
+
+.hud-badge-priority.medium {
+  background: #fef7e0;
+  border: 1px solid rgba(217, 165, 32, 0.55);
+  color: #784f04;
+}
+
+.hud-badge-priority.low {
+  background: #ebf7ee;
+  border: 1px solid rgba(101, 185, 106, 0.55);
+  color: #1e562a;
+}
+
+.hud-badge-note {
+  background: #f3f0fa;
+  border: 1px solid rgba(181, 167, 214, 0.65);
+  color: #49364b;
+}
+
+/* =========================================================
+   Full-Screen Fixed Modal Backdrop (Click Anywhere to Close)
+   ========================================================= */
+
+.hud-screen-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 22;
+  background: rgba(56, 47, 63, 0.32);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+/* Fixed Gmail-Style Workspace Inbox Modal */
+.hud-workspace-inbox {
+  width: min(54rem, 96vw);
+  max-height: min(36rem, 84vh);
+  background: #fffdf9;
+  border: 1px solid rgba(175, 123, 82, 0.45);
+  border-radius: 0.85rem;
+  box-shadow: 0 20px 48px rgba(56, 47, 63, 0.24);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hud-inbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1.1rem;
+  background: #fff0d8;
+  border-bottom: 1px solid rgba(175, 123, 82, 0.24);
+  flex-wrap: wrap;
+}
+
+.hud-inbox-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #382f3f;
+}
+
+.hud-inbox-brand h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.hud-inbox-toolbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.hud-filter-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: #52465c;
+}
+
+.hud-filter-label {
+  font-weight: 600;
+}
+
+.hud-filter-select {
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.24rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(175, 123, 82, 0.45);
+  background: #fffdf9;
+  color: #382f3f;
+}
+
+.hud-inbox-close-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  padding: 0.22rem 0.5rem;
+  font-size: 0.95rem;
+  color: #52465c;
+}
+
+.hud-inbox-close-btn:hover {
+  background: rgba(175, 123, 82, 0.14);
+  color: #382f3f;
+}
+
+/* Gmail Category Tabs Bar */
+.hud-inbox-tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.1rem;
+  background: #fff9eb;
+  border-bottom: 1px solid rgba(175, 123, 82, 0.2);
+}
+
+.hud-task-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.hud-tab-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #63566d;
+}
+
+.hud-tab-btn:hover {
+  background: rgba(175, 123, 82, 0.06);
+  color: #382f3f;
+}
+
+.hud-tab-btn.active {
+  color: #382f3f;
+  border-bottom-color: #af7b52;
+  font-weight: 700;
+}
+
+.hud-tab-count {
+  background: rgba(175, 123, 82, 0.15);
+  color: #382f3f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.04rem 0.42rem;
+  border-radius: 999px;
+}
+
+.hud-compose-inline-btn {
+  padding: 0.34rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(175, 123, 82, 0.45);
+  background: #fffdf9;
+  color: #382f3f;
+}
+
+.hud-compose-inline-btn:hover {
+  background: #fff0d8;
+}
+
+/* Gmail-Style Tabular Row List */
+.hud-inbox-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.hud-task-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #63566d;
+  font-size: 0.88rem;
+}
+
+.hud-empty-action-btn {
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 0.45rem;
+  background: #fff0d8;
+}
+
+.hud-inbox-row {
+  border-bottom: 1px solid rgba(175, 123, 82, 0.16);
+  background: #ffffff;
+  transition: background 0.12s ease;
+}
+
+.hud-inbox-row:hover {
+  background: #fcf9f2;
+}
+
+.hud-inbox-row.is-highlighted {
+  background: #f4fbfa;
+  box-shadow: inset 3px 0 0 #62cfc7;
+}
+
+.hud-inbox-row.is-done .hud-row-title {
+  text-decoration: line-through;
+  color: #7b6d85;
+}
+
+.hud-inbox-row.is-archived {
+  opacity: 0.68;
+}
+
+.hud-inbox-row-main {
+  display: grid;
+  grid-template-columns: 11.5rem 1fr auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 1.1rem;
+  cursor: pointer;
+}
+
+.hud-row-sender-col {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.hud-row-people {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hud-row-sender-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-row-recipient-name {
+  font-size: 0.72rem;
+  color: #63566d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-row-subject-col {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.hud-row-title {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 650;
+  color: #382f3f;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.hud-row-snippet {
+  font-size: 0.82rem;
+  color: #7b6d85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-row-actions-col {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.hud-row-date {
+  font-size: 0.75rem;
+  color: #63566d;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hud-status-select {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.22rem 0.5rem;
+  border-radius: 0.38rem;
+  border: 1px solid rgba(175, 123, 82, 0.45);
+  background: #fff9eb;
+  color: #382f3f;
+  cursor: pointer;
+}
+
+.hud-note-status-tag {
+  font-size: 0.74rem;
+  color: #63566d;
+  padding: 0.15rem 0.45rem;
+  background: #fff9eb;
+  border-radius: 0.35rem;
+}
+
+.hud-archive-btn {
+  padding: 0.22rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.38rem;
+  border: 1px solid rgba(175, 123, 82, 0.38);
+  background: #ffffff;
+  color: #382f3f;
+}
+
+.hud-archive-btn:hover {
+  background: #fff0d8;
+}
+
+.hud-inbox-row-detail {
+  padding: 0.5rem 1.1rem 0.75rem 3.3rem;
+  background: #fdfbf7;
+  border-top: 1px dashed rgba(175, 123, 82, 0.18);
+}
+
+.hud-card-desc {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #52465c;
+  line-height: 1.45;
+  max-width: 65ch;
+}
+
+.hud-inbox-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 1.1rem;
+  background: #fff9eb;
+  border-top: 1px solid rgba(175, 123, 82, 0.22);
+  flex-wrap: wrap;
+}
+
+.hud-inbox-footer-hint {
+  font-size: 0.75rem;
+  color: #63566d;
+}
+
+.hud-footer-create-btn {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  background: #af7b52;
+  color: #fff9eb;
+  border: none;
+  border-radius: 0.42rem;
+}
+
+.hud-footer-create-btn:hover {
+  background: #8e603d;
+}
+
+/* =========================================================
+   Gmail-Style Fixed Compose Modal (LeaveItemPopover)
+   ========================================================= */
+
+.hud-leave-popover {
+  width: min(32rem, 95vw);
+  background: #fffdf9;
+  border: 1px solid rgba(175, 123, 82, 0.48);
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 48px rgba(56, 47, 63, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hud-leave-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  background: #fff0d8;
+  border-bottom: 1px solid rgba(175, 123, 82, 0.22);
+}
+
+.hud-leave-header h2 {
+  margin: 0;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #382f3f;
+}
+
+.hud-leave-close {
+  background: none;
+  border: none;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.95rem;
+  color: #52465c;
+}
+
+.hud-leave-body {
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.hud-kind-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  background: #fff9eb;
+  padding: 0.22rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(175, 123, 82, 0.26);
+}
+
+.hud-kind-btn {
+  padding: 0.34rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 0.38rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #63566d;
+}
+
+.hud-kind-btn.active {
+  background: #ffffff;
+  border-color: rgba(175, 123, 82, 0.35);
+  color: #382f3f;
+  box-shadow: 0 1px 3px rgba(56, 47, 63, 0.08);
+}
+
+.hud-compose-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(175, 123, 82, 0.16);
+  flex-wrap: wrap;
+}
+
+.hud-compose-row-label {
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: #63566d;
+  min-width: 3.6rem;
+}
+
+.hud-compose-row-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.hud-recipient-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.hud-recipient-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.16rem 0.5rem 0.16rem 0.2rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #fff9eb;
+  border: 1px solid rgba(175, 123, 82, 0.32);
+}
+
+.hud-recipient-chip.selected {
+  background: #fff0d8;
+  border-color: #62cfc7;
+}
+
+.hud-compose-priority-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.hud-priority-pills {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.hud-priority-pill {
+  padding: 0.22rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  border-radius: 0.38rem;
+  border: 1px solid rgba(175, 123, 82, 0.3);
+  background: #fff9eb;
+}
+
+.hud-priority-pill.low.selected {
+  background: #ebf7ee;
+  color: #1e562a;
+  border-color: #65b96a;
+}
+
+.hud-priority-pill.medium.selected {
+  background: #fef7e0;
+  color: #784f04;
+  border-color: #d9a520;
+}
+
+.hud-priority-pill.high.selected {
+  background: #fdecec;
+  color: #991b1b;
+  border-color: #e66861;
+}
+
+.hud-date-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hud-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.hud-form-label {
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: #52465c;
+}
+
+.hud-form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.hud-char-counter {
+  font-size: 0.7rem;
+  color: #7b6d85;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-form-textarea.extended {
+  min-height: 5.5rem;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.hud-attachments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.hud-attachments-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.hud-attach-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 650;
+  border-radius: 0.4rem;
+  border: 1px dashed rgba(175, 123, 82, 0.55);
+  background: #fff9eb;
+  color: #382f3f;
+}
+
+.hud-attach-btn:hover:not(:disabled) {
+  background: #fff0d8;
+  border-color: #62cfc7;
+}
+
+.hud-attach-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hud-attach-hint {
+  font-size: 0.7rem;
+  color: #7b6d85;
+}
+
+.hud-attachment-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hud-attachment-thumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.45rem 0.25rem 0.25rem;
+  background: #fff9eb;
+  border: 1px solid rgba(175, 123, 82, 0.35);
+  border-radius: 0.45rem;
+  max-width: 11rem;
+}
+
+.hud-attachment-thumb img {
+  width: 2.2rem;
+  height: 2.2rem;
+  object-fit: cover;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(56, 47, 63, 0.12);
+}
+
+.hud-attachment-name {
+  font-size: 0.72rem;
+  color: #382f3f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 5.5rem;
+}
+
+.hud-attachment-remove {
+  padding: 0.1rem 0.32rem;
+  font-size: 0.72rem;
+  background: rgba(230, 104, 97, 0.14);
+  color: #991b1b;
+  border: none;
+  border-radius: 0.3rem;
+}
+
+.hud-badge-attachment {
+  background: #eef6ff;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #1e40af;
+}
+
+.hud-delete-btn {
+  padding: 0.22rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.38rem;
+  border: 1px solid rgba(230, 104, 97, 0.45);
+  background: #fff5f5;
+  color: #991b1b;
+}
+
+.hud-delete-btn:hover {
+  background: #fdecec;
+  border-color: #e66861;
+}
+
+.hud-detail-review-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(175, 123, 82, 0.14);
+  flex-wrap: wrap;
+}
+
+.hud-detail-review-status {
+  font-size: 0.76rem;
+  color: #63566d;
+}
+
+.hud-detail-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.hud-quick-status-btn {
+  padding: 0.22rem 0.58rem;
+  font-size: 0.73rem;
+  font-weight: 650;
+  border-radius: 0.38rem;
+  border: 1px solid rgba(175, 123, 82, 0.35);
+  background: #ffffff;
+  color: #382f3f;
+}
+
+.hud-quick-status-btn.viewing:hover {
+  background: #eef6ff;
+  border-color: #60a5fa;
+}
+
+.hud-quick-status-btn.done:hover {
+  background: #ebf7ee;
+  border-color: #65b96a;
+}
+
+.hud-quick-status-btn.delete {
+  background: #fff5f5;
+  border-color: rgba(230, 104, 97, 0.45);
+  color: #991b1b;
+}
+
+.hud-detail-attachments {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hud-detail-attachments-label {
+  font-size: 0.74rem;
+  font-weight: 650;
+  color: #52465c;
+}
+
+.hud-detail-attachments-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.hud-detail-attachment-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+  max-width: 11rem;
+}
+
+.hud-detail-attachment-img-btn {
+  padding: 0;
+  border: 1px solid rgba(175, 123, 82, 0.38);
+  border-radius: 0.45rem;
+  overflow: hidden;
+  background: #ffffff;
+  cursor: zoom-in;
+}
+
+.hud-detail-attachment-img-btn img {
+  display: block;
+  width: 10.5rem;
+  height: 6.5rem;
+  object-fit: cover;
+}
+
+.hud-detail-attachment-name {
+  font-size: 0.7rem;
+  color: #63566d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(25, 20, 30, 0.76);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.hud-lightbox-content {
+  max-width: min(56rem, 94vw);
+  max-height: 90vh;
+  background: #fffdf9;
+  border-radius: 0.75rem;
+  padding: 0.65rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hud-lightbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.84rem;
+  font-weight: 650;
+  color: #382f3f;
+}
+
+.hud-lightbox-img {
+  max-width: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  border-radius: 0.45rem;
+}
+
+.hud-form-input,
+.hud-form-select,
+.hud-form-textarea {
+  font: inherit;
+  font-size: 0.84rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.42rem;
+  border: 1px solid rgba(175, 123, 82, 0.42);
+  background: #ffffff;
+  color: #382f3f;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.hud-form-input.compact {
+  padding: 0.22rem 0.45rem;
+  font-size: 0.78rem;
+}
+
+.hud-form-input:focus,
+.hud-form-select:focus,
+.hud-form-textarea:focus {
+  border-color: #62cfc7;
+}
+
+.hud-field-error {
+  margin: 0;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.75rem;
+  color: #991b1b;
+  background: #fdecec;
+  border-left: 3px solid #e66861;
+  border-radius: 0.25rem;
+}
+
+.hud-leave-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: #fff9eb;
+  border-top: 1px solid rgba(175, 123, 82, 0.2);
+}
+
+.hud-leave-hint {
+  font-size: 0.73rem;
+  color: #7b6d85;
+}
+
+.hud-leave-btns {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.hud-cancel-btn {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  background: #ffffff;
+  border: 1px solid rgba(175, 123, 82, 0.4);
+  border-radius: 0.42rem;
+}
+
+.hud-submit-btn {
+  padding: 0.4rem 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  background: #af7b52;
+  color: #fff9eb;
+  border: none;
+  border-radius: 0.42rem;
+}
+
+.hud-submit-btn:hover {
+  background: #8e603d;
+}
+
+/* =========================================================
+   RFC v3: Interactive 2D Elements, Minimized Gmail Dock,
+   Threaded Replies, Privacy Badges & Auto-Close Indicators
+   ========================================================= */
+
+.hud-board-quick-btn {
+  padding: 0.24rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 650;
+  border-radius: 999px;
+  border: 1px solid rgba(175, 123, 82, 0.38);
+  background: #fff9eb;
+  color: #382f3f;
+}
+
+.hud-board-quick-btn:hover {
+  background: #fff0d8;
+  border-color: #62cfc7;
+}
+
+.hud-user-chip-interactive {
+  border: 1px solid rgba(175, 123, 82, 0.3);
+  cursor: pointer;
+}
+
+.hud-user-chip-interactive:hover {
+  border-color: #62cfc7;
+}
+
+.hud-role-badge.mode-focus {
+  background: rgba(230, 104, 97, 0.22);
+  color: #991b1b;
+}
+
+.hud-role-badge.mode-reviewing {
+  background: rgba(217, 165, 32, 0.24);
+  color: #784f04;
+}
+
+.hud-status-dropdown {
+  width: min(17rem, 88vw);
+}
+
+.hud-status-mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.hud-status-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.38rem 0.6rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(175, 123, 82, 0.22);
+  background: #fff9eb;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #382f3f;
+}
+
+.hud-status-mode-btn.active {
+  background: #fff0d8;
+  border-color: #62cfc7;
+}
+
+.hud-mode-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #65b96a;
+}
+
+.hud-mode-dot.mode-focus {
+  background: #e66861;
+}
+
+.hud-mode-dot.mode-reviewing {
+  background: #d9a520;
+}
+
+.hud-notification-timer-hint {
+  font-size: 0.7rem;
+  color: #7b6d85;
+  margin-right: auto;
+  align-self: center;
+}
+
+.hud-privacy-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.14rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(98, 207, 199, 0.2);
+  color: #1f4f4b;
+}
+
+.hud-inbox-search-input {
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.24rem 0.6rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(175, 123, 82, 0.45);
+  background: #ffffff;
+  color: #382f3f;
+  width: 11.5rem;
+}
+
+.hud-inbox-collapse-all-btn,
+.hud-inbox-minimize-btn {
+  padding: 0.22rem 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(175, 123, 82, 0.38);
+  background: #fffdf9;
+  color: #382f3f;
+}
+
+.hud-inbox-collapse-all-btn:hover,
+.hud-inbox-minimize-btn:hover {
+  background: #fff0d8;
+}
+
+/* Gmail Minimized Bottom Dock Bar */
+.hud-inbox-minimized-dock {
+  position: fixed;
+  bottom: 1rem;
+  right: 22rem;
+  z-index: 21;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  background: #382f3f;
+  color: #fff9eb;
+  border-radius: 0.6rem 0.6rem 0.25rem 0.25rem;
+  box-shadow: 0 10px 28px rgba(25, 20, 30, 0.32);
+  pointer-events: auto;
+}
+
+.hud-minimized-expand-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: transparent;
+  border: none;
+  color: #fff9eb;
+  font-size: 0.8rem;
+  font-weight: 650;
+  padding: 0.2rem 0.35rem;
+}
+
+.hud-minimized-badge {
+  font-size: 0.72rem;
+  padding: 0.1rem 0.42rem;
+  border-radius: 0.35rem;
+  background: rgba(98, 207, 199, 0.24);
+  color: #a9e7f4;
+}
+
+.hud-thread-count-pill {
+  margin-left: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #63566d;
+}
+
+.hud-share-inline-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.hud-thread-section {
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(175, 123, 82, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.hud-thread-replies-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.hud-thread-reply-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  background: #fff9eb;
+  border-radius: 0.45rem;
+  border-left: 3px solid #62cfc7;
+}
+
+.hud-thread-reply-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.hud-thread-reply-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #63566d;
+  margin-bottom: 0.15rem;
+}
+
+.hud-thread-reply-text {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #382f3f;
+  line-height: 1.4;
+}
+
+.hud-thread-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hud-thread-tag-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.hud-thread-tag-hint {
+  font-size: 0.72rem;
+  color: #63566d;
+}
+
+.hud-tag-mention-chip {
+  padding: 0.12rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid rgba(98, 207, 199, 0.55);
+  background: #f4fbfa;
+  color: #1f4f4b;
+}
+
+.hud-tag-mention-chip:hover {
+  background: #dff6f3;
+}
+
+.hud-thread-input-row {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.hud-reply-input {
+  flex: 1;
+  padding: 0.36rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.hud-reply-send-btn {
+  padding: 0.36rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  border-radius: 0.42rem;
+  border: none;
+  background: #af7b52;
+  color: #fff9eb;
+}
+
+.hud-reply-send-btn:hover {
+  background: #8e603d;
+}
+
+@media (max-width: 768px) {
+  .hud-top-islands {
+    top: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    gap: 0.4rem;
+  }
+  .hud-inbox-row-main {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
 }
