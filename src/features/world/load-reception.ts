@@ -1,19 +1,12 @@
 import { type Group } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { disposeResources } from './dispose-resources';
+import { composeRoom } from './compose-room';
+import { loadRoomModules } from './load-room-modules';
+import { receptionRoom } from './reception-room';
 
 export interface ReceptionResource { scene: Group; dispose(): void }
 
-/** Uncached authored room; this owner alone releases its GPU resources. */
+/** Uncached reception composed from its module GLBs; clones share template resources, so this owner alone releases them. */
 export async function loadReception(): Promise<ReceptionResource> {
-  const { scene } = await new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}models/rooms/reception.glb`);
-  let disposed = false;
-  return {
-    scene,
-    dispose() {
-      if (disposed) return;
-      disposed = true;
-      disposeResources([scene]);
-    },
-  };
+  const modules = await loadRoomModules(receptionRoom.placements.map(placement => placement.module));
+  return { scene: composeRoom(receptionRoom, modules.templates), dispose: modules.dispose };
 }

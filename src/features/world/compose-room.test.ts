@@ -1,17 +1,12 @@
-import { readFileSync } from 'node:fs';
-import { Box3, Mesh, type Group, type Object3D } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { Box3, Mesh, type Object3D } from 'three';
 import { describe, expect, it } from 'vitest';
 import { composeRoom } from './compose-room';
 import { receptionRoom } from './reception-room';
-import { checkerGrid, type RoomDefinition } from './room-definition';
-import { roomModuleIds, roomModulePath, type RoomModuleId } from './room-modules';
+import { checkerGrid } from './room-definition';
+import { roomModuleIds } from './room-modules';
+import monolith from './__fixtures__/reception-monolith-bounds.json';
+import { moduleTemplates } from './test-room';
 
-async function parse(path: string) {
-  const bytes = readFileSync(path);
-  const buffer = new ArrayBuffer(bytes.byteLength); new Uint8Array(buffer).set(bytes);
-  return new GLTFLoader().parseAsync(buffer, '');
-}
 const meshes = (root: Object3D) => { root.updateMatrixWorld(true); const found: Mesh[] = []; root.traverse(node => { if (node instanceof Mesh) found.push(node); }); return found; };
 const key = (mesh: Mesh) => { const box = new Box3().setFromObject(mesh); return [...box.min.toArray(), ...box.max.toArray()]; };
 
@@ -26,11 +21,8 @@ describe('checkerGrid', () => {
 });
 
 describe('composeRoom', () => {
-  const templatesFor = async (definition: RoomDefinition) => new Map<RoomModuleId, Group>(await Promise.all(
-    [...new Set(definition.placements.map(placement => placement.module))].map(async id => [id, (await parse(`public/${roomModulePath(id)}`)).scene] as const)));
-
   it('places shared clones at the declared position and yaw', async () => {
-    const templates = await templatesFor(receptionRoom);
+    const templates = await moduleTemplates(receptionRoom);
     const room = composeRoom({ placements: [{ module: 'bench', position: [1, 2, 3], yaw: Math.PI / 2 }] }, templates);
     const [clone] = room.children;
     expect(clone!.position.toArray()).toEqual([1, 2, 3]); expect(clone!.rotation.y).toBeCloseTo(Math.PI / 2);
@@ -44,19 +36,19 @@ describe('composeRoom', () => {
     for (const { module } of receptionRoom.placements) expect(roomModuleIds).toContain(module);
   });
 
-  it('reproduces the monolithic reception: same mesh count, per-mesh bounds and overall box', async () => {
-    const room = composeRoom(receptionRoom, await templatesFor(receptionRoom));
-    const monolith = (await parse('public/models/rooms/reception.glb')).scene;
-    const composed = meshes(room); const original = meshes(monolith);
-    expect(original).toHaveLength(144); expect(composed).toHaveLength(144);
-    const unmatched = original.map(key);
+  // Fixture: per-mesh world boxes of the retired reception.glb (git 49070f7), rounded to 3 decimals.
+  it('reproduces the retired monolithic reception: same mesh count, per-mesh bounds and overall box', async () => {
+    const room = composeRoom(receptionRoom, await moduleTemplates(receptionRoom));
+    const composed = meshes(room);
+    expect(monolith.meshes).toHaveLength(144); expect(composed).toHaveLength(144);
+    const unmatched = [...monolith.meshes];
     for (const box of composed.map(key)) {
       const found = unmatched.findIndex(candidate => candidate.every((value, index) => Math.abs(value - box[index]!) < 0.011));
       expect(found, `no original mesh near ${box.map(value => value.toFixed(3))}`).toBeGreaterThanOrEqual(0);
       unmatched.splice(found, 1);
     }
     expect(unmatched).toHaveLength(0);
-    const a = new Box3().setFromObject(room); const b = new Box3().setFromObject(monolith);
-    for (const [index, value] of [...a.min.toArray(), ...a.max.toArray()].entries()) expect(value).toBeCloseTo([...b.min.toArray(), ...b.max.toArray()][index]!, 2);
+    const a = new Box3().setFromObject(room);
+    for (const [index, value] of [...a.min.toArray(), ...a.max.toArray()].entries()) expect(value).toBeCloseTo(monolith.box[index]!, 2);
   });
 });

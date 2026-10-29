@@ -32,7 +32,7 @@ export interface ReceptionSceneProps {
 
 /** Only the foremost actual tile top may become a floor intent. No furniture flattening. */
 export function floorDestination(hit?: Intersection): Point | null {
-  if (!hit || !/^ITReception_Tile \d+-\d+$/.test(hit.object.userData.name ?? '')
+  if (!hit || !/^Tile \d+-\d+$/.test(hit.object.userData.name ?? '')
     || Math.abs(hit.point.y) > 0.015 || !hit.face) return null;
   const normal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
   return normal.y > 0.99 ? { x: hit.point.x, y: 0, z: hit.point.z } : null;

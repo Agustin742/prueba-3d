@@ -1,5 +1,4 @@
 import { StrictMode } from 'react';
-import { readFileSync } from 'node:fs';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { loadAvatar } from '../avatar/load-avatar';
 import { act, render } from '@testing-library/react';
@@ -9,6 +8,7 @@ import type { AvatarResource } from '../avatar/load-avatar';
 import { createNavigation } from './navigation';
 import { receptionAvatarRadius, receptionNpcPlacement } from './reception-layout';
 import { ReceptionScene, floorDestination } from './ReceptionScene';
+import { composedReception, parseGlb } from './test-room';
 
 const renderer = vi.hoisted(() => ({ frames: [] as ((state: unknown, dt: number) => void)[], width: 1000, height: 600 }));
 const camera = new OrthographicCamera(-500, 500, 300, -300, 0.1, 100);
@@ -20,17 +20,17 @@ vi.mock('@react-three/fiber', () => ({
 beforeEach(() => { renderer.frames = []; renderer.width = 1000; renderer.height = 600; });
 
 it('selects only the nearest genuine floor top, never furniture, walls, avatar, or off-floor', () => {
-  const mesh = new Mesh(); mesh.userData.name = 'ITReception_Tile 0-0';
+  const mesh = new Mesh(); mesh.userData.name = 'Tile 0-0';
   const hit: Intersection = {
     object: mesh, distance: 1, point: new Vector3(1, 0, 2),
     face: { a: 0, b: 1, c: 2, materialIndex: 0, normal: new Vector3(0, 1, 0) },
   };
   expect(floorDestination(hit)).toEqual({ x: 1, y: 0, z: 2 });
   expect(floorDestination(undefined)).toBeNull();
-  for (const name of ['ITReception_Coral counter crown', 'ITReception_Seat arm', 'ITReception_Back left', 'Avatar']) {
+  for (const name of ['Coral counter crown', 'Seat arm', 'Back left', 'Avatar']) {
     mesh.userData.name = name; expect(floorDestination(hit)).toBeNull();
   }
-  mesh.userData.name = 'ITReception_Tile 0-0';
+  mesh.userData.name = 'Tile 0-0';
   hit.point.y = 1; expect(floorDestination(hit)).toBeNull();
   hit.point.y = 0; hit.face!.normal.set(1, 0, 0); expect(floorDestination(hit)).toBeNull();
 });
@@ -40,7 +40,7 @@ it('dispatches onInteract when a 3D interactive reception prop is selected inste
   const avatar = { scene, update: vi.fn(), dispose: vi.fn() } as unknown as AvatarResource;
   const room = new Group();
   const bell = new Mesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial());
-  bell.userData.name = 'ITReception_Bell dome';
+  bell.userData.name = 'Bell dome';
   room.add(bell);
   const onSelect = vi.fn();
   const onInteract = vi.fn();
@@ -130,32 +130,27 @@ it('renders the optional NPC at its counter spot inside the room group, and noth
   expect(npc.dispose).not.toHaveBeenCalled();
 });
 
-async function parseAsset(path: string) {
-  const bytes = readFileSync(path); const buffer = new ArrayBuffer(bytes.byteLength); new Uint8Array(buffer).set(bytes);
-  return new GLTFLoader().parseAsync(buffer, '');
-}
-
 it('anchors the original posed rig and distinguishes actual room ray hits (CPU evidence, not GPU clearance)', async () => {
-  const gltf = await parseAsset('public/models/character.glb');
+  const gltf = await parseGlb('public/models/character.glb');
   vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValueOnce(gltf);
   const avatar = await loadAvatar(false);
-  const room = await parseAsset('public/models/rooms/reception.glb');
-  const { unmount } = render(<ReceptionScene avatar={avatar} room={{ scene: room.scene, dispose: vi.fn() }} tick={() => createNavigation().spawn()!} onSelect={vi.fn()} onReady={vi.fn()} onFailure={vi.fn()} />);
+  const room = await composedReception();
+  const { unmount } = render(<ReceptionScene avatar={avatar} room={{ scene: room, dispose: vi.fn() }} tick={() => createNavigation().spawn()!} onSelect={vi.fn()} onReady={vi.fn()} onFailure={vi.fn()} />);
   const root = avatar.scene.parent!.parent!;
   const bounds = new Box3().setFromObject(root, true);
   expect(bounds.min.y).toBeCloseTo(0); expect(bounds.getSize(new Vector3()).y).toBeCloseTo(2);
   expect(bounds.getCenter(new Vector3()).x).toBeCloseTo(0); expect(bounds.getCenter(new Vector3()).z).toBeCloseTo(2);
   console.info('Original Idle posed avatar at height2: XZ full extents', bounds.getSize(new Vector3()).x, bounds.getSize(new Vector3()).z, '; default core radius remains 0.25; reception uses its explicit larger envelope.');
-  room.scene.updateMatrixWorld(true);
+  room.updateMatrixWorld(true);
   for (const [x, z, floor] of [[0.675, 1.35, true], [-2.8, -1.6, false], [-4.3, 1.5, false], [-5.3, 0, false]] as const) {
-    const hits = new Raycaster(new Vector3(x, 6, z), new Vector3(0, -1, 0)).intersectObject(room.scene, true);
+    const hits = new Raycaster(new Vector3(x, 6, z), new Vector3(0, -1, 0)).intersectObject(room, true);
     expect(!!floorDestination(hits[0])).toBe(floor);
   }
   unmount(); avatar.dispose(); vi.restoreAllMocks();
 });
 
 it('encloses actual normalized Idle/Run bounds at sampled poses and rotations in the reception footprint', async () => {
-  const gltf = await parseAsset('public/models/character.glb');
+  const gltf = await parseGlb('public/models/character.glb');
   vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValueOnce(gltf);
   const avatar = await loadAvatar(false);
   const room = new Group(); room.add(new Mesh(new BoxGeometry(11, 4, 10), new MeshBasicMaterial()));

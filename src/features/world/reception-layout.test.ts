@@ -1,28 +1,30 @@
-import { readFileSync } from 'node:fs';
+import { Box3, Mesh } from 'three';
 import { describe, expect, it } from 'vitest';
 import { receptionLayout } from './reception-layout';
+import { composedReception } from './test-room';
 
-// Real exported GLB, not a mocked scene or a history-dependent fixture.
-const bytes = readFileSync('public/models/rooms/reception.glb');
-const asset = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)).toString());
-function bounds(name: string) {
-  const node = asset.nodes.find((entry: { name: string }) => entry.name === `ITReception_${name}`);
-  expect(node, name).toBeDefined();
-  expect(node.matrix ?? node.translation ?? node.rotation ?? node.scale).toBeUndefined();
-  const accessor = asset.accessors[asset.meshes[node.mesh].primitives[0].attributes.POSITION];
-  return [...accessor.min, ...accessor.max] as number[];
+// Real module GLBs composed by the reception placements, not a mocked scene or a history-dependent fixture.
+const room = await composedReception();
+room.updateMatrixWorld(true);
+// World AABB [minX, minY, minZ, maxX, maxY, maxZ] over every mesh whose source name matches (repeated clones included).
+function bounds(name: string | RegExp) {
+  const box = new Box3();
+  room.traverse(node => {
+    const source = node.userData.name as string | undefined;
+    if (node instanceof Mesh && source !== undefined && (typeof name === 'string' ? source === name : name.test(source))) box.expandByObject(node);
+  });
+  expect(box.isEmpty(), String(name)).toBe(false);
+  return [...box.min.toArray(), ...box.max.toArray()] as number[];
 }
 
-describe('reception layout derived from the authored GLB', () => {
+describe('reception layout derived from the composed module GLBs', () => {
   it('keeps the floor inside the tile envelope, not the floating plinth or open portal', () => {
-    expect(bytes.toString('ascii', 0, 4)).toBe('glTF');
-    const first = bounds('Tile 0-0');
-    const last = bounds('Tile 7-6');
+    const tiles = bounds(/^Tile \d+-\d+$/);
     expect(receptionLayout.floor).toEqual({ minX: -5.39, maxX: 5.39, minZ: -4.716, maxZ: 4.716 });
-    expect(first[0]).toBeCloseTo(-5.391);
-    expect(first[5]).toBeCloseTo(4.716);
-    expect(last[3]).toBeCloseTo(5.391);
-    expect(last[2]).toBeCloseTo(-4.716);
+    expect(tiles[0]).toBeCloseTo(-5.391);
+    expect(tiles[5]).toBeCloseTo(4.716);
+    expect(tiles[3]).toBeCloseTo(5.391);
+    expect(tiles[2]).toBeCloseTo(-4.716);
     expect(bounds('Threshold')[2]).toBeLessThan(receptionLayout.floor.minZ);
   });
 

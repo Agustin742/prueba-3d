@@ -62,19 +62,19 @@ const INTERACTION_BY_ID: Record<ReceptionInteractionId, ReceptionInteractionDefi
 const MESH_PATTERNS: ReadonlyArray<{ id: ReceptionInteractionId; pattern: RegExp }> = [
   {
     id: 'counter-bell',
-    pattern: /^ITReception_(Bell[ _]foot|Bell[ _]dome|Bell[ _]button|Coral[ _]counter[ _]crown|L[ _]counter[ _]warm[ _]carcass|Counter[ _]recessed[ _]toe|Counter[ _]fluted[ _]inlay([._]\d+)?|Counter[ _]letter[ _]tray|Tray[ _]stationery)$/,
+    pattern: /^(Bell[ _]foot|Bell[ _]dome|Bell[ _]button|Coral[ _]counter[ _]crown|L[ _]counter[ _]warm[ _]carcass|Counter[ _]recessed[ _]toe|Counter[ _]fluted[ _]inlay([._]\d+)?|Counter[ _]letter[ _]tray|Tray[ _]stationery)$/,
   },
   {
     id: 'noticeboard',
-    pattern: /^ITReception_(Noticeboard[ _]frame|Noticeboard[ _]inset|Pinned[ _]notice([._]\d+)?|Notice[ _]pin([._]\d+)?)$/,
+    pattern: /^(Noticeboard[ _]frame|Noticeboard[ _]inset|Pinned[ _]notice([._]\d+)?|Notice[ _]pin([._]\d+)?)$/,
   },
   {
     id: 'waiting-seat',
-    pattern: /^ITReception_(Seat[ _]foot([._]\d+)?|Seat[ _]timber[ _]cradle|Upholstered[ _]back|Peach[ _]seat[ _]cushion([._]\d+)?|Seat[ _]arm([._]\d+)?)$/,
+    pattern: /^(Seat[ _]foot([._]\d+)?|Seat[ _]timber[ _]cradle|Upholstered[ _]back|Peach[ _]seat[ _]cushion([._]\d+)?|Seat[ _]arm([._]\d+)?)$/,
   },
   {
     id: 'portal-doorway',
-    pattern: /^ITReception_(Door[ _]jamb([._]\d+)?|Door[ _]header|Threshold|Portal[ _]crest|Door[ _]lintel[ _]wall)$/,
+    pattern: /^(Door[ _]jamb([._]\d+)?|Door[ _]header|Threshold|Portal[ _]crest|Door[ _]lintel[ _]wall)$/,
   },
 ];
 

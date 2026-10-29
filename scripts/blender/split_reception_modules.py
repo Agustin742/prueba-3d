@@ -1,5 +1,9 @@
 """Split the approved reception GLB into reusable module GLBs.
 
+The monolith public/models/rooms/reception.glb was retired after this split. Recover it from git
+history (commit 49070f7) or re-export it from assets/blender/reception.blend via
+author_reception.py / recolor_reception.py, then point SOURCE at it to rerun the split.
+
 Blender MCP safe mode cannot read files or runpy, so paste this file into Blender and call
 split(project_root). It works only in a new scene named SCENE; the user's scenes are untouched.
 
@@ -15,7 +19,7 @@ from mathutils import Matrix, Vector
 
 PREFIX = "ITReception_"
 SCENE = "RoomModules"
-SOURCE = "public/models/rooms/reception.glb"
+SOURCE = "public/models/rooms/reception.glb"  # retired; see the module docstring for how to recover it
 TARGET = "public/models/rooms/modules"
 QUARTER = math.pi / 2
 

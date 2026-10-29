@@ -1,6 +1,4 @@
-import { readFileSync } from 'node:fs';
 import { Mesh, Vector3, type Intersection } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { describe, expect, it } from 'vitest';
 import {
   RECEPTION_INTERACTIONS,
@@ -8,6 +6,7 @@ import {
   receptionInteractionTarget,
   type ReceptionInteractionId,
 } from './reception-interactions';
+import { composedReception } from './test-room';
 
 describe('reception local interactions catalog and mesh hit resolution', () => {
   it('defines all four bounded reception interactions with explicit local-only classes and feedback', () => {
@@ -29,19 +28,19 @@ describe('reception local interactions catalog and mesh hit resolution', () => {
 
   it('resolves interactive reception mesh hits across counter, noticeboard, waiting seat and portal doorway', () => {
     const cases: Array<[string, ReceptionInteractionId]> = [
-      ['ITReception_Bell dome', 'counter-bell'],
-      ['ITReception_Bell button', 'counter-bell'],
-      ['ITReception_Coral counter crown', 'counter-bell'],
-      ['ITReception_L counter warm carcass', 'counter-bell'],
-      ['ITReception_Noticeboard frame', 'noticeboard'],
-      ['ITReception_Pinned notice.001', 'noticeboard'],
-      ['ITReception_Notice pin.002', 'noticeboard'],
-      ['ITReception_Peach seat cushion', 'waiting-seat'],
-      ['ITReception_Upholstered back', 'waiting-seat'],
-      ['ITReception_Seat arm.001', 'waiting-seat'],
-      ['ITReception_Door header', 'portal-doorway'],
-      ['ITReception_Portal crest', 'portal-doorway'],
-      ['ITReception_Threshold', 'portal-doorway'],
+      ['Bell dome', 'counter-bell'],
+      ['Bell button', 'counter-bell'],
+      ['Coral counter crown', 'counter-bell'],
+      ['L counter warm carcass', 'counter-bell'],
+      ['Noticeboard frame', 'noticeboard'],
+      ['Pinned notice.001', 'noticeboard'],
+      ['Notice pin.002', 'noticeboard'],
+      ['Peach seat cushion', 'waiting-seat'],
+      ['Upholstered back', 'waiting-seat'],
+      ['Seat arm.001', 'waiting-seat'],
+      ['Door header', 'portal-doorway'],
+      ['Portal crest', 'portal-doorway'],
+      ['Threshold', 'portal-doorway'],
     ];
     for (const [name, expected] of cases) {
       const mesh = new Mesh();
@@ -54,11 +53,11 @@ describe('reception local interactions catalog and mesh hit resolution', () => {
   it('returns null for floor tiles, walls, plants, shelves and missing hits', () => {
     expect(receptionInteractionTarget(undefined)).toBeNull();
     for (const nonInteractive of [
-      'ITReception_Tile 0-0',
-      'ITReception_Back left',
-      'ITReception_Lance leaf 0',
-      'ITReception_Layered display shelf',
-      'ITReception_Rounded window frame',
+      'Tile 0-0',
+      'Back left',
+      'Lance leaf 0',
+      'Layered display shelf',
+      'Rounded window frame',
       'Avatar',
     ]) {
       const mesh = new Mesh();
@@ -68,13 +67,9 @@ describe('reception local interactions catalog and mesh hit resolution', () => {
     }
   });
 
-  it('matches actual mesh names inside public/models/rooms/reception.glb for every catalog interaction', async () => {
-    const bytes = readFileSync('public/models/rooms/reception.glb');
-    const buffer = new ArrayBuffer(bytes.byteLength);
-    new Uint8Array(buffer).set(bytes);
-    const gltf = await new GLTFLoader().parseAsync(buffer, '');
+  it('matches actual mesh names inside the room composed from the module GLBs for every catalog interaction', async () => {
     const matched = new Set<ReceptionInteractionId>();
-    gltf.scene.traverse(node => {
+    (await composedReception()).traverse(node => {
       const hit: Intersection = { object: node, distance: 1, point: new Vector3() };
       const id = receptionInteractionTarget(hit);
       if (id) matched.add(id);
