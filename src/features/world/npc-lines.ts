@@ -17,7 +17,7 @@ export const npcLines: readonly string[] = [
   'sabías que hay gente que no rindió el examen? me lo contó un lorito',
   'rindan el examen',
   'No revisen el chat',
-  'Gabi abri la asistenca, Gabi?'
+  'Gabi abri la asistenca, Gabi?',
   'Alejo, Santi esta grabando?',
   'Promptealo'
 ];
