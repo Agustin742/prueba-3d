@@ -1,6 +1,6 @@
 # Local reception navigation study
 
-The default app view integrates the existing reception and avatar GLBs with T3a's deterministic local navigation core and T5's bounded local object interactions. This is a single-player experiment, not the finished product: authentication, Colyseus, persistent tasks, chat, business actions and server persistence are absent. Additional rooms remain deferred awaiting team review.
+The default app view integrates the modular reception (composed from module GLBs) and the avatar GLB with T3a's deterministic local navigation core and T5's bounded local object interactions. This is a single-player experiment, not the finished product: authentication, Colyseus, persistent tasks, chat, business actions and server persistence are absent. Additional rooms remain deferred awaiting team review.
 
 ## Try the local study
 
@@ -18,13 +18,13 @@ Provisional keyboard mapping is world-aligned: W → −Z, S → +Z, A → −X,
 | --- | --- |
 | [ReceptionPreview](../../src/features/world/ReceptionPreview.tsx) | Full-viewport reception stage, asset downloads, loading/error/readiness, exclusive resource lifetime, compact floating status pill and centered noticeboard modal dialog. |
 | [ReceptionScene](../../src/features/world/ReceptionScene.tsx) | Fixed bounds-fit camera, posed avatar anchoring, exact navigation-to-transform copies, facing, original Idle/Walk selection, nearest-hit floor and interactive prop selection. Reuses the unchanged scene-lifecycle hook. |
-| [reception-interactions](../../src/features/world/reception-interactions.ts) | Bounded reception interaction catalog (`counter-bell`, `noticeboard`, `waiting-seat`, `portal-doorway`) and mesh-name hit classification across decorative responses, local dialog preview and unavailable room transition. |
+| [reception-interactions](../../src/features/world/reception-interactions.ts) | Bounded reception interaction catalog (`counter-bell`, `noticeboard`, `waiting-seat`, `portal-doorway`) and hit classification by source mesh name (`userData.name`, e.g. `Bell dome`, no prefix) across decorative responses, local dialog preview and unavailable room transition. |
 | [use-navigation-controls](../../src/features/world/use-navigation-controls.ts) | The single navigation snapshot, held keys and pointer-tap arbitration. Frames call core `move`/`advance` with dt capped at 0.1 seconds; no second position or corner-cutting interpolation. |
-| [load-reception](../../src/features/world/load-reception.ts) | One uncached authored room and idempotent geometry/material/texture disposal. Avatar ownership stays in the existing avatar loader/mixer; optional `setMoving` preserves default Idle, reduced motion and final disposal. |
+| [load-reception](../../src/features/world/load-reception.ts) | One uncached room: loads the modules `receptionRoom` needs, composes them, and idempotently disposes the shared template geometry/materials/textures once (clones share them). Rejects on failure; no procedural substitute. Avatar ownership stays in the existing avatar loader/mixer; optional `setMoving` preserves default Idle, reduced motion and final disposal. |
 
 Typing/contenteditable/controls and dialogs do not own world keys. Focus loss, window blur, visibility changes, inactive controls, modal insertion, pointer cancellation and view unmount discard stale intent. Recovery requires a fresh key press or tap. UI pointer activation never becomes a destination. Floor taps use PointerEvents without hover and reject drags (8 CSS-pixel threshold); taps interrupted before release are discarded.
 
-Room picking considers only the nearest actual mesh hit: named tile top faces near Y0 qualify. Countertops, seats, walls, avatars and off-room misses are rejected, never projected through to the floor. Tile joints can reject a precise tap even though the movement core treats the floor envelope continuously. Rejected targets cancel the old route and announce rejection; they do not imply arrival. The open portal is not a transition.
+Room picking considers only the nearest actual mesh hit: tile meshes (source names `Tile n-m`) top faces near Y0 qualify. Countertops, seats, walls, avatars and off-room misses are rejected, never projected through to the floor. Tile joints can reject a precise tap even though the movement core treats the floor envelope continuously. Rejected targets cancel the old route and announce rejection; they do not imply arrival. The open portal is not a transition.
 
 Both original assets must download and complete a render before readiness. Asset errors and WebGL setup/context failures remain distinct from readiness, with manual reload guidance and no procedural substitutes. Failures/unmount dispose owned assets; uncancellable late downloads are disposed without mounting. The original calibration component, lifecycle hook and tests remain unchanged.
 
@@ -60,9 +60,9 @@ T3b must map WASD to world XZ (e.g. W → negative Z), give pointer/touch the sa
 
 ## Geometry source and collision policy
 
-[The Blender recipe](../../scripts/blender/author_reception.py), `compose()`, defines the layout. Blender XY maps to Three XZ as `(X, -Y)`; Blender Z becomes Three Y. The actual [reception GLB](../../public/models/rooms/reception.glb) already uses these coordinates and has identity mesh nodes. Do not apply this conversion twice.
+The room is [`receptionRoom`](../../src/features/world/reception-room.ts): placements of the module GLBs in [public/models/rooms/modules/](../../public/models/rooms/modules/), composed by [`composeRoom`](../../src/features/world/compose-room.ts). Positions are Three world space with each module's pivot at its bottom-centre; modules face +Z. The original [Blender recipe](../../scripts/blender/author_reception.py) and [split script](../../scripts/blender/split_reception_modules.py) authored them (Blender XY maps to Three XZ as `(X, -Y)`; do not apply this conversion twice). Repeated pieces are clones that share their template's geometry and materials.
 
-[reception-layout.ts](../../src/features/world/reception-layout.ts) uses conservative horizontal rectangles:
+[reception-layout.ts](../../src/features/world/reception-layout.ts) keeps the explicit floor envelope and derives obstacles with [derive-layout.ts](../../src/features/world/derive-layout.ts): each module declares conservative XZ footprints in [room-modules.ts](../../src/features/world/room-modules.ts), transformed by its placement (quarter-turn yaw only). Resulting rectangles:
 
 - Tile envelope X≈±5.391, Z≈±4.716, feet Y=0. Small tile joints are treated as continuous floor. The floating plinth is not extra floor.
 - Back/left wall footprints include protruding lower bands/rails and both door jambs.
@@ -70,7 +70,7 @@ T3b must map WASD to world XZ (e.g. W → negative Z), give pointer/touch the sa
 - Seat footprint includes cradle/back/arms. Planter uses its rim's square envelope, not sprawling foliage. Wall shelves conservatively block their body-height footprint.
 - Hanging pendants, noticeboard, leaves and tiny countertop stationery do not create independent floor obstacles. The underlying counter still blocks.
 
-The portal is geometrically open, but movement cannot leave the floor. It grants no access or room transition. GLB integration tests load the **real current file**, assert named source meshes/identity transforms and check relevant bounds; no fixture reads Git history or substitutes a mocked scene.
+The portal is geometrically open, but movement cannot leave the floor. It grants no access or room transition. Layout, interaction and scene tests compose the **real module GLBs** and check relevant bounds and source mesh names. The only fixture is `reception-monolith-bounds.json` (per-mesh world boxes of the retired monolith), which `compose-room.test.ts` uses to prove the composed room reproduces it.
 
 ## Provisional tuning and limitations
 
