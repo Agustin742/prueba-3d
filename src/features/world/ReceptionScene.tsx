@@ -6,7 +6,7 @@ import { useSceneLifecycle } from '../avatar/use-scene-lifecycle';
 import type { ReceptionResource } from './load-reception';
 import type { NavigationState, Point } from './navigation';
 import { receptionInteractionTarget, type ReceptionInteractionId } from './reception-interactions';
-import { RemotePlayer } from '../network/RemotePlayer';
+import { RemotePlayer, turnTowardsAngle } from '../network/RemotePlayer';
 import { createAvatarBillboard } from '../network/AvatarBillboard';
 import type { PlayerState } from '../network/socket';
 
@@ -167,7 +167,8 @@ export function ReceptionScene({
     const { position } = tick(delta);
     const dx = position.x - root.position.x; const dz = position.z - root.position.z;
     const moving = Math.hypot(dx, dz) > 1e-8;
-    if (moving) root.rotation.y = Math.atan2(dx, dz);
+    // Turn at a capped rate (same as remote players) so heading changes never snap.
+    if (moving) root.rotation.y = turnTowardsAngle(root.rotation.y, Math.atan2(dx, dz), delta * 8);
     root.position.set(position.x, 0, position.z);
     avatar.setMoving?.(moving); avatar.update(delta);
 

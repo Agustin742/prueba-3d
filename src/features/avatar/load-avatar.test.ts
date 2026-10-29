@@ -38,28 +38,55 @@ describe('original avatar loading contract', () => {
     expect(dispose).toHaveBeenCalledTimes(1);
   });
 
-  it('switches Idle/Walk without replacing the mixer or stopping all actions during movement', async () => {
+  it('switches Idle/Run without replacing the mixer or stopping all actions during movement', async () => {
     const gltf = await originalAvatar();
     vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValue(gltf);
     const stop = vi.spyOn(AnimationMixer.prototype, 'stopAllAction');
     const avatar = await loadAvatar(false);
     const idle = gltf.animations.find(clip => clip.name === 'Idle')!;
-    const walk = gltf.animations.find(clip => clip.name === 'Walk')!;
+    const run = gltf.animations.find(clip => clip.name === 'Run')!;
     expect(avatar.setMoving).toBeTypeOf('function');
     avatar.setMoving!(true);
     avatar.update(0.1);
-    expect(avatar.mixer.existingAction(walk)?.isRunning()).toBe(true);
+    expect(avatar.mixer.existingAction(run)?.isRunning()).toBe(true);
     avatar.setMoving!(true);
     avatar.setMoving!(false);
     avatar.update(0.1);
+    avatar.update(0.1);
+    avatar.update(0.1);
     expect(avatar.mixer.existingAction(idle)?.isRunning()).toBe(true);
-    expect(avatar.mixer.existingAction(walk)?.isRunning()).toBe(false);
+    expect(avatar.mixer.existingAction(run)?.isRunning()).toBe(false);
     expect(stop).not.toHaveBeenCalled();
     avatar.dispose();
     avatar.setMoving!(true);
     avatar.update(0.1);
     expect(stop).toHaveBeenCalledTimes(1);
-    expect(avatar.mixer.existingAction(walk)).toBeNull();
+    expect(avatar.mixer.existingAction(run)).toBeNull();
+  });
+
+  it('cross-fades Idle and Run instead of cutting between poses', async () => {
+    const gltf = await originalAvatar();
+    vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockResolvedValue(gltf);
+    const avatar = await loadAvatar(false);
+    const idle = avatar.mixer.existingAction(gltf.animations.find(clip => clip.name === 'Idle')!)!;
+    const run = gltf.animations.find(clip => clip.name === 'Run')!;
+    avatar.update(0.1);
+    avatar.setMoving!(true);
+    avatar.update(0.05);
+    const running = avatar.mixer.existingAction(run)!;
+    // Mid-fade both clips contribute, so the pose blends instead of popping.
+    expect(idle.isRunning()).toBe(true);
+    expect(running.isRunning()).toBe(true);
+    expect(idle.getEffectiveWeight()).toBeGreaterThan(0);
+    expect(idle.getEffectiveWeight()).toBeLessThan(1);
+    expect(running.getEffectiveWeight()).toBeGreaterThan(0);
+    expect(running.getEffectiveWeight()).toBeLessThan(1);
+    // update() caps each delta at 0.1s, so finish the 0.2s fade in capped steps.
+    avatar.update(0.1);
+    avatar.update(0.1);
+    expect(idle.isRunning()).toBe(false);
+    expect(running.getEffectiveWeight()).toBeCloseTo(1);
+    avatar.dispose();
   });
 
   it('suppresses both movement clips for reduced motion and caps animation delta', async () => {
@@ -70,7 +97,7 @@ describe('original avatar loading contract', () => {
     avatar.setMoving!(true);
     avatar.update(5);
     expect(avatar.mixer.time).toBeCloseTo(0.1);
-    expect(avatar.mixer.existingAction(gltf.animations.find(clip => clip.name === 'Walk')!)).toBeNull();
+    expect(avatar.mixer.existingAction(gltf.animations.find(clip => clip.name === 'Run')!)).toBeNull();
     avatar.setMoving!(false);
     expect(avatar.mixer.existingAction(gltf.animations.find(clip => clip.name === 'Idle')!)).toBeNull();
     avatar.dispose();

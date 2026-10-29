@@ -44,11 +44,11 @@ export function RemotePlayer({ nickname, position, rotation, animation, bubbleTe
 
     const mx = new AnimationMixer(clone);
     const idleClip = animations.find(clip => clip.name === 'Idle' || clip.name.toLowerCase() === 'idle');
-    const walkClip = animations.find(clip => clip.name === 'Walk' || clip.name.toLowerCase() === 'walk');
+    const runClip = animations.find(clip => clip.name === 'Run' || clip.name.toLowerCase() === 'run');
 
     const acts = {
       idle: idleClip ? mx.clipAction(idleClip) : null,
-      walk: walkClip ? mx.clipAction(walkClip) : null,
+      run: runClip ? mx.clipAction(runClip) : null,
     };
 
     if (acts.idle) {
@@ -105,7 +105,7 @@ export function RemotePlayer({ nickname, position, rotation, animation, bubbleTe
     }
 
     const isMoving = animation === 'run' || animation === 'walk';
-    const nextAction = isMoving ? actions.walk : actions.idle;
+    const nextAction = isMoving ? actions.run : actions.idle;
     if (nextAction && (!nextAction.isRunning() || nextAction !== currentActionRef.current)) {
       if (currentActionRef.current && currentActionRef.current !== nextAction) {
         currentActionRef.current.fadeOut(0.2);
