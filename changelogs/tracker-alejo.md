@@ -2,12 +2,12 @@
 
 ## 2026-10-29 — Integrate a wardrobe without replacing the original avatar
 
-- **Status:** in-progress
+- **Status:** blocked
 - **Area / files:** `src/features/avatar/`, local entry wiring in `src/app/App.tsx` and `src/features/world/ReceptionPreview.tsx`, nine cosmetic GLBs and `README.md`.
 - **Change:** Reuse the wardrobe with additive afro/dreads, hoodie/tank and five accessories on the unchanged original character and animation controller. Preserve navigation, NPC, remote players and server configuration. Female modules require an incompatible rig and remain excluded; pending Blender experiments and modular-room changes are separate.
 - **Reason:** Bring only the approved wardrobe/cosmetics into a fresh branch from main without undoing teammate improvements.
-- **Verification:** Cosmetic and UI slices passed focused tests, full suites, TypeScript and builds (`0dbd9e6`, `8050d25`). Entry integration passed 165 tests; its canvas test mock then failed TypeScript overload checking and is being corrected. Real-browser visual acceptance remains pending. Preferences and appearance are local-only, not account persistence or remote synchronization.
-- **Next step:** Complete type/build and visual checks before marking the candidate ready for team review. No push, PR or merge has been performed.
+- **Verification:** Cosmetic/UI slices passed focused tests, full suites, TypeScript and builds (`0dbd9e6`, `8050d25`). Entry integration (`2066a50`) passed 165 tests; two TypeScript failures in its partial canvas mock were corrected, followed by successful type checks, build, five CI regression tests and 43-document link checks. Original protected paths are unchanged. Independent static verification found no severe code-caused blocker but did not grant visual acceptance. Existing Three.js/R3F test warnings and the 1,182.62 kB bundle warning remain. Preferences and appearance are local-only, not account persistence or remote synchronization.
+- **Next step:** Human visual review of cosmetic fit during Idle/Run, rotation and desktop/mobile readability in the local preview. Browser proof is unavailable in this verification run; do not mark ready or publish without it. No push, PR or merge has been performed.
 
 ## 2026-10-27 — Repair project-local dependency resolution
 
