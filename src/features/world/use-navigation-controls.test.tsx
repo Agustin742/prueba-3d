@@ -22,17 +22,17 @@ const key = (value: string, repeat = false) => fireEvent.keyDown(root(), { key: 
 describe('navigation input arbitration through rendered controls', () => {
   it('moves WASD on world axes, caps resumed dt, and stops on release', () => {
     render(<Controls />); root().focus(); key('w');
-    expect(frame().position).toEqual({ x: 0, y: 0, z: 1.75 });
+    expect(frame().position).toEqual({ x: 0, y: 0, z: 1.5 });
     fireEvent.keyUp(window, { key: 'w' });
-    expect(frame().position.z).toBe(1.75);
-    key('d'); expect(frame().position.x).toBe(0.25);
+    expect(frame().position.z).toBe(1.5);
+    key('d'); expect(frame().position.x).toBe(0.5);
   });
 
   it('normalizes diagonal A/S input through the same collision owner', () => {
     render(<Controls />); root().focus(); key('a'); key('s');
     const { position } = frame();
-    expect(position.x).toBeCloseTo(-0.25 / Math.sqrt(2));
-    expect(position.z).toBeCloseTo(2 + 0.25 / Math.sqrt(2));
+    expect(position.x).toBeCloseTo(-0.5 / Math.sqrt(2));
+    expect(position.z).toBeCloseTo(2 + 0.5 / Math.sqrt(2));
   });
 
   it('replaces targets, interrupts with manual input, cancels and rejects blocked targets honestly', () => {
@@ -53,7 +53,7 @@ describe('navigation input arbitration through rendered controls', () => {
     control.focus(); fireEvent.keyDown(control, { key: 'd' });
     expect(frame().position).toEqual({ x: 0, y: 0, z: 2 });
     root().focus(); key('w', true); expect(frame().position.z).toBe(2);
-    key('w'); expect(frame().position.z).toBe(1.75);
+    key('w'); expect(frame().position.z).toBe(1.5);
   });
 
   it('UI pointer activation cancels held movement even when the control does not take focus', () => {

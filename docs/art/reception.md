@@ -6,8 +6,10 @@ An original, warm reception diorama authored in Blender for the [room foundation
 
 | File | Purpose |
 |---|---|
-| [reception.blend](../../assets/blender/reception.blend) | Separate source scene `ITReception_Scene`, materials, studio camera/lights and the original avatar as a scale reference. |
-| [reception.glb](../../public/models/rooms/reception.glb) | Room geometry/materials only: 144 mesh nodes, one scene; no avatar, animations, cameras or lights. |
+| [reception.blend](../../assets/blender/reception.blend) | Authored source (the monolith GLB was retired after the split; re-export it with the recipes below if needed). Separate source scene `ITReception_Scene`, materials, studio camera/lights and the original avatar as a scale reference. |
+| [modules/](../../public/models/rooms/modules/) | The runtime room: 15 reusable module GLBs (geometry/materials only; no avatar, animations, cameras or lights) with ids, paths and collision footprints in [room-modules.ts](../../src/features/world/room-modules.ts). |
+| [reception-room.ts](../../src/features/world/reception-room.ts) | `receptionRoom`: the 4x4 reception (32x28 tiles, door in the right of the back wall) as declarative placements (module, position, quarter-turn yaw, optional scale) plus the walkable floor envelope; `receptionUnitRoom` keeps the original single room as the parity oracle. [compose-room.ts](../../src/features/world/compose-room.ts) clones the modules (and instances the repeated floor tiles) into one scene; [derive-layout.ts](../../src/features/world/derive-layout.ts) derives the collision obstacles from the footprints. |
+| [split_reception_modules.py](../../scripts/blender/split_reception_modules.py) | One-off split of the monolithic export into the modules. |
 | [author_reception.py](../../scripts/blender/author_reception.py) | Authoring recipe, output guards, export validation, camera framing and shared material-assignment resolver. |
 | [recolor_reception.py](../../scripts/blender/recolor_reception.py) | Explicit two-phase material-only revision with read-only baseline, staged export/source checks and guarded promotion. |
 | [test_reception_palette.py](../../scripts/blender/test_reception_palette.py) | Blender-independent assignment and export-invariance regression tests. |
@@ -18,7 +20,7 @@ Local review images are in `odd/artifacts/reception/desktop.png`, `mobile.png` a
 
 ## Composition and proposed scale
 
-The room combines a beveled tiled plinth, two cutaway walls, a framed open portal, an L-shaped counter with bell and stationery, cushioned waiting seat, noticeboard, window/display shelves, broad-leaf planter and pendant accents. The user approved a cream/wood base with turquoise accents after team feedback that the previous reception was too pink. This is reception-specific approval, not a new product-wide palette or permission to author other rooms. The material resolver maps coral assignments to turquoise, peach to cream and terracotta to wood; sand floor tiles become pale cream while existing cream tiles remain. All palette HEX identities, historical object names (including color names), geometry and the original avatar remain unchanged.
+The reception is the original room repeated 4x4 in tile pattern and grown toward the front and right (back-left corner fixed); the description below is of that unit. The room combines a beveled tiled plinth, two cutaway walls, a framed open portal, an L-shaped counter with bell and stationery, cushioned waiting seat, noticeboard, window/display shelves, broad-leaf planter and pendant accents. The user approved a cream/wood base with turquoise accents after team feedback that the previous reception was too pink. This is reception-specific approval, not a new product-wide palette or permission to author other rooms. The material resolver maps coral assignments to turquoise, peach to cream and terracotta to wood; sand floor tiles become pale cream while existing cream tiles remain. All palette HEX identities, historical object names (including color names), geometry and the original avatar remain unchanged.
 
 | Measurement | Proposed value |
 |---|---|
@@ -31,6 +33,8 @@ The room combines a beveled tiled plinth, two cutaway walls, a framed open porta
 These are asset layout measurements, not a navigation or physics contract. The export has no collision bodies or interaction implementation. Exact gameplay scale, camera follow, performance and interaction distance remain to be validated.
 
 ## Rebuilding safely
+
+The recipes below still export the monolithic `public/models/rooms/reception.glb`, which is no longer shipped or loaded; the app consumes only the modules. The last committed monolith is in git history at commit `49070f7`. Re-split with `split_reception_modules.py` after changing the source.
 
 The recipe runs in the connected Blender UI in Object mode. Use a fresh authoring session with no `ITReception_` data and with all five output paths absent. It refuses existing outputs or an occupied namespace rather than deleting user data. Do not remove or overwrite an existing study merely to rerun the command; preserve it and decide on a separate revision first.
 

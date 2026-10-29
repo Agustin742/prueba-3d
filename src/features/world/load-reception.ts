@@ -1,31 +1,24 @@
-import { Mesh, Texture, type Group, type Material } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { InstancedMesh, type Group } from 'three';
+import { composeRoom } from './compose-room';
+import { loadRoomModules } from './load-room-modules';
+import { receptionRoom } from './reception-room';
+import type { RoomDefinition } from './room-definition';
 
 export interface ReceptionResource { scene: Group; dispose(): void }
 
-/** Uncached authored room; this owner alone releases its GPU resources. */
-export async function loadReception(): Promise<ReceptionResource> {
-  const { scene } = await new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}models/rooms/reception.glb`);
+/** Uncached reception composed from its module GLBs; clones and instances share template resources, so this owner alone releases them. */
+export async function loadReception(definition: RoomDefinition = receptionRoom): Promise<ReceptionResource> {
+  const modules = await loadRoomModules(definition.placements.map(placement => placement.module));
+  const scene = composeRoom(definition, modules.templates);
   let disposed = false;
   return {
     scene,
     dispose() {
       if (disposed) return;
       disposed = true;
-      const geometries = new Set<Mesh['geometry']>();
-      const materials = new Set<Material>();
-      const textures = new Set<Texture>();
-      scene.traverse(node => {
-        if (!(node instanceof Mesh)) return;
-        geometries.add(node.geometry);
-        for (const material of Array.isArray(node.material) ? node.material : [node.material]) {
-          materials.add(material);
-          for (const value of Object.values(material)) if (value instanceof Texture) textures.add(value);
-        }
-      });
-      geometries.forEach(value => value.dispose());
-      materials.forEach(value => value.dispose());
-      textures.forEach(value => value.dispose());
+      // InstancedMesh.dispose() only frees its own instance buffer; geometry and materials belong to the templates.
+      scene.traverse(node => { if (node instanceof InstancedMesh) node.dispose(); });
+      modules.dispose();
     },
   };
 }
