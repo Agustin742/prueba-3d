@@ -7,7 +7,7 @@ import { Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, OrthographicCamera, 
 import { beforeEach, expect, it, vi } from 'vitest';
 import type { AvatarResource } from '../avatar/load-avatar';
 import { createNavigation } from './navigation';
-import { receptionAvatarRadius } from './reception-layout';
+import { receptionAvatarRadius, receptionNpcPlacement } from './reception-layout';
 import { ReceptionScene, floorDestination } from './ReceptionScene';
 
 const renderer = vi.hoisted(() => ({ frames: [] as ((state: unknown, dt: number) => void)[], width: 1000, height: 600 }));
@@ -108,6 +108,26 @@ it('retains feet anchoring through StrictMode setup/cleanup without disposing re
   const bounds = new Box3().setFromObject(scene.parent!.parent!, true);
   expect(bounds.min.y).toBeCloseTo(0); expect(bounds.max.y).toBeCloseTo(2);
   unmount(); expect(avatar.dispose).not.toHaveBeenCalled();
+});
+
+it('renders the optional NPC at its counter spot inside the room group, and nothing without one', () => {
+  const room = new Group(); room.add(new Mesh(new BoxGeometry(11, 4, 10), new MeshBasicMaterial()));
+  const avatarScene = new Group(); avatarScene.add(new Mesh(new BoxGeometry(2, 4, 1), new MeshBasicMaterial()));
+  const avatar = { scene: avatarScene, update: vi.fn(), dispose: vi.fn() } as unknown as AvatarResource;
+  const npcScene = new Group(); npcScene.add(new Mesh(new BoxGeometry(2, 4, 1), new MeshBasicMaterial()));
+  const npc = { scene: npcScene, update: vi.fn(), dispose: vi.fn() } as unknown as AvatarResource;
+  const props = { avatar, room: { scene: room, dispose: vi.fn() }, tick: () => createNavigation().spawn()!, onSelect: vi.fn(), onReady: vi.fn(), onFailure: vi.fn() };
+  const { rerender, unmount } = render(<ReceptionScene {...props} />);
+  expect(npcScene.parent).toBeNull();
+  rerender(<ReceptionScene {...props} npc={npc} />);
+  const npcRoot = npcScene.parent!.parent!;
+  expect(npcRoot.position.x).toBeCloseTo(receptionNpcPlacement.position[0]);
+  expect(npcRoot.position.z).toBeCloseTo(receptionNpcPlacement.position[1]);
+  expect(npcRoot.rotation.y).toBe(receptionNpcPlacement.yaw);
+  act(() => { for (const frame of renderer.frames) frame({}, 0.05); });
+  expect(npc.update).toHaveBeenCalledWith(0.05);
+  unmount();
+  expect(npc.dispose).not.toHaveBeenCalled();
 });
 
 async function parseAsset(path: string) {

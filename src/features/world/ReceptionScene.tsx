@@ -1,11 +1,14 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { Box3, Group, OrthographicCamera, SkinnedMesh, Vector3, type Intersection } from 'three';
+import { Box3, Group, OrthographicCamera, Vector3, type Intersection } from 'three';
 import type { AvatarResource } from '../avatar/load-avatar';
 import { useSceneLifecycle } from '../avatar/use-scene-lifecycle';
 import type { ReceptionResource } from './load-reception';
 import type { NavigationState, Point } from './navigation';
 import { receptionInteractionTarget, type ReceptionInteractionId } from './reception-interactions';
+import { frameAvatar } from './frame-avatar';
+import { NpcActor } from './NpcActor';
+import { receptionNpcPlacement } from './reception-layout';
 import { RemotePlayer, turnTowardsAngle } from '../network/RemotePlayer';
 import { createAvatarBillboard } from '../network/AvatarBillboard';
 import type { PlayerState } from '../network/socket';
@@ -13,6 +16,8 @@ import type { PlayerState } from '../network/socket';
 export interface ReceptionSceneProps {
   avatar: AvatarResource;
   room: ReceptionResource;
+  /** Optional receptionist; the reception renders fine without it. */
+  npc?: AvatarResource;
   tick(dt: number): NavigationState;
   onSelect(point: Point | null): void;
   onInteract?(id: ReceptionInteractionId): void;
@@ -36,6 +41,7 @@ export function floorDestination(hit?: Intersection): Point | null {
 export function ReceptionScene({
   avatar,
   room,
+  npc,
   tick,
   onSelect,
   onInteract,
@@ -70,24 +76,10 @@ export function ReceptionScene({
   }, [nickname, bubbleText, root]);
 
   useLayoutEffect(() => {
-    const originalPosition = avatar.scene.position.clone();
-    avatar.update(0); // Evaluate the original clip before measuring skinned posed vertices.
-    avatar.scene.updateMatrixWorld(true);
-    avatar.scene.traverse(node => { if (node instanceof SkinnedMesh) node.skeleton.update(); });
-    const bounds = new Box3().setFromObject(avatar.scene, true);
-    const center = bounds.isEmpty() ? new Vector3() : bounds.getCenter(new Vector3());
-    const height = bounds.getSize(new Vector3()).y;
-    const frame = new Group();
-    frame.scale.setScalar(height > 0 ? 2 / height : 1);
-    avatar.scene.position.add(new Vector3(-center.x, bounds.isEmpty() ? 0 : -bounds.min.y, -center.z));
-    frame.add(avatar.scene);
-    root.name = 'reception-avatar-root'; root.add(frame);
+    const release = frameAvatar(avatar, root);
+    root.name = 'reception-avatar-root';
     const { position } = tick(0); root.position.set(position.x, 0, position.z);
-    return () => {
-      frame.remove(avatar.scene); root.remove(frame);
-      avatar.scene.position.copy(originalPosition);
-      avatar.scene.updateMatrixWorld(true);
-    };
+    return release;
   }, [avatar, root]);
 
   useLayoutEffect(() => {
@@ -200,6 +192,7 @@ export function ReceptionScene({
     <group onPointerUp={select} dispose={null}>
       <primitive object={room.scene} dispose={null} />
       <primitive object={root} dispose={null} />
+      {npc && <NpcActor npc={npc} position={receptionNpcPlacement.position} yaw={receptionNpcPlacement.yaw} />}
       {remotePlayers && Object.values(remotePlayers).map(rp => (
         <RemotePlayer
           key={rp.id}
