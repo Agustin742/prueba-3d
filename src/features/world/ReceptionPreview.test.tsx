@@ -4,6 +4,22 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { loadAvatar, type AvatarResource } from '../avatar/load-avatar';
 import { loadReception, type ReceptionResource } from './load-reception';
 import { ReceptionPreview } from './ReceptionPreview';
+import { loadCustomizedAvatar } from '../avatar/load-customized-avatar';
+import { parseAppearanceCatalogue } from '../avatar/avatar-catalogue';
+import { defaultAvatarConfiguration } from '../avatar/avatar-preferences';
+import manifest from '../../../public/models/avatars/integration-catalogue.json';
+import { socket } from '../network/socket';
+
+vi.mock('../avatar/load-customized-avatar', () => ({ loadCustomizedAvatar: vi.fn() }));
+vi.mock('../network/socket', () => ({ socket: {
+  connected: true, on: vi.fn(), off: vi.fn(), emit: vi.fn(), connect: vi.fn(), once: vi.fn(),
+} }));
+vi.mock('../network/ChatOverlay', () => ({ ChatOverlay: (props: {
+  joined: boolean; currentNickname: string; onChangeNickname?: () => void;
+}) => <div>
+  <span>{props.joined ? `Chat de ${props.currentNickname}` : 'Unirte a la recepción'}</span>
+  {props.onChangeNickname && <button onClick={props.onChangeNickname}>Cambiar apodo</button>}
+</div> }));
 
 vi.mock('../avatar/load-avatar', () => ({ loadAvatar: vi.fn() }));
 vi.mock('./load-reception', () => ({ loadReception: vi.fn() }));
@@ -30,6 +46,8 @@ const avatar = () => ({ scene: new Group(), dispose: vi.fn(), update: vi.fn() } 
 const room = () => ({ scene: new Group(), dispose: vi.fn() });
 beforeEach(() => {
   renderer.crashes = false;
+  localStorage.clear();
+  vi.mocked(loadCustomizedAvatar).mockImplementation(() => new Promise((yes, no) => { resolveAvatar = yes; rejectAvatar = no; }));
   // jsdom has no PointerEvent constructor; preserve pointer fields on real DOM events.
   vi.stubGlobal('PointerEvent', class extends MouseEvent {
     pointerId: number; pointerType: string;
@@ -43,6 +61,71 @@ beforeEach(() => {
   vi.mocked(loadReception).mockReturnValue(new Promise((yes, no) => { resolveRoom = yes; rejectRoom = no; }));
 });
 async function loaded() { await act(async () => { resolveAvatar(avatar()); resolveRoom(room()); }); }
+
+const catalogue = parseAppearanceCatalogue(manifest);
+const configuration = { ...defaultAvatarConfiguration(catalogue), nickname: 'Sol' };
+it('preserves the previous default loader and legacy join payload without appearance', async () => {
+  localStorage.setItem('avatar_nickname', 'Legacy');
+  render(<ReceptionPreview multiplayer />);
+  expect(loadAvatar).toHaveBeenCalledWith(false);
+  expect(loadCustomizedAvatar).not.toHaveBeenCalled();
+  expect(socket.emit).toHaveBeenCalledWith('join-room', { roomCode: 'global', nickname: 'Legacy' });
+  await loaded();
+  fireEvent.click(screen.getByText('Rendered'));
+  expect(screen.getByLabelText('Local reception navigation').getAttribute('aria-busy')).toBe('false');
+});
+it('loads an independently owned customized gameplay avatar with confirmed nickname and additive appearance', async () => {
+  localStorage.setItem('avatar_nickname', 'Wrong legacy name');
+  vi.stubGlobal('matchMedia', () => ({ matches: true }));
+  const { unmount } = render(<ReceptionPreview multiplayer configuration={configuration} catalogue={catalogue} />);
+  expect(loadCustomizedAvatar).toHaveBeenCalledWith(configuration, catalogue, true);
+  expect(loadAvatar).not.toHaveBeenCalled();
+  expect(screen.getByText('Chat de Sol')).toBeDefined();
+  expect(screen.queryByText('Unirte a la recepción')).toBeNull();
+  expect(screen.queryByText('Cambiar apodo')).toBeNull();
+  expect(socket.emit).toHaveBeenCalledWith('join-room', { roomCode: 'global', nickname: 'Sol', appearance: configuration });
+  const reconnect = vi.mocked(socket.on).mock.calls.find(([name]) => name === 'connect')![1];
+  act(() => { reconnect(); });
+  expect(socket.emit).toHaveBeenLastCalledWith('join-room', { roomCode: 'global', nickname: 'Sol', appearance: configuration });
+  const a = avatar(); const r = room();
+  await act(async () => { resolveAvatar(a); resolveRoom(r); });
+  expect(screen.getByLabelText('Local reception navigation').getAttribute('aria-busy')).toBe('true');
+  fireEvent.click(screen.getByText('Rendered'));
+  expect(screen.getByLabelText('Local reception navigation').getAttribute('aria-busy')).toBe('false');
+  unmount();
+  expect(a.dispose).toHaveBeenCalledOnce(); expect(r.dispose).toHaveBeenCalledOnce();
+});
+it('cleans a late customized gameplay result after room failure without reverting to the original loader', async () => {
+  render(<ReceptionPreview configuration={configuration} catalogue={catalogue} />);
+  await act(async () => rejectRoom(Error('private detail')));
+  const late = avatar();
+  await act(async () => resolveAvatar(late));
+  expect(late.dispose).toHaveBeenCalledOnce();
+  expect(screen.getByRole('alert').textContent).toMatch(/reception/i);
+  expect(loadAvatar).not.toHaveBeenCalled();
+});
+it('replaces customized gameplay ownership and resets readiness when confirmed configuration changes', async () => {
+  const { rerender } = render(<ReceptionPreview configuration={configuration} catalogue={catalogue} />);
+  const old = avatar();
+  await act(async () => { resolveAvatar(old); resolveRoom(room()); });
+  fireEvent.click(screen.getByText('Rendered'));
+  rerender(<ReceptionPreview configuration={{ ...configuration, hairId: 'fade' }} catalogue={catalogue} />);
+  expect(old.dispose).toHaveBeenCalledOnce();
+  expect(screen.queryByTestId('canvas')).toBeNull();
+  expect(screen.getByLabelText('Local reception navigation').getAttribute('aria-busy')).toBe('true');
+  expect(loadCustomizedAvatar).toHaveBeenCalledTimes(2);
+});
+
+it('keeps an equivalent confirmed configuration on its existing resource owner', async () => {
+  const { rerender } = render(<ReceptionPreview configuration={configuration} catalogue={catalogue} />);
+  const a = avatar();
+  await act(async () => { resolveAvatar(a); resolveRoom(room()); });
+  fireEvent.click(screen.getByText('Rendered'));
+  rerender(<ReceptionPreview configuration={{ ...configuration }} catalogue={{ ...catalogue }} />);
+  expect(a.dispose).not.toHaveBeenCalled();
+  expect(loadCustomizedAvatar).toHaveBeenCalledTimes(1);
+  expect(screen.getByLabelText('Local reception navigation').getAttribute('aria-busy')).toBe('false');
+});
 
 it('waits for BOTH original assets and a rendered frame, then renders a clean interactive viewport without toolbar clutter', async () => {
   render(<ReceptionPreview />);

@@ -1,6 +1,9 @@
 import { Component, useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { loadAvatar, type AvatarResource } from '../avatar/load-avatar';
+import { loadCustomizedAvatar } from '../avatar/load-customized-avatar';
+import type { AvatarConfiguration } from '../avatar/AvatarCustomizer';
+import type { AppearanceCatalogue } from '../avatar/avatar-appearance';
 import { loadReception, type ReceptionResource } from './load-reception';
 import { ReceptionScene } from './ReceptionScene';
 import {
@@ -22,11 +25,15 @@ class ReceptionBoundary extends Component<{ children: ReactNode }, { failed: boo
   render() { return this.state.failed ? <WebGLFailure /> : this.props.children; }
 }
 
-export interface ReceptionPreviewProps {
-  multiplayer?: boolean;
-}
+export type ReceptionPreviewProps = { multiplayer?: boolean } & (
+  | { configuration: AvatarConfiguration; catalogue: AppearanceCatalogue }
+  | { configuration?: undefined; catalogue?: undefined }
+);
 
-function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
+function ReceptionContent(props: ReceptionPreviewProps) {
+  const multiplayer = props.multiplayer ?? false;
+  // The keyed parent replaces this owner for changed values, not equivalent new object references.
+  const [{ configuration, catalogue }] = useState(() => props);
   const [avatar, setAvatar] = useState<AvatarResource>();
   const [room, setRoom] = useState<ReceptionResource>();
   const [status, setStatus] = useState<'loading' | 'ready' | 'avatar-error' | 'room-error' | 'webgl-error'>('loading');
@@ -44,6 +51,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
 
   // Persistent session nickname
   const [savedNick] = useState(() => {
+    if (configuration) return configuration.nickname;
     try {
       return typeof window !== 'undefined' ? (localStorage.getItem('avatar_nickname') || '') : '';
     } catch {
@@ -51,7 +59,8 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     }
   });
   const [joined, setJoined] = useState(!multiplayer || Boolean(savedNick));
-  const [nickname, setNickname] = useState(savedNick);
+  const [legacyNickname, setNickname] = useState(savedNick);
+  const nickname = configuration?.nickname ?? legacyNickname;
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [filterProfanity, setFilterProfanity] = useState(() => {
     try {
@@ -98,6 +107,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
         socket.emit('join-room', {
           roomCode: 'global',
           nickname: activeName,
+          ...(configuration ? { appearance: configuration } : {}),
         });
       }
     };
@@ -180,6 +190,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
         socket.emit('join-room', {
           roomCode: 'global',
           nickname: activeName,
+          ...(configuration ? { appearance: configuration } : {}),
         });
       }
     }
@@ -193,7 +204,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       socket.off('player-left', onPlayerLeft);
       socket.off('chat-message', onChatMessage);
     };
-  }, [multiplayer, nickname, savedNick, showBubble]);
+  }, [multiplayer, nickname, savedNick, showBubble, configuration]);
 
   const handleJoin = useCallback((name: string) => {
     setNickname(name);
@@ -206,6 +217,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       socket.emit('join-room', {
         roomCode: 'global',
         nickname: name,
+        ...(configuration ? { appearance: configuration } : {}),
       });
     };
 
@@ -215,7 +227,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
       socket.once('connect', emitJoin);
       socket.connect();
     }
-  }, []);
+  }, [configuration]);
 
   const handleChangeNickname = useCallback(() => {
     try {
@@ -319,11 +331,14 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
     const reject = (error: 'avatar-error' | 'room-error') => {
       if (active) { cleanup(); setStatus(error); }
     };
-    loadAvatar(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-      .then(resource => accept(resource, setAvatar)).catch(() => reject('avatar-error'));
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const avatarRequest = configuration && catalogue
+      ? loadCustomizedAvatar(configuration, catalogue, reducedMotion)
+      : loadAvatar(reducedMotion);
+    avatarRequest.then(resource => accept(resource, setAvatar)).catch(() => reject('avatar-error'));
     loadReception().then(resource => accept(resource, setRoom)).catch(() => reject('room-error'));
     return cleanup;
-  }, [failed]);
+  }, [failed, configuration, catalogue]);
 
   if (status === 'webgl-error') return <WebGLFailure />;
   if (status === 'avatar-error' || status === 'room-error') return <p role="alert">
@@ -385,7 +400,7 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
         <ChatOverlay
           joined={joined}
           onJoin={handleJoin}
-          onChangeNickname={handleChangeNickname}
+          onChangeNickname={configuration ? undefined : handleChangeNickname}
           messages={messages}
           onSendMessage={handleSendMessage}
           onlineCount={onlineCount}
@@ -404,5 +419,6 @@ function ReceptionContent({ multiplayer = false }: ReceptionPreviewProps) {
 }
 
 export function ReceptionPreview(props: ReceptionPreviewProps) {
-  return <ReceptionBoundary><ReceptionContent {...props} /></ReceptionBoundary>;
+  const key = props.configuration ? JSON.stringify([props.configuration, props.catalogue]) : 'original';
+  return <ReceptionBoundary key={key}><ReceptionContent {...props} /></ReceptionBoundary>;
 }
