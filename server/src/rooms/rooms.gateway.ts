@@ -9,8 +9,10 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { RoomsService } from './rooms.service';
+import { validateAvatarAppearance, type AvatarAppearance } from './avatar-appearance';
 
 interface PlayerState {
+  appearance?: AvatarAppearance;
   id: string;
   roomCode: string;
   nickname: string;
@@ -53,8 +55,15 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       nickname: string;
       position?: [number, number, number];
       rotation?: number;
+      appearance?: unknown;
     },
   ) {
+    const hasAppearance = Object.prototype.hasOwnProperty.call(data, 'appearance');
+    const appearance = hasAppearance ? validateAvatarAppearance(data.appearance) : null;
+    if (hasAppearance && !appearance) {
+      client.emit('join-error', { message: 'Invalid avatar appearance' });
+      return;
+    }
     const roomCode = data.roomCode?.trim() || 'global';
     const nickname = data.nickname?.trim() || `Player-${client.id.slice(0, 4)}`;
 
@@ -67,6 +76,7 @@ export class RoomsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(roomCode);
 
     const playerState: PlayerState = {
+      ...(appearance ? { appearance } : {}),
       id: client.id,
       roomCode,
       nickname,
