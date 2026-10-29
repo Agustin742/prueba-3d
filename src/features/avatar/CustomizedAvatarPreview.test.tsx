@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { Group } from 'three';
+import { Group, OrthographicCamera, Vector3 } from 'three';
 import { beforeEach, expect, it, vi } from 'vitest';
 import manifest from '../../../public/models/avatars/integration-catalogue.json';
 import { parseAppearanceCatalogue } from './avatar-catalogue';
@@ -11,7 +11,8 @@ import { CustomizedAvatarPreview } from './CustomizedAvatarPreview';
 
 vi.mock('./load-customized-avatar', () => ({ loadCustomizedAvatar: vi.fn() }));
 const renderer = vi.hoisted(() => ({ crashes: false }));
-vi.mock('@react-three/fiber', () => ({ Canvas: ({ children }: { children: React.ReactNode }) => {
+const camera = new OrthographicCamera();
+vi.mock('@react-three/fiber', () => ({ useThree: () => ({ camera }), Canvas: ({ children }: { children: React.ReactNode }) => {
   if (renderer.crashes) throw Error('private renderer diagnostic');
   return <div data-testid="canvas">{children}</div>;
 } }));
@@ -25,6 +26,8 @@ let pending: { resolve(value: AvatarResource): void; reject(error: Error): void 
 const resource = () => ({ scene: new Group(), dispose: vi.fn(), update: vi.fn() } as unknown as AvatarResource);
 beforeEach(() => {
   renderer.crashes = false;
+  camera.position.set(4, 3.5, 4);
+  camera.lookAt(0, 0, 0);
   pending = [];
   vi.mocked(loadCustomizedAvatar).mockImplementation(() => new Promise((resolve, reject) => pending.push({ resolve, reject })));
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({ getExtension: () => null } as unknown as ReturnType<HTMLCanvasElement['getContext']>);
@@ -84,6 +87,36 @@ it('isolates StrictMode effect replay so an abandoned request cannot publish or 
   expect(input.onStatusChange).toHaveBeenLastCalledWith('ready');
   unmount();
   expect(current.dispose).toHaveBeenCalledOnce();
+});
+it('orbits the real preview camera to the rear without changing its resource or readiness', async () => {
+  const input = props();
+  const { rerender } = render(<CustomizedAvatarPreview {...input} />);
+  const avatar = resource();
+  await act(async () => pending[0].resolve(avatar));
+  fireEvent.click(screen.getByText('Render frame'));
+  const rootMatrix = avatar.scene.matrix.clone();
+  const right = screen.queryByRole('button', { name: 'Girar a la derecha' });
+  for (let step = 0; step < 4; step++) if (right) fireEvent.click(right);
+  expect(camera.position.x).toBeCloseTo(-4);
+  expect(camera.position.z).toBeCloseTo(-4);
+  expect(camera.position.y).toBe(3.5);
+  expect(camera.getWorldDirection(new Vector3()).dot(camera.position.clone().normalize())).toBeCloseTo(-1);
+  expect(avatar.scene.matrix.equals(rootMatrix)).toBe(true);
+  expect(avatar.dispose).not.toHaveBeenCalled();
+  expect(loadCustomizedAvatar).toHaveBeenCalledTimes(1);
+  expect(input.onStatusChange).toHaveBeenLastCalledWith('ready');
+  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, nickname: 'Sol' }} />);
+  expect(loadCustomizedAvatar).toHaveBeenCalledTimes(1);
+  expect(camera.position.x).toBeCloseTo(-4);
+  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, topId: 'hoodie' }} />);
+  expect(avatar.dispose).toHaveBeenCalledOnce();
+  const replacement = resource();
+  await act(async () => pending[1].resolve(replacement));
+  expect(camera.position.x).toBeCloseTo(-4);
+  expect(camera.position.z).toBeCloseTo(-4);
+  expect(input.onStatusChange).toHaveBeenLastCalledWith('loading');
+  fireEvent.click(screen.getByText('Render frame'));
+  expect(input.onStatusChange).toHaveBeenLastCalledWith('ready');
 });
 it('disposes late results after unmount', async () => {
   const { unmount } = render(<CustomizedAvatarPreview {...props()} />);

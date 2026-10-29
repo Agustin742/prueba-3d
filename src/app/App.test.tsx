@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { Group } from 'three';
+import { Group, OrthographicCamera } from 'three';
 import { beforeEach, expect, it, vi } from 'vitest';
 import { App } from './App';
 import { loadCustomizedAvatar } from '../features/avatar/load-customized-avatar';
@@ -13,7 +13,11 @@ vi.mock('../features/world/load-reception', () => ({ loadReception: vi.fn() }));
 vi.mock('../features/network/socket', () => ({ socket: {
   connected: true, on: vi.fn(), off: vi.fn(), emit: vi.fn(), connect: vi.fn(), once: vi.fn(),
 } }));
-vi.mock('@react-three/fiber', () => ({ Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="canvas">{children}</div> }));
+const previewCamera = new OrthographicCamera();
+vi.mock('@react-three/fiber', () => ({
+  useThree: () => ({ camera: previewCamera }),
+  Canvas: ({ children }: { children: React.ReactNode }) => <div data-testid="canvas">{children}</div>,
+}));
 vi.mock('../features/avatar/AvatarScene', () => ({ AvatarScene: ({ onReady }: { onReady(): void }) => <button onClick={onReady}>Render preview</button> }));
 vi.mock('../features/world/ReceptionScene', () => ({ ReceptionScene: ({ onReady, nickname }: { onReady(): void; nickname: string }) => <>
   <button onClick={onReady}>Render reception</button><p>Avatar de {nickname}</p>

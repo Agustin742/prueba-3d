@@ -5,6 +5,7 @@ import type { AppearanceCatalogue } from './avatar-appearance';
 import type { AvatarResource } from './load-avatar';
 import { loadCustomizedAvatar } from './load-customized-avatar';
 import { AvatarScene } from './AvatarScene';
+import { AvatarPreviewCamera, AvatarPreviewRotation } from './AvatarPreviewRotation';
 
 export type CustomizedPreviewStatus = 'loading' | 'ready' | 'unavailable';
 export interface CustomizedAvatarPreviewProps {
@@ -28,7 +29,7 @@ class PreviewBoundary extends Component<{ children: ReactNode; onFailure(): void
   render() { return this.state.failed ? <WebGLFailure /> : this.props.children; }
 }
 
-function OwnedPreview(props: CustomizedAvatarPreviewProps) {
+function OwnedPreview(props: CustomizedAvatarPreviewProps & { angle: number }) {
   // This keyed owner represents exactly one visual request, even if its nickname changes.
   const [request] = useState(() => ({ configuration: props.configuration, catalogue: props.catalogue }));
   const [avatar, setAvatar] = useState<AvatarResource>();
@@ -91,6 +92,7 @@ function OwnedPreview(props: CustomizedAvatarPreviewProps) {
       </p>
       <div role="img" aria-label="Vista previa 3D de tu avatar" style={{ width: '100%', flex: 1, minHeight: 0 }}>
         {avatar && <Canvas orthographic camera={{ position: [4, 3.5, 4], zoom: 100 }} dpr={[1, 1.5]}>
+          <AvatarPreviewCamera angle={props.angle} />
           <AvatarScene avatar={avatar} onReady={ready} onFailure={failed} />
         </Canvas>}
       </div>
@@ -101,5 +103,5 @@ function OwnedPreview(props: CustomizedAvatarPreviewProps) {
 export function CustomizedAvatarPreview(props: CustomizedAvatarPreviewProps) {
   // Remounting also resets frame counters and error boundaries; scenes never cross canvases.
   const key = `${appearancePreviewKey(props.configuration)}:${JSON.stringify(props.catalogue)}`;
-  return <OwnedPreview key={key} {...props} />;
+  return <AvatarPreviewRotation>{angle => <OwnedPreview key={key} {...props} angle={angle} />}</AvatarPreviewRotation>;
 }
