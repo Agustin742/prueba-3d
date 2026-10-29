@@ -12,13 +12,16 @@ function stubModules(make: (id: string) => Group) {
   return vi.spyOn(GLTFLoader.prototype, 'loadAsync').mockImplementation(async url => ({ scene: make(url.split('/').pop()!.replace('.glb', '')) }) as Gltf);
 }
 
-it('loads only the modules the reception needs, never the retired monolith, and composes every placement', async () => {
+it('loads only the modules the reception needs, never the retired monolith, and composes every placement, instancing the floor tiles', async () => {
   const load = stubModules(() => new Group().add(new Mesh(new BoxGeometry(), new MeshBasicMaterial())));
   const room = await loadReception();
   expect(load).toHaveBeenCalledTimes(neededModules.length);
   for (const id of neededModules) expect(load).toHaveBeenCalledWith(`/models/rooms/modules/${id}.glb`);
   expect(load).not.toHaveBeenCalledWith('/models/rooms/reception.glb');
-  expect(room.scene.children).toHaveLength(receptionRoom.placements.length);
+  const tiles = receptionRoom.placements.filter(placement => receptionRoom.instanced?.includes(placement.module)).length;
+  expect(tiles).toBe(32 * 28); // drawn as one InstancedMesh per tile template, not 896 clones
+  expect(room.scene.children).toHaveLength(receptionRoom.placements.length - tiles + 2);
+  expect(room.scene.children.filter(node => node instanceof InstancedMesh)).toHaveLength(2);
 });
 it('releases shared geometry/material/texture exactly once across every clone', async () => {
   const texture = new Texture(); const material = new MeshBasicMaterial({ map: texture }); const geometry = new BoxGeometry();

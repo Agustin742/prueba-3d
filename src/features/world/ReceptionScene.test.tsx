@@ -144,7 +144,7 @@ it('anchors the original posed rig and distinguishes actual room ray hits (CPU e
   expect(bounds.getCenter(new Vector3()).x).toBeCloseTo(0); expect(bounds.getCenter(new Vector3()).z).toBeCloseTo(2);
   console.info('Original Idle posed avatar at height2: XZ full extents', bounds.getSize(new Vector3()).x, bounds.getSize(new Vector3()).z, '; default core radius remains 0.25; reception uses its explicit larger envelope.');
   room.updateMatrixWorld(true);
-  for (const [x, z, floor] of [[0.675, 1.35, true], [-2.8, -1.6, false], [-4.3, 1.5, false], [-5.3, 0, false]] as const) {
+  for (const [x, z, floor] of [[0.675, 1.35, true], [-2.8, -1.6, false], [-4.3, 1.5, false], [-5.3, 0, false], [30, 20, true], [37.5, 32.9, true], [32.8, -3, true], [-4.3, 12, false], [20, -4.6, false], [40, 20, false]] as const) {
     const hits = new Raycaster(new Vector3(x, 6, z), new Vector3(0, -1, 0)).intersectObject(room, true);
     expect(!!floorDestination(hits[0])).toBe(floor);
   }
@@ -187,19 +187,39 @@ it('encloses actual normalized Idle/Run bounds at sampled poses and rotations in
   unmount(); avatar.dispose(); vi.restoreAllMocks();
 });
 
-it.each([[1000, 600], [340, 700]])('fits the full authored room in a fixed orthographic view at %sx%s', (width, height) => {
+const stubTick = (x: number, z: number) => () => ({ position: { x, y: 0, z }, path: [] });
+const frameRoom = (width: number, height: number, tick: (dt?: number) => unknown) => {
   renderer.width = width; renderer.height = height;
   camera.left = -width / 2; camera.right = width / 2; camera.top = height / 2; camera.bottom = -height / 2;
   const room = new Group(); room.add(new Mesh(new BoxGeometry(11, 4, 10), new MeshBasicMaterial()));
   const avatar = { scene: new Group(), update: vi.fn() } as unknown as AvatarResource;
-  render(<ReceptionScene avatar={avatar} room={{ scene: room, dispose: vi.fn() }} tick={() => createNavigation().spawn()!} onSelect={vi.fn()} onReady={vi.fn()} onFailure={vi.fn()} />);
+  return render(<ReceptionScene avatar={avatar} room={{ scene: room, dispose: vi.fn() }} tick={tick as never} onSelect={vi.fn()} onReady={vi.fn()} onFailure={vi.fn()} />);
+};
+const offset = new Vector3(14, 14, 14);
+
+it.each([[1000, 600], [340, 700]])('fits a unit-room window around the avatar in a fixed orthographic view at %sx%s', (width, height) => {
+  frameRoom(width, height, stubTick(16, 14));
   expect(camera.position.y).toBeGreaterThan(5);
   expect(camera.zoom).toBeGreaterThan(1);
+  const focus = camera.position.clone().sub(offset);
+  expect(focus.x).toBeCloseTo(16); expect(focus.z).toBeCloseTo(14);
   camera.updateMatrixWorld();
-  for (const x of [-5.5, 5.5]) for (const y of [-2, 2]) for (const z of [-5, 5]) {
-    const projected = new Vector3(x, y, z).project(camera);
+  for (const x of [-5.4, 5.4]) for (const y of [-0.9, 3.6]) for (const z of [-4.725, 4.725]) {
+    const projected = new Vector3(focus.x + x, y, focus.z + z).project(camera);
     expect(Math.abs(projected.x)).toBeLessThan(1); expect(Math.abs(projected.y)).toBeLessThan(1);
   }
+});
+
+it('follows the avatar every frame and stops at the floor edge instead of showing the void', () => {
+  let x = 16;
+  frameRoom(1000, 600, () => ({ position: { x, y: 0, z: 14 }, path: [] }));
+  expect(camera.position.x - offset.x).toBeCloseTo(16);
+  x = 30; act(() => { for (const frame of renderer.frames) frame({}, 0.016); });
+  expect(camera.position.x - offset.x).toBeCloseTo(30);
+  x = 37.7; act(() => { for (const frame of renderer.frames) frame({}, 0.016); });
+  expect(camera.position.x - offset.x).toBeCloseTo(37.79 - 5.4);
+  const center = new Vector3(37.7, 0, 14).project(camera);
+  expect(Math.abs(center.x)).toBeLessThan(1);
 });
 
 it('turns a ray hit on an instanced floor tile into a floor intent at that exact point', async () => {

@@ -14,10 +14,10 @@ describe('flat reception navigation public API', () => {
   });
 
   it.each([
-    ['off-floor', p(5.3, 0)], ['portal beyond floor', p(2.4, -4.8)],
+    ['off-floor', p(37.6, 0)], ['portal beyond floor', p(32.8, -4.8)],
     ['back wall', p(0, -4.5)], ['left wall', p(-5.15, 0)],
     ['counter front', p(-2.8, -1.6)], ['counter return', p(-0.9, -3)],
-    ['seat', p(-4.3, 1.5)], ['planter', p(4.35, -3.63)],
+    ['seat', p(-4.3, 1.5)], ['planter', p(4.35, -3.63)], ['left planter', p(-4.3, 12)], ['old door position, now wall', p(2.4, -4.4)],
     ['shelf', p(-4.9, 4)], ['unsupported elevation', p(0, 0, 0.1)],
     ['nonfinite point', p(NaN, 0)], ['radius tangent to counter', p(-2, -0.8)],
   ])('rejects %s without replacing position or stored intent', (_name, target) => {
@@ -33,8 +33,9 @@ describe('flat reception navigation public API', () => {
   it('keeps the open counter recess and overhead decoration navigable', () => {
     expect(nav.isValidPoint(p(-2.8, -3))).toBe(true);
     expect(nav.isValidPoint(p(-3, -2.7))).toBe(true); // Below a pendant.
-    expect(nav.isValidPoint(p(2.4, -4.4))).toBe(true); // Inside portal, not outside floor.
-    expect(nav.isValidPoint(p(5.14, 0))).toBe(true); // Radius inset, inclusive floor edge.
+    expect(nav.isValidPoint(p(32.8, -4.4))).toBe(true); // Inside the moved portal, not outside floor.
+    expect(nav.isValidPoint(p(37.54, 0))).toBe(true); // Radius inset, inclusive floor edge.
+    expect(nav.isValidPoint(p(5.14, 20))).toBe(true); // Open floor of the grown room.
   });
 
   it('normalizes diagonal input, supports variable dt, and leaves the input snapshot unchanged', () => {
@@ -93,7 +94,7 @@ describe('flat reception navigation public API', () => {
 
   it('rejects disconnected valid floor rather than reporting arrival', () => {
     const split = createNavigation({ ...receptionLayout, obstacles: [
-      { id: 'sealed test divider', minX: -0.1, maxX: 0.1, minZ: -5, maxZ: 5 },
+      { id: 'sealed test divider', minX: -0.1, maxX: 0.1, minZ: -5, maxZ: 34 },
     ] });
     const start = split.spawn(p(-2, 0))!;
     expect(split.isValidPoint(p(2, 0))).toBe(true);
@@ -120,7 +121,7 @@ describe('flat reception navigation public API', () => {
     const wide = createNavigation(undefined, { radius: 1.1 });
     expect(nav.isValidPoint(p(-2.8, -3))).toBe(true);
     expect(wide.isValidPoint(p(-2.8, -3))).toBe(false);
-    expect(wide.isValidPoint(p(2.4, -4.4))).toBe(false); // Portal narrower than diameter 2.2.
+    expect(wide.isValidPoint(p(32.8, -4.4))).toBe(false); // Portal narrower than diameter 2.2.
     expect(wide.spawn()).not.toBeNull();
     const start = wide.spawn()!;
     const moved = wide.move(start, { x: 0, z: -1 }, 100);
@@ -139,5 +140,20 @@ describe('flat reception navigation public API', () => {
     }
     expect(nav.move(state, { x: Infinity, z: 0 }, 1)).toBe(state);
     expect(nav.move(state, { x: 0, z: 0 }, 0)).toBe(state);
+  });
+});
+
+describe('grown reception routes', () => {
+  it('routes across the whole room to the door pocket and the far corner within the same deterministic result', () => {
+    const start = nav.spawn()!;
+    for (const target of [p(32.8, -4.4), p(37.5, 32.8), p(-4.6, 32.8)]) {
+      const request = nav.requestTarget(start, target);
+      expect(request.reason, JSON.stringify(target)).toBeUndefined();
+      expect(request.state.path.at(-1)).toEqual(target);
+      expect(nav.requestTarget(start, target)).toEqual(request);
+      let state = request.state;
+      for (let guard = 0; guard < 400 && state.path.length; guard++) state = nav.advance(state, 1);
+      expect(state.position).toEqual(target);
+    }
   });
 });

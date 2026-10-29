@@ -19,7 +19,7 @@ export async function moduleTemplates(definition: Pick<RoomDefinition, 'placemen
   return new Map<RoomModuleId, Group>(await Promise.all(ids.map(async id => [id, (await parseGlb(`public/${roomModulePath(id)}`)).scene] as const)));
 }
 
-/** Test-only: the real reception composed from the shipped module GLBs. */
-export async function composedReception() {
-  return composeRoom(receptionRoom, await moduleTemplates(receptionRoom));
+/** Test-only: a room (default: the real reception) composed from the shipped module GLBs. */
+export async function composedReception(definition: RoomDefinition = receptionRoom) {
+  return composeRoom(definition, await moduleTemplates(definition));
 }

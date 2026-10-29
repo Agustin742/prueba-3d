@@ -1,7 +1,7 @@
 import { Box3, InstancedMesh, Matrix4, Mesh, type Object3D } from 'three';
 import { describe, expect, it } from 'vitest';
 import { composeRoom } from './compose-room';
-import { receptionRoom } from './reception-room';
+import { receptionRoom, receptionUnitRoom } from './reception-room';
 import { checkerGrid } from './room-definition';
 import { roomModuleIds } from './room-modules';
 import monolith from './__fixtures__/reception-monolith-bounds.json';
@@ -77,8 +77,8 @@ describe('composeRoom', () => {
   });
 
   // Fixture: per-mesh world boxes of the retired reception.glb (git 49070f7), rounded to 3 decimals.
-  it('reproduces the retired monolithic reception: same mesh count, per-mesh bounds and overall box', async () => {
-    const room = composeRoom(receptionRoom, await moduleTemplates(receptionRoom));
+  it('reproduces the retired monolithic reception from the unit definition: same mesh count, per-mesh bounds and overall box', async () => {
+    const room = composeRoom(receptionUnitRoom, await moduleTemplates(receptionUnitRoom));
     const composed = meshes(room);
     expect(monolith.meshes).toHaveLength(144); expect(composed).toHaveLength(144);
     const unmatched = [...monolith.meshes];

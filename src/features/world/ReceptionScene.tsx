@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { Box3, Group, OrthographicCamera, Vector3, type Intersection } from 'three';
+import { cameraFocus, receptionViewBox } from './camera-focus';
 import type { AvatarResource } from '../avatar/load-avatar';
 import { useSceneLifecycle } from '../avatar/use-scene-lifecycle';
 import type { ReceptionResource } from './load-reception';
@@ -8,7 +9,7 @@ import type { NavigationState, Point } from './navigation';
 import { receptionInteractionTarget, type ReceptionInteractionId } from './reception-interactions';
 import { frameAvatar } from './frame-avatar';
 import { NpcActor } from './NpcActor';
-import { receptionNpcPlacement } from './reception-layout';
+import { receptionLayout, receptionNpcPlacement } from './reception-layout';
 import { RemotePlayer, turnTowardsAngle } from '../network/RemotePlayer';
 import { createAvatarBillboard } from '../network/AvatarBillboard';
 import type { PlayerState } from '../network/socket';
@@ -37,6 +38,8 @@ export function floorDestination(hit?: Intersection): Point | null {
   const normal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
   return normal.y > 0.99 ? { x: hit.point.x, y: 0, z: hit.point.z } : null;
 }
+
+const cameraOffset = new Vector3(14, 14, 14);
 
 export function ReceptionScene({
   avatar,
@@ -82,22 +85,27 @@ export function ReceptionScene({
     return release;
   }, [avatar, root]);
 
+  // The camera follows the avatar with a fixed isometric offset, clamped at the floor edges (see camera-focus.ts).
+  const follow = (): Vector3 | undefined => {
+    if (!(camera instanceof OrthographicCamera)) return undefined;
+    const focus = cameraFocus({ x: root.position.x, y: 0, z: root.position.z }, receptionLayout.floor, zoomFactorRef.current);
+    camera.position.copy(focus).add(cameraOffset); camera.lookAt(focus); camera.updateMatrixWorld(true);
+    return focus;
+  };
+
   useLayoutEffect(() => {
-    if (!(camera instanceof OrthographicCamera)) return;
-    const bounds = new Box3().setFromObject(room.scene, true);
-    const center = bounds.getCenter(new Vector3());
-    camera.position.copy(center).add(new Vector3(14, 14, 14));
-    camera.lookAt(center); camera.updateMatrixWorld(true);
+    const focus = follow();
+    if (!(camera instanceof OrthographicCamera) || !focus) return;
     const viewBounds = new Box3();
-    for (const x of [bounds.min.x, bounds.max.x]) for (const y of [bounds.min.y, bounds.max.y]) {
-      for (const z of [bounds.min.z, bounds.max.z]) viewBounds.expandByPoint(new Vector3(x, y, z).applyMatrix4(camera.matrixWorldInverse));
+    for (const x of [receptionViewBox.min.x, receptionViewBox.max.x]) for (const y of [receptionViewBox.min.y, receptionViewBox.max.y]) {
+      for (const z of [receptionViewBox.min.z, receptionViewBox.max.z]) viewBounds.expandByPoint(new Vector3(focus.x + x, y, focus.z + z).applyMatrix4(camera.matrixWorldInverse));
     }
     const span = viewBounds.getSize(new Vector3());
     const baseZoom = 0.9 * Math.min(size.width / Math.max(span.x, 1), size.height / Math.max(span.y, 1));
     minZoomRef.current = baseZoom;
     camera.zoom = baseZoom * zoomFactorRef.current;
     camera.updateProjectionMatrix();
-  }, [camera, room, size.width, size.height]);
+  }, [camera, root, size.width, size.height]);
 
   // Mouse wheel zoom & mobile pinch-to-zoom
   useEffect(() => {
@@ -163,6 +171,7 @@ export function ReceptionScene({
     if (moving) root.rotation.y = turnTowardsAngle(root.rotation.y, Math.atan2(dx, dz), delta * 8);
     root.position.set(position.x, 0, position.z);
     avatar.setMoving?.(moving); avatar.update(delta);
+    follow();
 
     if (onAvatarMove) {
       const now = performance.now();
