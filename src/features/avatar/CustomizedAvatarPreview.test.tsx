@@ -51,7 +51,7 @@ it('loads a dedicated customized resource with reduced motion and waits for a re
 it('discards out-of-order choices and never lets their frame mark the current choice ready', async () => {
   const input = props();
   const { rerender } = render(<CustomizedAvatarPreview {...input} />);
-  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, hairId: 'fade' }} />);
+  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, hairId: 'dreads' }} />);
   const stale = resource();
   await act(async () => pending[0].resolve(stale));
   expect(stale.dispose).toHaveBeenCalledOnce();
@@ -68,7 +68,7 @@ it('releases a mounted choice immediately on replacement and does not reload for
   await act(async () => pending[0].resolve(old));
   rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, nickname: 'Sol' }} />);
   expect(loadCustomizedAvatar).toHaveBeenCalledTimes(1);
-  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, topId: 'hoodie' }} />);
+  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, topId: 'tank' }} />);
   expect(old.dispose).toHaveBeenCalledOnce();
   expect(screen.queryByTestId('canvas')).toBeNull();
   expect(input.onStatusChange).toHaveBeenLastCalledWith('loading');
@@ -108,7 +108,7 @@ it('orbits the real preview camera to the rear without changing its resource or 
   rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, nickname: 'Sol' }} />);
   expect(loadCustomizedAvatar).toHaveBeenCalledTimes(1);
   expect(camera.position.x).toBeCloseTo(-4);
-  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, topId: 'hoodie' }} />);
+  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, topId: 'tank' }} />);
   expect(avatar.dispose).toHaveBeenCalledOnce();
   const replacement = resource();
   await act(async () => pending[1].resolve(replacement));
@@ -128,7 +128,7 @@ it('disposes late results after unmount', async () => {
 it('reports safe load failure and ignores obsolete rejection', async () => {
   const input = props();
   const { rerender } = render(<CustomizedAvatarPreview {...input} />);
-  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, hairId: 'fade' }} />);
+  rerender(<CustomizedAvatarPreview {...input} configuration={{ ...configuration, hairId: 'dreads' }} />);
   await act(async () => pending[0].reject(Error('obsolete')));
   expect(screen.queryByRole('alert')).toBeNull();
   await act(async () => pending[1].reject(Error('private download diagnostic')));

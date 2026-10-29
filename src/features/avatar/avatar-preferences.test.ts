@@ -12,7 +12,7 @@ describe('browser-only appearance preferences', () => {
   it('loads safe editable defaults and optional legacy nickname without writing', () => {
     const store = storage(); store.setItem('avatar_nickname', 'Visitor'); store.setItem.mockClear();
     const result = loadAvatarPreferences(catalogue(), store);
-    expect(result.configuration).toMatchObject({ body: 'male', hairId: 'classic-short', topId: 'tshirt', accessoryId: null, hairColor: '#6c4d48', clothingColor: '#5b4f96', nickname: 'Visitor' });
+    expect(result.configuration).toMatchObject({ body: 'male', hairId: 'afro', topId: 'hoodie', accessoryId: null, hairColor: '#6c4d48', clothingColor: '#5b4f96', nickname: 'Visitor' });
     expect(result.warning).toBeUndefined(); expect(store.setItem).not.toHaveBeenCalled();
   });
   it('roundtrips only explicitly saved confirmed configurations', () => {

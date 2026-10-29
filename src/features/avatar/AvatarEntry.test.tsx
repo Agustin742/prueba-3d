@@ -57,7 +57,7 @@ it('restores remembered appearance and nickname on a fresh mount without bypassi
   const confirmed = vi.fn();
   const first = render(<AvatarEntry onConfirm={confirmed} />);
   fireEvent.click(screen.getByLabelText('Femenino'));
-  fireEvent.change(screen.getByLabelText('Peinado'), { target: { value: 'bob' } });
+  fireEvent.change(screen.getByLabelText('Peinado'), { target: { value: 'afro' } });
   fireEvent.change(screen.getByLabelText('Accesorio'), { target: { value: 'earrings' } });
   fireEvent.change(nickname(), { target: { value: 'Luz' } });
   renderFrame();
@@ -66,7 +66,7 @@ it('restores remembered appearance and nickname on a fresh mount without bypassi
   confirmed.mockClear();
   render(<AvatarEntry onConfirm={confirmed} />);
   expect((screen.getByLabelText('Femenino') as HTMLInputElement).checked).toBe(true);
-  expect((screen.getByLabelText('Peinado') as HTMLSelectElement).value).toBe('bob');
+  expect((screen.getByLabelText('Peinado') as HTMLSelectElement).value).toBe('afro');
   expect((screen.getByLabelText('Accesorio') as HTMLSelectElement).value).toBe('earrings');
   expect(nickname().value).toBe('Luz');
   expect(entryButton().disabled).toBe(true);
@@ -76,7 +76,7 @@ it('invalidates readiness immediately on choice changes and ignores obsolete pre
   render(<AvatarEntry onConfirm={vi.fn()} />);
   renderFrame();
   const obsolete = preview.requests.at(-1)!;
-  fireEvent.change(screen.getByLabelText('Peinado'), { target: { value: 'fade' } });
+  fireEvent.change(screen.getByLabelText('Peinado'), { target: { value: 'dreads' } });
   expect(entryButton().disabled).toBe(true);
   act(() => obsolete.onStatusChange('ready'));
   expect(entryButton().disabled).toBe(true);
@@ -89,8 +89,8 @@ it('requires a fresh frame when returning to an earlier choice and rejects its p
   render(<AvatarEntry onConfirm={vi.fn()} />);
   renderFrame();
   const obsolete = preview.requests.at(-1)!;
-  fireEvent.change(screen.getByLabelText('Peinado'), { target: { value: 'fade' } });
-  fireEvent.change(screen.getByLabelText('Peinado'), { target: { value: 'classic-short' } });
+  fireEvent.change(screen.getByLabelText('Peinado'), { target: { value: 'dreads' } });
+  fireEvent.change(screen.getByLabelText('Peinado'), { target: { value: 'afro' } });
   expect(entryButton().disabled).toBe(true);
   act(() => obsolete.onStatusChange('ready'));
   expect(entryButton().disabled).toBe(true);

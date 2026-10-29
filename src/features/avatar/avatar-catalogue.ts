@@ -20,7 +20,7 @@ function materials(value: unknown): string[] {
   return result;
 }
 function assets(value: unknown, body: AvatarBody, slot: AppearanceAsset['slot']): AppearanceAsset[] {
-  if (!Array.isArray(value) || value.length !== 5) throw Error('Expected five appearance options');
+  if (!Array.isArray(value) || value.length < 1 || value.length > 5) throw Error('Expected between one and five appearance options');
   const seen = new Set<string>();
   return value.map(item => {
     const asset = record(item);

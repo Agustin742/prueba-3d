@@ -8,8 +8,8 @@ describe('appearance catalogue boundary', () => {
     const parsed = parseAppearanceCatalogue(manifest);
     expect(parsed.bodies.map(body => body.id)).toEqual(['male', 'female']);
     const ids = [
-      [['classic-short', 'fade', 'afro', 'dreads', 'long-tied'], ['tshirt', 'hoodie', 'shirt', 'tank', 'jacket'], ['round-glasses', 'square-glasses', 'cap', 'headphones', 'backpack']],
-      [['original', 'bob', 'high-ponytail', 'bun', 'afro'], ['tshirt', 'hoodie', 'blouse', 'tank', 'jacket'], ['glasses', 'cap', 'headphones', 'earrings', 'handbag']],
+      [['afro', 'dreads'], ['hoodie', 'tank'], ['round-glasses', 'square-glasses', 'cap', 'headphones', 'backpack']],
+      [['original', 'afro'], ['tshirt', 'hoodie', 'tank'], ['glasses', 'cap', 'headphones', 'earrings']],
     ];
     parsed.bodies.forEach((body, index) => {
       expect([body.hair, body.tops, body.accessories].map(list => list.map(item => item.id))).toEqual(ids[index]);
@@ -26,9 +26,9 @@ describe('appearance catalogue boundary', () => {
     value.bodies[1] = value.bodies[0];
     expect(() => parseAppearanceCatalogue(value)).toThrow();
   });
-  it('requires five unique entries and correct slots and material arrays', () => {
+  it('requires non-empty unique entries and correct slots and material arrays', () => {
     for (const mutate of [
-      (v: ReturnType<typeof fixture>) => v.bodies[0].hair.pop(),
+      (v: ReturnType<typeof fixture>) => { v.bodies[0].hair = []; },
       (v: ReturnType<typeof fixture>) => { v.bodies[0].hair[1].id = v.bodies[0].hair[0].id; },
       (v: ReturnType<typeof fixture>) => { v.bodies[0].hair[0].slot = 'top'; },
       (v: ReturnType<typeof fixture>) => { v.bodies[0].hair[0].tintMaterials = [null as unknown as string]; },

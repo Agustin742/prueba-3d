@@ -155,8 +155,8 @@ describe('customized avatar public resource', () => {
       }
     });
     const body = catalogue.bodies[0];
-    const first = await loadCustomizedAvatar(configuration(body, { hairId: 'long-tied', topId: 'jacket' }), catalogue, false);
-    const second = await loadCustomizedAvatar(configuration(body, { hairId: 'long-tied', hairColor: '#e5ad58' }), catalogue, false);
+    const first = await loadCustomizedAvatar(configuration(body, { hairId: 'dreads', topId: 'hoodie' }), catalogue, false);
+    const second = await loadCustomizedAvatar(configuration(body, { hairId: 'dreads', hairColor: '#e5ad58' }), catalogue, false);
     const materials = (scene: GLTF['scene']) => meshes(scene).flatMap(mesh => Array.isArray(mesh.material) ? mesh.material : [mesh.material]) as MeshStandardMaterial[];
     expect(materials(first.scene).filter(mat => mat.name === 'AvatarHairTint').every(mat => mat.color.equals(new Color('#6c4d48')))).toBe(true);
     expect(materials(second.scene).filter(mat => mat.name === 'AvatarHairTint').every(mat => mat.color.equals(new Color('#e5ad58')))).toBe(true);

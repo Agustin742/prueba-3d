@@ -15,7 +15,7 @@ vi.mock('../avatar/load-customized-avatar', () => ({ loadCustomizedAvatar: vi.fn
 vi.mock('./AvatarBillboard', () => ({ createAvatarBillboard: (...args: unknown[]) => {
   renderer.billboard(...args); return new Sprite(new SpriteMaterial());
 } }));
-const appearance: AvatarConfiguration = { body: 'female', hairId: 'bun', topId: 'hoodie', accessoryId: 'earrings', hairColor: '#c77daa', clothingColor: '#7eba8b', nickname: 'Draft' };
+const appearance: AvatarConfiguration = { body: 'female', hairId: 'afro', topId: 'hoodie', accessoryId: 'earrings', hairColor: '#c77daa', clothingColor: '#7eba8b', nickname: 'Draft' };
 const props = { nickname: 'Canonical', position: [4, 0, 3] as [number, number, number], rotation: 1, animation: 'run', bubbleText: 'Hi' };
 function resource(): AvatarResource {
   const scene = new Group(); scene.add(new Mesh(new BoxGeometry(2, 4, 1), new MeshBasicMaterial()));
@@ -60,7 +60,7 @@ it('loads selected body/pieces/tints with reduced motion, canonical billboard an
 it('disposes late obsolete results and independently owns resources for each remote', async () => {
   const first = resource(); const second = resource(); const third = resource();
   const view = render(<RemotePlayer {...props} appearance={appearance} />); const oldResolve = resolve;
-  view.rerender(<RemotePlayer {...props} appearance={{ ...appearance, body: 'male', hairId: 'fade', topId: 'shirt', accessoryId: null }} />);
+  view.rerender(<RemotePlayer {...props} appearance={{ ...appearance, body: 'male', hairId: 'dreads', topId: 'tank', accessoryId: null }} />);
   await act(async () => oldResolve(first)); expect(first.dispose).toHaveBeenCalledOnce(); expect(first.scene.parent).toBeNull();
   await act(async () => resolve(second));
   const peer = render(<RemotePlayer {...props} appearance={appearance} />);
