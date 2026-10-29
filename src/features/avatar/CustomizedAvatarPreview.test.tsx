@@ -95,8 +95,8 @@ it('orbits the real preview camera to the rear without changing its resource or 
   await act(async () => pending[0].resolve(avatar));
   fireEvent.click(screen.getByText('Render frame'));
   const rootMatrix = avatar.scene.matrix.clone();
-  const right = screen.queryByRole('button', { name: 'Girar a la derecha' });
-  for (let step = 0; step < 4; step++) if (right) fireEvent.click(right);
+  const view = screen.getByRole('group', { name: 'Girar vista previa del avatar' });
+  for (let step = 0; step < 4; step++) fireEvent.keyDown(view, { key: 'ArrowRight' });
   expect(camera.position.x).toBeCloseTo(-4);
   expect(camera.position.z).toBeCloseTo(-4);
   expect(camera.position.y).toBe(3.5);

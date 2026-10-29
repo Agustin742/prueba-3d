@@ -39,20 +39,24 @@ function expectFrame(x: number, z: number) {
   expect(camera.position.length()).toBeCloseTo(Math.hypot(4, 3.5, 4));
   expect(camera.getWorldDirection(new Vector3()).dot(camera.position.clone().normalize())).toBeCloseTo(-1);
 }
+it('leaves the preview unobstructed without visible rotation controls', () => {
+  setup();
+  expect(screen.queryAllByRole('button')).toHaveLength(0);
+  expect(screen.queryByText(/Arrastrá para girar/)).toBeNull();
+});
 it('supports left, right, a full revolution and exact reset without changing framing', () => {
   setup();
-  const left = screen.getByRole('button', { name: 'Girar a la izquierda' });
-  const right = screen.getByRole('button', { name: 'Girar a la derecha' });
-  left.focus();
-  expect(document.activeElement).toBe(left);
-  fireEvent.click(left);
+  const view = screen.getByRole('group', { name: 'Girar vista previa del avatar' });
+  view.focus();
+  expect(document.activeElement).toBe(view);
+  fireEvent.keyDown(view, { key: 'ArrowLeft' });
   expectFrame(0, Math.hypot(4, 4));
-  fireEvent.click(right);
+  fireEvent.keyDown(view, { key: 'ArrowRight' });
   expectFrame(4, 4);
-  for (let step = 0; step < 8; step++) fireEvent.click(right);
+  for (let step = 0; step < 8; step++) fireEvent.keyDown(view, { key: 'ArrowRight' });
   expectFrame(4, 4);
-  fireEvent.click(right);
-  fireEvent.click(screen.getByRole('button', { name: 'Restablecer vista' }));
+  fireEvent.keyDown(view, { key: 'ArrowRight' });
+  fireEvent.keyDown(view, { key: 'Home' });
   expectFrame(4, 4);
 });
 it.each(['mouse', 'touch'])('orbits through a captured %s drag and stops on release', pointerType => {
@@ -94,7 +98,7 @@ it('does not spin or continue moving after an explicit turn', () => {
   vi.useFakeTimers();
   try {
     setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Girar a la derecha' }));
+    fireEvent.keyDown(screen.getByRole('group'), { key: 'ArrowRight' });
     const position = camera.position.clone();
     const direction = camera.quaternion.clone();
     vi.advanceTimersByTime(10_000);
@@ -109,10 +113,10 @@ it('keeps keyboard and pointer activation inside the preview, without capturing 
     <input aria-label="Apodo" />
     <AvatarPreviewRotation>{angle => <AvatarPreviewCamera angle={angle} />}</AvatarPreviewRotation>
   </div>);
-  const right = screen.getByRole('button', { name: 'Girar a la derecha' });
-  fireEvent.keyDown(right, { key: 'Enter' });
-  fireEvent.keyUp(right, { key: 'Enter' });
-  fireEvent.click(right);
+  const view = screen.getByRole('group');
+  fireEvent.keyDown(view, { key: 'ArrowRight' });
+  fireEvent.keyUp(view, { key: 'ArrowRight' });
+  fireEvent.click(view);
   expect(shortcut).not.toHaveBeenCalled();
   expect(click).not.toHaveBeenCalled();
   const direction = camera.quaternion.clone();

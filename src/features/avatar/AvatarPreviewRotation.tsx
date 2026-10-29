@@ -4,8 +4,6 @@ import { useThree } from '@react-three/fiber';
 const TURN = Math.PI * 2;
 const STEP = Math.PI / 4;
 const wrap = (angle: number) => ((angle % TURN) + TURN) % TURN;
-const buttonStyle = { minHeight: 44, padding: '4px 8px', borderRadius: 8,
-  border: '1px solid #6C4D48', background: '#FFF9EB', color: '#382F3F', cursor: 'pointer' };
 
 /** Only the dedicated preview camera moves; the framed avatar stays untouched. */
 export function AvatarPreviewCamera({ angle }: { angle: number }) {
@@ -24,8 +22,17 @@ export function AvatarPreviewRotation({ children }: { children(angle: number): R
   const [angle, setAngle] = useState(0);
   const drag = useRef<{ id: number; x: number } | null>(null);
   const turn = (delta: number) => setAngle(current => wrap(current + delta));
-  return <div role="group" aria-label="Girar vista previa del avatar"
-    onKeyDown={event => event.stopPropagation()} onKeyUp={event => event.stopPropagation()}
+  return <div role="group" aria-label="Girar vista previa del avatar" tabIndex={0}
+    aria-description="Arrastrá para girar. Con teclado: flechas izquierda y derecha; Inicio para restablecer."
+    onKeyDown={event => {
+      event.stopPropagation();
+      if (event.target !== event.currentTarget) return;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight' || event.key === 'Home') {
+        event.preventDefault();
+        if (event.key === 'Home') setAngle(0);
+        else turn(event.key === 'ArrowLeft' ? -STEP : STEP);
+      }
+    }} onKeyUp={event => event.stopPropagation()}
     onClick={event => event.stopPropagation()} onPointerDown={event => event.stopPropagation()}
     onPointerUp={event => event.stopPropagation()}
     style={{ position: 'relative', width: '100%', height: '100%', minWidth: 0 }}>
@@ -55,15 +62,6 @@ export function AvatarPreviewRotation({ children }: { children(angle: number): R
       onPointerCancel={() => { drag.current = null; }}
       onLostPointerCapture={() => { drag.current = null; }}>
       {children(angle)}
-    </div>
-    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, display: 'flex',
-      flexWrap: 'wrap', justifyContent: 'center', gap: 4 }}>
-      <p style={{ flexBasis: '100%', textAlign: 'center', margin: 0, fontSize: '.75rem' }}>
-        Arrastrá para girar · 360°
-      </p>
-      <button style={buttonStyle} type="button" aria-label="Girar a la izquierda" onClick={() => turn(-STEP)}>↶ Izquierda</button>
-      <button style={buttonStyle} type="button" aria-label="Restablecer vista" onClick={() => setAngle(0)}>Restablecer</button>
-      <button style={buttonStyle} type="button" aria-label="Girar a la derecha" onClick={() => turn(STEP)}>Derecha ↷</button>
     </div>
   </div>;
 }
