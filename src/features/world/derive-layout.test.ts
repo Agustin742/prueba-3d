@@ -37,6 +37,17 @@ describe('deriveLayout', () => {
     expect(plain.id).toBe(footprint.id); expect(plain.minX).toBeCloseTo(1 + footprint.minX, 6); expect(plain.maxZ).toBeCloseTo(2 + footprint.maxZ, 6);
   });
 
+  it('scales footprints per local axis before the yaw turns them', () => {
+    const floor = { minX: -9, maxX: 9, minZ: -9, maxZ: 9 };
+    const footprint = roomModuleFootprints['wall-left']![0]!;
+    const [stretched] = deriveLayout({ floor, placements: [{ module: 'wall-left', position: [1, 0, 2], scale: [2, 1, 1] }] }).obstacles;
+    expect(stretched!.minX).toBeCloseTo(1 + footprint.minX * 2, 6); expect(stretched!.maxX).toBeCloseTo(1 + footprint.maxX * 2, 6);
+    expect(stretched!.minZ).toBeCloseTo(2 + footprint.minZ, 6); expect(stretched!.maxZ).toBeCloseTo(2 + footprint.maxZ, 6);
+    const [turned] = deriveLayout({ floor, placements: [{ module: 'wall-left', position: [0, 0, 0], yaw: Math.PI / 2, scale: [2, 1, 1] }] }).obstacles;
+    expect(turned!.maxZ).toBeCloseTo(-footprint.minX * 2, 6); expect(turned!.minZ).toBeCloseTo(-footprint.maxX * 2, 6);
+    expect(turned!.minX).toBeCloseTo(footprint.minZ, 6); expect(turned!.maxX).toBeCloseTo(footprint.maxZ, 6);
+  });
+
   it('declares footprints only for known modules and ignores decorative placements', () => {
     for (const id of Object.keys(roomModuleFootprints)) expect(roomModuleIds).toContain(id);
     expect(deriveLayout({ floor: receptionLayout.floor, placements: [{ module: 'desk-bell', position: [0, 0, 0] }] }).obstacles).toEqual([]);

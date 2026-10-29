@@ -2,13 +2,15 @@ import { StrictMode } from 'react';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { loadAvatar } from '../avatar/load-avatar';
 import { act, render } from '@testing-library/react';
-import { Box3, BoxGeometry, Group, Mesh, MeshBasicMaterial, OrthographicCamera, Raycaster, Vector3, type Intersection } from 'three';
+import { Box3, BoxGeometry, Group, InstancedMesh, Mesh, MeshBasicMaterial, OrthographicCamera, Raycaster, Vector3, type Intersection } from 'three';
 import { beforeEach, expect, it, vi } from 'vitest';
 import type { AvatarResource } from '../avatar/load-avatar';
 import { createNavigation } from './navigation';
 import { receptionAvatarRadius, receptionNpcPlacement } from './reception-layout';
 import { ReceptionScene, floorDestination } from './ReceptionScene';
-import { composedReception, parseGlb } from './test-room';
+import { composeRoom } from './compose-room';
+import { checkerGrid } from './room-definition';
+import { composedReception, moduleTemplates, parseGlb } from './test-room';
 
 const renderer = vi.hoisted(() => ({ frames: [] as ((state: unknown, dt: number) => void)[], width: 1000, height: 600 }));
 const camera = new OrthographicCamera(-500, 500, 300, -300, 0.1, 100);
@@ -198,4 +200,17 @@ it.each([[1000, 600], [340, 700]])('fits the full authored room in a fixed ortho
     const projected = new Vector3(x, y, z).project(camera);
     expect(Math.abs(projected.x)).toBeLessThan(1); expect(Math.abs(projected.y)).toBeLessThan(1);
   }
+});
+
+it('turns a ray hit on an instanced floor tile into a floor intent at that exact point', async () => {
+  const definition = { placements: checkerGrid({ origin: [0, 0], step: 1.35, cols: 3, rows: 2, y: -0.05, base: 'floor-tile-pale', accent: 'floor-tile-cream', accents: [[1, 0]] }), instanced: ['floor-tile-cream', 'floor-tile-pale'] } as const;
+  const room = composeRoom(definition, await moduleTemplates(definition)); room.updateMatrixWorld(true);
+  for (const [x, z] of [[0, 0], [1.35, 0], [2.7, -1.35]] as const) {
+    const [hit] = new Raycaster(new Vector3(x + 0.1, 6, z - 0.2), new Vector3(0, -1, 0)).intersectObject(room, true);
+    expect(hit!.object).toBeInstanceOf(InstancedMesh); expect(hit!.instanceId).toBeDefined();
+    const point = floorDestination(hit)!;
+    expect(point.x).toBeCloseTo(x + 0.1); expect(point.z).toBeCloseTo(z - 0.2);
+  }
+  const [offFloor] = new Raycaster(new Vector3(40, 6, 40), new Vector3(0, -1, 0)).intersectObject(room, true);
+  expect(floorDestination(offFloor)).toBeNull();
 });

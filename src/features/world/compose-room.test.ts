@@ -1,4 +1,4 @@
-import { Box3, Mesh, type Object3D } from 'three';
+import { Box3, InstancedMesh, Matrix4, Mesh, type Object3D } from 'three';
 import { describe, expect, it } from 'vitest';
 import { composeRoom } from './compose-room';
 import { receptionRoom } from './reception-room';
@@ -20,7 +20,47 @@ describe('checkerGrid', () => {
   });
 });
 
+describe('composeRoom instancing', () => {
+  const placements = [
+    { module: 'floor-tile-cream', position: [0, -0.05, 0] }, { module: 'floor-tile-pale', position: [1.35, -0.05, 0] },
+    { module: 'floor-tile-cream', position: [2.7, -0.05, 0] }, { module: 'bench', position: [1, 0.04, 3], yaw: Math.PI / 2 },
+  ] as const;
+  const definition = { placements, instanced: ['floor-tile-cream', 'floor-tile-pale'] } as const;
+
+  it('draws every repeated module as one InstancedMesh per template mesh sharing its geometry and material', async () => {
+    const templates = await moduleTemplates(definition);
+    const room = composeRoom(definition, templates);
+    const instanced = room.children.filter((node): node is InstancedMesh => node instanceof InstancedMesh);
+    expect(instanced.map(node => node.count)).toEqual([2, 1]);
+    expect(room.children).toHaveLength(3);
+    const [source] = meshes(templates.get('floor-tile-cream')!);
+    expect(instanced[0]!.geometry).toBe(source!.geometry); expect(instanced[0]!.material).toBe(source!.material);
+    expect(instanced[0]!.userData.name).toBe(source!.userData.name);
+  });
+  it('keeps every instance exactly where the plain clone would sit', async () => {
+    const templates = await moduleTemplates(definition);
+    const plain = meshes(composeRoom({ placements }, templates)).filter(mesh => /^Tile/.test(mesh.userData.name));
+    const room = composeRoom(definition, templates); room.updateMatrixWorld(true);
+    const boxes: number[][] = [];
+    for (const node of room.children) if (node instanceof InstancedMesh) {
+      node.geometry.computeBoundingBox();
+      for (let index = 0; index < node.count; index++) {
+        const matrix = new Matrix4(); node.getMatrixAt(index, matrix);
+        const box = node.geometry.boundingBox!.clone().applyMatrix4(matrix.premultiply(node.matrixWorld));
+        boxes.push([...box.min.toArray(), ...box.max.toArray()]);
+      }
+    }
+    expect(boxes).toHaveLength(plain.length);
+    for (const expected of plain.map(key)) expect(boxes.some(box => box.every((value, index) => Math.abs(value - expected[index]!) < 1e-4))).toBe(true);
+  });
+});
+
 describe('composeRoom', () => {
+  it('applies an optional per-axis scale to the clone and defaults to unit scale', async () => {
+    const templates = await moduleTemplates({ placements: [{ module: 'planter', position: [0, 0, 0] }] });
+    const [scaled, plain] = composeRoom({ placements: [{ module: 'planter', position: [0, 0, 0], scale: [2, 1, 3] }, { module: 'planter', position: [5, 0, 0] }] }, templates).children;
+    expect(scaled!.scale.toArray()).toEqual([2, 1, 3]); expect(plain!.scale.toArray()).toEqual([1, 1, 1]);
+  });
   it('places shared clones at the declared position and yaw', async () => {
     const templates = await moduleTemplates(receptionRoom);
     const room = composeRoom({ placements: [{ module: 'bench', position: [1, 2, 3], yaw: Math.PI / 2 }] }, templates);
