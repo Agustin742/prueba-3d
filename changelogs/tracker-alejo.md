@@ -1,5 +1,14 @@
 # Tracker — Alejo
 
+## 2026-10-29 — Integrate a wardrobe without replacing the original avatar
+
+- **Status:** in-progress
+- **Area / files:** `src/features/avatar/`, local entry wiring in `src/app/App.tsx` and `src/features/world/ReceptionPreview.tsx`, nine cosmetic GLBs and `README.md`.
+- **Change:** Reuse the wardrobe with additive afro/dreads, hoodie/tank and five accessories on the unchanged original character and animation controller. Preserve navigation, NPC, remote players and server configuration. Female modules require an incompatible rig and remain excluded; pending Blender experiments and modular-room changes are separate.
+- **Reason:** Bring only the approved wardrobe/cosmetics into a fresh branch from main without undoing teammate improvements.
+- **Verification:** Cosmetic and UI slices passed focused tests, full suites, TypeScript and builds (`0dbd9e6`, `8050d25`). Entry integration passed 165 tests; its canvas test mock then failed TypeScript overload checking and is being corrected. Real-browser visual acceptance remains pending. Preferences and appearance are local-only, not account persistence or remote synchronization.
+- **Next step:** Complete type/build and visual checks before marking the candidate ready for team review. No push, PR or merge has been performed.
+
 ## 2026-10-27 — Repair project-local dependency resolution
 
 - **Status:** completed

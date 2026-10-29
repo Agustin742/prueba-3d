@@ -4,6 +4,17 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { loadAvatar, type AvatarResource } from '../avatar/load-avatar';
 import { loadReception, type ReceptionResource } from './load-reception';
 import { ReceptionPreview } from './ReceptionPreview';
+import { loadCustomizedAvatar } from '../avatar/load-customized-avatar';
+import manifest from '../../../public/models/avatars/integration-catalogue.json';
+import { parseAppearanceCatalogue } from '../avatar/avatar-catalogue';
+import { defaultAvatarConfiguration } from '../avatar/avatar-preferences';
+vi.mock('../avatar/load-customized-avatar', () => ({ loadCustomizedAvatar: vi.fn() }));
+const connection = vi.hoisted(() => ({ connected: true, on: vi.fn(), off: vi.fn(), emit: vi.fn(), connect: vi.fn() }));
+vi.mock('../network/socket', () => ({ socket: connection }));
+vi.mock('../network/ChatOverlay', () => ({ ChatOverlay: ({ joined, currentNickname, onChangeNickname, onJoin }: import('../network/ChatOverlay').ChatOverlayProps) => <>
+  <span>{joined ? `Joined: ${currentNickname}` : 'Choose nickname'}</span>
+  <button onClick={onChangeNickname}>Change nickname</button><button onClick={() => onJoin('Grace')}>Rejoin</button>
+</> }));
 
 vi.mock('../avatar/load-avatar', () => ({ loadAvatar: vi.fn() }));
 vi.mock('./load-reception', () => ({ loadReception: vi.fn() }));
@@ -153,6 +164,32 @@ it('interacts directly with 3D reception objects, opens the Noticeboard dialog o
   fireEvent.click(closeButton);
   expect(screen.queryByRole('dialog')).toBeNull();
   expect(document.activeElement).toBe(region);
+});
+
+it('seeds confirmed entry identity once without overriding subsequent chat nickname changes or expanding the wire payload', async () => {
+  const catalogue = parseAppearanceCatalogue(manifest), configuration = { ...defaultAvatarConfiguration(catalogue), nickname: 'Ada' };
+  vi.mocked(loadCustomizedAvatar).mockResolvedValue(avatar());
+  const { rerender } = render(<ReceptionPreview multiplayer configuration={configuration} catalogue={catalogue} />);
+  await act(async () => resolveRoom(room()));
+  expect(screen.getByText('Joined: Ada')).toBeDefined();
+  expect(connection.emit).toHaveBeenLastCalledWith('join-room', { roomCode: 'global', nickname: 'Ada' });
+  fireEvent.click(screen.getByText('Change nickname')); expect(screen.getByText('Choose nickname')).toBeDefined();
+  fireEvent.click(screen.getByText('Rejoin')); expect(screen.getByText('Joined: Grace')).toBeDefined();
+  rerender(<ReceptionPreview multiplayer configuration={{ ...configuration, nickname: 'Changed prop' }} catalogue={catalogue} />);
+  expect(screen.getByText('Joined: Grace')).toBeDefined(); expect(loadCustomizedAvatar).toHaveBeenCalledOnce();
+  expect(connection.emit).toHaveBeenLastCalledWith('join-room', { roomCode: 'global', nickname: 'Grace' });
+});
+
+it('uses additive cosmetics only for confirmed local input while preserving the parallel original NPC and cleanup', async () => {
+  const catalogue = parseAppearanceCatalogue(manifest), configuration = { ...defaultAvatarConfiguration(catalogue), nickname: 'Ada' };
+  const a = avatar(), n = avatar(); vi.mocked(loadCustomizedAvatar).mockResolvedValue(a);
+  const { unmount } = render(<ReceptionPreview configuration={configuration} catalogue={catalogue} />);
+  expect(loadCustomizedAvatar).toHaveBeenCalledWith(configuration, catalogue, false);
+  expect(loadAvatar).toHaveBeenCalledExactlyOnceWith(false, 'models/npc/monkey.glb');
+  await act(async () => resolveRoom(room())); fireEvent.click(screen.getByText('Rendered'));
+  expect(screen.queryByTestId('npc')).toBeNull();
+  await act(async () => resolveNpc(n)); expect(screen.getByTestId('npc')).toBeDefined();
+  unmount(); expect(a.dispose).toHaveBeenCalledOnce(); expect(n.dispose).toHaveBeenCalledOnce();
 });
 
 it('loads the NPC model in parallel and renders it without gating readiness on it', async () => {
