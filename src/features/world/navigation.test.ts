@@ -42,8 +42,8 @@ describe('flat reception navigation public API', () => {
     const start = nav.spawn()!;
     const straight = nav.move(start, { x: 1, z: 0 }, 0.2);
     const diagonal = nav.move(start, { x: 1, z: 1 }, 0.2);
-    expect(distance(straight.position, start.position)).toBeCloseTo(0.5);
-    expect(distance(diagonal.position, start.position)).toBeCloseTo(0.5);
+    expect(distance(straight.position, start.position)).toBeCloseTo(1);
+    expect(distance(diagonal.position, start.position)).toBeCloseTo(1);
     const halves = nav.move(nav.move(start, { x: 1, z: 0 }, 0.1), { x: 1, z: 0 }, 0.1);
     expect(halves.position).toEqual(straight.position);
     expect(start).toEqual(nav.spawn());

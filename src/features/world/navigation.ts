@@ -19,7 +19,7 @@ export type Navigation = Readonly<{
 
 // Provisional tuning, not product decisions. Square footprint conservatively encloses a disc.
 const RADIUS = 0.25;
-const SPEED = 2.5;
+const SPEED = 5;
 const CELL = 0.3;
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.z - b.z);
 const point = (x: number, z: number): Point => ({ x, y: 0, z });
@@ -103,9 +103,9 @@ export function createNavigation(
     return snapshot(slideZ);
   }
 
-  function findPath(from: Point, target: Point): readonly Point[] | null {
-    if (isSegmentClear(from, target)) return distance(from, target) === 0 ? [] : [target];
-    // Small reception lattice. No giant matrices or frame-sized collision sampling.
+  // Valid lattice cells depend only on the layout: built on the first route request, then reused.
+  let lattice: { nodes: Point[]; cells: Map<string, number> } | undefined;
+  function buildLattice() {
     const nodes: Point[] = [];
     const cells = new Map<string, number>();
     for (let x = Math.ceil(floor.minX / CELL); x <= Math.floor(floor.maxX / CELL); x++) {
@@ -117,29 +117,51 @@ export function createNavigation(
         }
       }
     }
+    return { nodes, cells };
+  }
+
+  function findPath(from: Point, target: Point): readonly Point[] | null {
+    if (isSegmentClear(from, target)) return distance(from, target) === 0 ? [] : [target];
+    const { nodes, cells } = lattice ??= buildLattice();
     const costs = new Map<number, number>();
     const parents = new Map<number, number>();
-    const open = new Set<number>();
+    // Min-heap of [score, id] with stale entries skipped on pop; ties break on the lower id, as a linear scan would.
+    const open: [number, number][] = [];
+    const before = (a: [number, number], b: [number, number]) => a[0] < b[0] || (a[0] === b[0] && a[1] < b[1]);
+    const push = (id: number) => {
+      open.push([costs.get(id)! + distance(nodes[id], target), id]);
+      for (let i = open.length - 1, up = (i - 1) >> 1; i > 0 && before(open[i], open[up]); i = up, up = (i - 1) >> 1) {
+        [open[i], open[up]] = [open[up], open[i]];
+      }
+    };
+    const pop = () => {
+      const top = open[0];
+      const last = open.pop()!;
+      if (open.length) {
+        open[0] = last;
+        for (let i = 0; ;) {
+          const l = 2 * i + 1; const r = l + 1;
+          let next = i;
+          if (l < open.length && before(open[l], open[next])) next = l;
+          if (r < open.length && before(open[r], open[next])) next = r;
+          if (next === i) break;
+          [open[i], open[next]] = [open[next], open[i]]; i = next;
+        }
+      }
+      return top;
+    };
     // Exact endpoints connect only via clear segments; never snap through an obstacle.
     nodes.forEach((node, id) => {
       if (isSegmentClear(from, node)) {
         costs.set(id, distance(from, node));
         parents.set(id, -1);
-        open.add(id);
+        push(id);
       }
     });
     const closed = new Set<number>();
-    while (open.size) {
-      let current = -1;
-      let best = Infinity;
-      for (const id of open) {
-        const score = costs.get(id)! + distance(nodes[id], target);
-        if (score < best || (score === best && id < current)) {
-          best = score;
-          current = id;
-        }
-      }
-      open.delete(current);
+    while (open.length) {
+      const [score, current] = pop();
+      if (closed.has(current) || score !== costs.get(current)! + distance(nodes[current], target)) continue;
       closed.add(current);
       const here = nodes[current];
       if (isSegmentClear(here, target)) {
@@ -157,7 +179,7 @@ export function createNavigation(
           if (cost < (costs.get(id) ?? Infinity)) {
             costs.set(id, cost);
             parents.set(id, current);
-            open.add(id);
+            push(id);
           }
         }
       }
