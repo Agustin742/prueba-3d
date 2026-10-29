@@ -24,6 +24,7 @@ export interface AvatarCustomizerProps extends AvatarConfiguration {
   /** Safe, user-facing error; entry remains blocked until cleared by the owner. */
   error?: string;
   persistenceWarning?: string;
+  persistenceNotice?: string;
   onChange: (configuration: AvatarConfiguration) => void;
   onEnter: (configuration: AvatarConfiguration) => void;
 }
@@ -133,7 +134,7 @@ export function AvatarCustomizer(props: AvatarCustomizerProps) {
             aria-invalid={nicknameInvalid} aria-describedby={nicknameInvalid ? `${id}-nickname-error` : undefined}
             onChange={event => update({ nickname: event.target.value })} />
           {nicknameInvalid && <p id={`${id}-nickname-error`} role="alert">Escribí tu apodo para continuar.</p>}
-          <p className="avatar-customizer__notice">Esta vista no guarda datos por sí sola. El guardado local, cuando esté disponible, será solo en este navegador, no en una cuenta ni entre dispositivos. Al borrar los datos del navegador, se pierde.</p>
+          <p className="avatar-customizer__notice">{props.persistenceNotice ?? 'Esta vista no guarda datos por sí sola. El guardado local, cuando esté disponible, será solo en este navegador, no en una cuenta ni entre dispositivos. Al borrar los datos del navegador, se pierde.'}</p>
           {persistenceWarning && <p className="avatar-customizer__notice" role="status">{persistenceWarning}</p>}
           {status === 'loading' && <p role="status">Cargando tu avatar… Esperá para entrar.</p>}
           {status === 'unavailable' && <p role="alert">La vista previa no está disponible. Esperá a que esté lista para entrar.</p>}
