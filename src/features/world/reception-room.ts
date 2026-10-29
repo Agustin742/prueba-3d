@@ -45,6 +45,34 @@ const backWalls: Placement[] = [
   ...[22.8, 24.8, 26.8, 28.8, 30.8, 34.8, 36.8].map((x): Placement => ({ module: 'wall-back-right', position: [x, 0, -4.6425] })),
 ];
 
+// Lounge: two benches facing each other, a pendant lamp over the gap and a planter at each end.
+const lounge = (x: number, z: number): Placement[] => [
+  { module: 'bench', position: [x, 0.04, z - 1.6] },
+  { module: 'bench', position: [x, 0.04, z + 1.6], yaw: Math.PI },
+  { module: 'pendant-lamp', position: [x, 2.92, z] },
+  { module: 'planter', position: [x - 2.3, 0.06, z] },
+  { module: 'planter', position: [x + 2.3, 0.06, z] },
+];
+// Decor for the grown area, clear of the unit corner and the door opening (x 31.8..33.8).
+const decor: Placement[] = [
+  ...lounge(11, 6), ...lounge(25, 15), ...lounge(10, 24), ...lounge(28, 28),
+  // Back wall: noticeboards and shelves against its inner face.
+  { module: 'noticeboard', position: [8.5, 1.655, -4.32] },
+  { module: 'noticeboard', position: [21.5, 1.655, -4.32] },
+  { module: 'display-shelf', position: [14.5, 1.365, -4.1] },
+  { module: 'display-shelf', position: [27, 1.365, -4.1] },
+  // Left wall: shelves, a bench and a third window.
+  { module: 'display-shelf', position: [-5.0, 1.365, 7], yaw: quarter },
+  { module: 'display-shelf', position: [-5.0, 1.365, 30], yaw: quarter },
+  { module: 'bench', position: [-4.3925, 0.04, 26], yaw: quarter },
+  { module: 'window', position: [-5.09, 1.615, 30], yaw: quarter },
+  // Corner and door-side planters.
+  { module: 'planter', position: [29, 0.06, -3.6193] },
+  { module: 'planter', position: [37, 0.06, -3.6193] },
+  { module: 'planter', position: [-4.3, 0.06, 22.5] },
+  { module: 'planter', position: [37, 0.06, 22] },
+];
+
 export const receptionRoom: RoomDefinition = Object.freeze({
   floor: Object.freeze({ minX: -5.39, maxX: 37.79, minZ: -4.716, maxZ: 33.066 }),
   instanced: Object.freeze(['floor-tile-cream', 'floor-tile-pale'] as const),
@@ -63,5 +91,6 @@ export const receptionRoom: RoomDefinition = Object.freeze({
     { module: 'planter', position: [4.3565, 0.06, -3.6193] },
     { module: 'planter', position: [-4.3, 0.06, 12] },
     ...furniture.filter(({ module }) => module === 'display-shelf' || module === 'noticeboard'),
+    ...decor,
   ]),
 });

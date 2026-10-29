@@ -77,7 +77,8 @@ describe('the 4x4 reception layout', () => {
     expect(receptionLayout.floor).toEqual({ minX: -5.39, maxX: 37.79, minZ: -4.716, maxZ: 33.066 });
   });
   it('stretches the walls, moves the door jambs, adds the left planter and keeps the other furniture', () => {
-    expect(receptionLayout.obstacles.map(obstacle => obstacle.id)).toEqual(grown.map(obstacle => obstacle.id));
+    // The grown-area decor follows these in placement order.
+    expect(receptionLayout.obstacles.slice(0, grown.length).map(obstacle => obstacle.id)).toEqual(grown.map(obstacle => obstacle.id));
     for (const [index, expected] of grown.entries()) for (const side of ['minX', 'maxX', 'minZ', 'maxZ'] as const) {
       expect(receptionLayout.obstacles[index]![side], `${expected.id}#${index}.${side}`).toBeCloseTo(expected[side], 6);
     }
@@ -90,6 +91,6 @@ describe('the 4x4 reception layout', () => {
   });
   it('retains the unit-room furniture placements untouched in the grown room', () => {
     const keep = (room: typeof receptionRoom) => room.placements.filter(({ module }) => !/^(floor-|wall-|door$|window$|planter$)/.test(module));
-    expect(keep(receptionRoom)).toEqual(keep(receptionUnitRoom));
+    expect(keep(receptionRoom)).toEqual(expect.arrayContaining(keep(receptionUnitRoom)));
   });
 });
